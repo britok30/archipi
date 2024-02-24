@@ -9,15 +9,37 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/three": "^0.161.2",
+    "@uidotdev/usehooks": "^2.4.1",
+    "area-polygon": "^1.0.1",
+    "classnames": "^2.5.1",
+    "convert-units": "^2.3.4",
+    "file-loader": "^6.2.0",
+    "immutable": "3.8.2",
+    "immutablediff": "^0.4.4",
+    "immutablepatch": "^0.5.0",
+    "next": "14.1.0",
+    "polylabel": "^1.1.0",
+    "rc-dropdown": "^4.1.0",
+    "rc-menu": "^9.12.4",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.1.0"
+    "react-icons": "^5.0.1",
+    "react-range": "^1.8.14",
+    "react-redux": "7.2.9",
+    "react-svg-pan-zoom": "^3.12.1",
+    "react-tabs": "^6.0.2",
+    "redux": "4.0.1",
+    "shortid": "^2.2.16",
+    "three": "0.94.0"
   },
   "devDependencies": {
+    "@types/node": "20.11.20",
     "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
-    "eslint": "^8",
-    "eslint-config-next": "14.1.0"
+    "typescript": "5.3.3"
   }
 }
