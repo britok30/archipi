@@ -39,9 +39,7 @@ export default function Content({ width, height, state, customContents }) {
       return <Viewer2D state={state} width={width} height={height} />;
 
     case constants.MODE_CONFIGURING_PROJECT:
-      return (
-        <ProjectConfigurator width={width} height={height} state={state} />
-      );
+      return <ProjectConfigurator state={state} />;
 
     default:
       if (customContents.hasOwnProperty(mode)) {

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.18",
     "@tippyjs/react": "^4.2.6",
     "@types/three": "^0.161.2",
     "@uidotdev/usehooks": "^2.4.1",
