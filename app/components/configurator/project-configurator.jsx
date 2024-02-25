@@ -49,6 +49,7 @@ const ProjectConfigurator = ({ state }) => {
           <input
             type="text"
             id="width"
+            name="width"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="width"
             value={dataWidth}
@@ -65,6 +66,7 @@ const ProjectConfigurator = ({ state }) => {
           <input
             type="text"
             id="height"
+            name="height"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="height"
             value={dataHeight}

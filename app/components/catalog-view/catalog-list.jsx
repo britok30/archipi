@@ -173,36 +173,25 @@ const CatalogList = ({ state, width, height, style }) => {
     </div>
   ));
 
-  const containerStyle = {
-    position: "fixed",
-    width: "calc( 100% - 51px)",
-    height: "calc( 100% - 20px)",
-    backgroundColor: "#FFF",
-    padding: "1em",
-    left: 50,
-    overflowY: "auto",
-    overflowX: "hidden",
-    zIndex: 10,
-  };
-
   return (
-    <ContentContainer
-      width={width}
-      height={height}
-      style={{ ...containerStyle, ...style }}
-    >
-      <h1 className="text-4xl font-semibold text-black mb-3">Catalog</h1>
+    <div className="bg-black w-full min-h-screen p-4 ">
+      <h1 className="text-4xl text-white mb-4">Catalog</h1>
       {breadcrumbComponent}
-      <div style={searchContainer}>
-        <span style={searchText}>{translator.t("Search Element")}</span>
+
+      <div className="flex space-x-1">
+        <label htmlFor="search">{translator.t("Search Element")}</label>
         <input
+          id="search"
           type="text"
-          style={searchInput}
+          name="search"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Search catalog"
           onChange={(e) => {
             matcharray(e.target.value);
           }}
         />
       </div>
+
       {selectedHistory.size ? (
         <div style={historyContainer}>
           <span>{translator.t("Last Selected")}</span>
@@ -210,7 +199,7 @@ const CatalogList = ({ state, width, height, style }) => {
         </div>
       ) : null}
 
-      <div style={itemsStyle}>
+      <div className="!no-scrollbar" style={itemsStyle}>
         {matchString === ""
           ? [
               turnBackButton,
@@ -229,7 +218,7 @@ const CatalogList = ({ state, width, height, style }) => {
               <CatalogItem key={elem.name} element={elem} />
             ))}
       </div>
-    </ContentContainer>
+    </div>
   );
 };
 

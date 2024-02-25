@@ -13,10 +13,7 @@ export function initPointerLock(camera, rendererElement) {
 
   let requestPointerLockEvent = (event) => {
     document.body.requestPointerLock =
-      document.body.requestPointerLock ||
-      document.body.mozRequestPointerLock ||
-      document.body.webkitRequestPointerLock;
-    document.body.requestPointerLock();
+      document.body.requestPointerLock || document.body.requestPointerLock();
   };
 
   if (havePointerLock) {
