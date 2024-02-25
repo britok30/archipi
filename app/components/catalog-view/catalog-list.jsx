@@ -11,18 +11,6 @@ import ContentContainer from "../style/content-container";
 import ContentTitle from "../style/content-title";
 import * as SharedStyle from "../../styles/shared-style";
 
-const containerStyle = {
-  position: "fixed",
-  width: "calc( 100% - 51px)",
-  height: "calc( 100% - 20px)",
-  backgroundColor: "#FFF",
-  padding: "1em",
-  left: 50,
-  overflowY: "auto",
-  overflowX: "hidden",
-  zIndex: 10,
-};
-
 const itemsStyle = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(14em, 1fr))",
@@ -185,13 +173,25 @@ const CatalogList = ({ state, width, height, style }) => {
     </div>
   ));
 
+  const containerStyle = {
+    position: "fixed",
+    width: "calc( 100% - 51px)",
+    height: "calc( 100% - 20px)",
+    backgroundColor: "#FFF",
+    padding: "1em",
+    left: 50,
+    overflowY: "auto",
+    overflowX: "hidden",
+    zIndex: 10,
+  };
+
   return (
     <ContentContainer
       width={width}
       height={height}
       style={{ ...containerStyle, ...style }}
     >
-      <ContentTitle>{translator.t("Catalog")}</ContentTitle>
+      <h1 className="text-4xl font-semibold text-black mb-3">Catalog</h1>
       {breadcrumbComponent}
       <div style={searchContainer}>
         <span style={searchText}>{translator.t("Search Element")}</span>
@@ -209,6 +209,7 @@ const CatalogList = ({ state, width, height, style }) => {
           {selectedHistoryElements}
         </div>
       ) : null}
+
       <div style={itemsStyle}>
         {matchString === ""
           ? [

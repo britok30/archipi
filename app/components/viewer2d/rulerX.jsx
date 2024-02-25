@@ -4,33 +4,44 @@ import React from "react";
 import PropTypes from "prop-types";
 import * as SharedStyle from "../../styles/shared-style";
 
-export const RulerX = (props) => {
-  let elementW = props.unitPixelSize * props.zoom;
+export const RulerX = ({
+  unitPixelSize,
+  positiveUnitsNumber = 50,
+  negativeUnitsNumber = 50,
+  zoom,
+  mouseX,
+  width,
+  zeroLeftPosition,
+  backgroundColor,
+  fontColor,
+  markerColor,
+}) => {
+  let elementW = unitPixelSize * zoom;
 
   let rulerStyle = {
-    backgroundColor: props.backgroundColor,
+    backgroundColor: backgroundColor,
     position: "relative",
-    width: props.width,
+    width: width,
     height: "100%",
-    color: props.fontColor,
+    color: fontColor,
   };
 
   let markerStyle = {
     position: "absolute",
-    left: props.zeroLeftPosition + props.mouseX * props.zoom - 6.5,
+    left: zeroLeftPosition + mouseX * zoom - 6.5,
     top: 8,
     width: 0,
     height: 0,
     borderLeft: "5px solid transparent",
     borderRight: "5px solid transparent",
-    borderTop: "8px solid " + props.markerColor,
+    borderTop: "8px solid #fff",
     zIndex: 9001,
   };
 
   let positiveDomElements = [];
 
   if (elementW <= 200) {
-    for (let x = 0; x < props.positiveUnitsNumber; x++) {
+    for (let x = 0; x < positiveUnitsNumber; x++) {
       positiveDomElements.push(
         <div
           key={x}
@@ -42,7 +53,7 @@ export const RulerX = (props) => {
       );
     }
   } else if (elementW > 200) {
-    for (let x = 0; x < props.positiveUnitsNumber; x++) {
+    for (let x = 0; x < positiveUnitsNumber; x++) {
       let val = x * 100;
       positiveDomElements.push(
         <div
@@ -66,14 +77,14 @@ export const RulerX = (props) => {
 
   let positiveRulerContainer = {
     ...rulerContainer,
-    width: props.positiveUnitsNumber * elementW,
-    left: props.zeroLeftPosition,
+    width: positiveUnitsNumber * elementW,
+    left: zeroLeftPosition,
   };
 
   let negativeRulerContainer = {
     ...rulerContainer,
-    width: props.negativeUnitsNumber * elementW,
-    left: props.zeroLeftPosition - props.negativeUnitsNumber * elementW,
+    width: negativeUnitsNumber * elementW,
+    left: zeroLeftPosition - negativeUnitsNumber * elementW,
   };
 
   return (
