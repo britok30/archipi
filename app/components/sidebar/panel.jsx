@@ -2,35 +2,8 @@
 
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import * as SharedStyle from "../../styles/shared-style";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
-
-const STYLE = {
-  borderTop: "1px solid #222",
-  borderBottom: "1px solid #48494E",
-  userSelect: "none",
-};
-const STYLE_TITLE = {
-  fontSize: "11px",
-  color: SharedStyle.PRIMARY_COLOR.text_alt,
-  padding: "5px 15px 8px 15px",
-  backgroundColor: SharedStyle.PRIMARY_COLOR.alt,
-  textShadow: "-1px -1px 2px rgba(0, 0, 0, 1)",
-  boxShadow: "inset 0px -3px 19px 0px rgba(0,0,0,0.5)",
-  margin: "0px",
-  cursor: "pointer",
-};
-const STYLE_CONTENT = {
-  fontSize: "11px",
-  color: SharedStyle.PRIMARY_COLOR.text_alt,
-  border: "1px solid #222",
-  padding: "0px",
-  backgroundColor: SharedStyle.PRIMARY_COLOR.alt,
-  textShadow: "-1px -1px 2px rgba(0, 0, 0, 1)",
-};
-const STYLE_ARROW = {
-  float: "right",
-};
+import classNames from "classnames";
 
 const Panel = ({
   name,
@@ -39,34 +12,39 @@ const Panel = ({
   opened: initialOpened = false,
 }) => {
   const [opened, setOpened] = useState(initialOpened);
-  const [hover, setHover] = useState(false);
 
   const toggleOpen = () => setOpened(!opened);
-  const toggleHover = () => setHover(!hover);
 
   return (
-    <div style={STYLE}>
+    <div className=" border-white border-b select-none bg-black">
       <h3
-        style={{
-          ...STYLE_TITLE,
-          color: hover
-            ? SharedStyle.SECONDARY_COLOR.main
-            : SharedStyle.PRIMARY_COLOR.text_alt,
-        }}
-        onMouseEnter={toggleHover}
-        onMouseLeave={toggleHover}
+        className={classNames(
+          "text-sm text-white p-3 appearance-none hover:text-gray-500 transition duration-200 ease-in-out",
+          {
+            "cursor-default": opened,
+            "cursor-pointer": !opened,
+          }
+        )}
         onClick={toggleOpen}
       >
         {name}
         {headComponents}
         {opened ? (
-          <FaAngleUp style={STYLE_ARROW} />
+          <FaAngleUp className="float-right" />
         ) : (
-          <FaAngleDown style={STYLE_ARROW} />
+          <FaAngleDown className="float-right" />
         )}
       </h3>
 
-      <div style={{ ...STYLE_CONTENT, display: opened ? "block" : "none" }}>
+      <div
+        className={classNames(
+          "text-xs border py-3 px-3 border-gray-800 p-0 bg-primary-alt text-shadow transition duration-200 ease-in-out",
+          {
+            block: opened,
+            hidden: !opened,
+          }
+        )}
+      >
         {children}
       </div>
     </div>

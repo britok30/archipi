@@ -9,8 +9,6 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { FaPencil, FaTrash, FaTimes } from "react-icons/fa";
 import { FormNumberInput } from "../../components/style/export";
 
-const tabStyle = { margin: "1em" };
-
 const iconStyle = {
   fontSize: "14px",
   margin: "2px",
@@ -37,7 +35,7 @@ const PanelGuides = ({ state }) => {
 
   return (
     <Panel name={translator.t("Guides")}>
-      <Tabs id="guidesTabs" style={tabStyle}>
+      <Tabs className="m-[1rem]" id="guidesTabs">
         <TabList>
           <Tab>{translator.t("Horizontal")}</Tab>
           <Tab>{translator.t("Vertical")}</Tab>
@@ -53,9 +51,9 @@ const PanelGuides = ({ state }) => {
                 .map(([hgKey, hgVal], ind) => {
                   return (
                     <tr key={hgKey}>
-                      <td style={{ width: "2em" }}>{ind + 1}</td>
+                      <td className="w-[2rem]">{ind + 1}</td>
                       <td>{hgVal}</td>
-                      <td style={{ width: "5em" }}>
+                      <td className="w-[5rem]">
                         {/*<FaPencil style={iconStyle} />*/}
                         <FaTrash
                           style={iconStyle}
@@ -110,9 +108,9 @@ const PanelGuides = ({ state }) => {
                 .map(([hgKey, hgVal], ind) => {
                   return (
                     <tr key={hgKey}>
-                      <td style={{ width: "2em" }}>{ind + 1}</td>
+                      <td className="w-[2rem]">{ind + 1}</td>
                       <td>{hgVal}</td>
-                      <td style={{ width: "5em" }}>
+                      <td className="w-[5rem]">
                         {/*<FaPencil style={iconStyle} />*/}
                         <FaTrash
                           style={iconStyle}
