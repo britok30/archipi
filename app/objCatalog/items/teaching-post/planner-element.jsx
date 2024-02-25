@@ -16,6 +16,7 @@ const CHAIR_TRANSLATION = 30;
 const TOTAL_DEPTH =
   DEPTH + CHAIR_DEPTH / 2 - (CHAIR_TRANSLATION - CHAIR_DEPTH / 2);
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "teaching-post",
   prototype: "items",
@@ -145,7 +146,7 @@ export default {
       p6.position.z += (0.5 * 3) / 2;
       p6.position.x += 0.4;
 
-      let texture = new Three.TextureLoader().load("./wood.jpg");
+      let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
       let materialTexture = new Three.MeshLambertMaterial({ map: texture });
 
       let roundedRectShape = new Three.Shape();
@@ -275,7 +276,7 @@ export default {
 
     let newAltitude = element.properties.get("altitude").get("length");
 
-    let texture = new Three.TextureLoader().load("./wood.jpg");
+    let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
     let materialTexture = new Three.MeshLambertMaterial({ map: texture });
     let green = new Three.MeshBasicMaterial({ color: 0x669966 });
 

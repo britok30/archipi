@@ -8,10 +8,10 @@ const DEPTH = 80;
 const HEIGHT = 200;
 
 const textureLoader = new Three.TextureLoader();
-const woodMaterial = textureLoader.load("./wood.jpg");
-const bookTexture1 = textureLoader.load("./bookTexture1.jpg");
-const bookTexture2 = textureLoader.load("./bookTexture2.jpg");
-const bookTexture3 = textureLoader.load("./bookTexture3.jpg");
+const woodMaterial = textureLoader.load("/images/textures/wood.jpg");
+const bookTexture1 = textureLoader.load("/images/textures/bookTexture1.jpg");
+const bookTexture2 = textureLoader.load("/images/textures/bookTexture2.jpg");
+const bookTexture3 = textureLoader.load("/images/textures/bookTexture3.jpg");
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();
@@ -94,7 +94,7 @@ function makeObjectMinLOD() {
 
   let textureLoader = new Three.TextureLoader();
 
-  let woodMaterial = textureLoader.load("./wood.jpg");
+  let woodMaterial = textureLoader.load("/images/textures/wood.jpg");
 
   //Bookcase
   let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
@@ -133,6 +133,7 @@ function makeObjectMinLOD() {
   return bookcase;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "bookcase",
   prototype: "items",
@@ -141,7 +142,7 @@ export default {
     tag: ["furnishings", "wood"],
     title: "bookcase",
     description: "bookcase",
-    image: require("./bookcase.png"),
+    image: "/images/bookcase.png",
   },
 
   properties: {

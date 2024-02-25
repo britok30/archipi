@@ -7,6 +7,7 @@ const WIDTH = 200;
 const DEPTH = 20;
 const HEIGHT = 40;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "coat-hook",
   prototype: "items",
@@ -107,7 +108,7 @@ export default {
     let newHeight = 0.1;
     let radius = 0.0125;
 
-    let texture = new Three.TextureLoader().load("./wood.jpg");
+    let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
     let materialTexture = new Three.MeshLambertMaterial({ map: texture });
 
     let geometry = new Three.BoxGeometry(newWidth, 1.5 * newHeight, newDepth);

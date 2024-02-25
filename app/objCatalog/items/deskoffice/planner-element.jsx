@@ -6,7 +6,7 @@ import React from "react";
 const textureLoader = new Three.TextureLoader();
 const white = textureLoader.load("./white.jpg");
 const whiteMaterial = new Three.MeshLambertMaterial({ color: 0x000000 });
-const wood = textureLoader.load("./wood.jpg");
+const wood = textureLoader.load("/images/textures/wood.jpg");
 const glassMaterial = new Three.MeshLambertMaterial({
   color: 0xc6c6c6,
   transparent: true,
@@ -548,6 +548,7 @@ function makeObjectMinLOD(newWidthA, newWidthB, newHeight, newDepth) {
   return desk;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "desk",
   prototype: "items",

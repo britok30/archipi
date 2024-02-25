@@ -4,8 +4,8 @@ import * as Three from "three";
 import React from "react";
 
 const PI_2 = Math.PI / 2;
-const paintedTexture = require("./painted.jpg");
-const brickTexture = require("./bricks.jpg");
+const paintedTexture = "/images/textures/painted.jpg";
+const brickTexture = "/images/textures/bricks.jpg";
 const scale = 100;
 
 let textureLoader = new Three.TextureLoader();
@@ -86,6 +86,7 @@ function makeObject(newWidth, newHeight, newDepth) {
   return balcony.add(p1, p2, p3, p4, p5, p6, p7);
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "balcony",
   prototype: "items",
@@ -94,7 +95,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "balcony",
     description: "balcony",
-    image: require("./balcony.png"),
+    image: "/images/balcony.png",
   },
   properties: {
     width: {

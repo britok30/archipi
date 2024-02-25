@@ -11,7 +11,7 @@ const RADIUS = 10;
 const grey = new Three.MeshLambertMaterial({ color: 0xc0c0c0 });
 const black = new Three.MeshLambertMaterial({ color: 0x00000 });
 const textureLoader = new Three.TextureLoader();
-const woodTexture = textureLoader.load("./wood.jpg");
+const woodTexture = textureLoader.load("/images/textures/wood.jpg");
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();
@@ -117,6 +117,7 @@ function makeObjectMinLOD() {
   return bench;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "bench",
   prototype: "items",
@@ -125,7 +126,7 @@ export default {
     tag: ["furnishings", "wood", "metal"],
     title: "bench",
     description: "bench",
-    image: require("./bench.png"),
+    image: "/images/bench.png",
   },
 
   properties: {

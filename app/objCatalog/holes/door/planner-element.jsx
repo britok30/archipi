@@ -4,6 +4,7 @@ import { loadObjWithMaterial } from '../../utils/load-obj';
 
 let cached3DDoor = null;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: 'door',
   prototype: 'holes',

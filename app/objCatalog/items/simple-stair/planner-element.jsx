@@ -5,6 +5,7 @@ import * as Three from "three";
 import React from "react";
 import convert from "convert-units";
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "simple-stair",
   prototype: "items",
@@ -13,7 +14,7 @@ export default {
     title: "simple stair",
     tag: ["building", "stair"],
     description: "Simple stair",
-    image: require("./simple-stair.png"),
+    image: "/images/simple-stair.png",
   },
 
   properties: {
@@ -163,7 +164,7 @@ export default {
     let stepPlaneMaterial = new Three.MeshBasicMaterial({
       side: Three.FrontSide,
     });
-    stepPlaneMaterial.map = loader.load("./textures/white-paint.jpg");
+    stepPlaneMaterial.map = loader.load("/images/textures/white-paint.jpg");
     stepPlaneMaterial.needsUpdate = true;
     stepPlaneMaterial.map.wrapS = Three.RepeatWrapping;
     stepPlaneMaterial.map.wrapT = Three.RepeatWrapping;
@@ -218,9 +219,7 @@ export default {
       side: Three.FrontSide,
     });
 
-    stairProfileMaterial.map = loader.load(
-      require("./textures/white-paint.jpg")
-    );
+    stairProfileMaterial.map = loader.load("/images/textures/white-paint.jpg");
     stairProfileMaterial.needsUpdate = true;
     stairProfileMaterial.map.wrapS = Three.RepeatWrapping;
     stairProfileMaterial.map.wrapT = Three.RepeatWrapping;
@@ -242,9 +241,7 @@ export default {
       side: Three.BackSide,
     });
 
-    stairProfileMaterial2.map = loader.load(
-      require("./textures/white-paint.jpg")
-    );
+    stairProfileMaterial2.map = loader.load("/images/textures/white-paint.jpg");
     stairProfileMaterial2.needsUpdate = true;
     stairProfileMaterial2.map.wrapS = Three.RepeatWrapping;
     stairProfileMaterial2.map.wrapT = Three.RepeatWrapping;
@@ -278,7 +275,7 @@ export default {
     let closure1Material = new Three.MeshPhongMaterial({
       side: Three.BackSide,
     });
-    closure1Material.map = loader.load("./textures/white-paint.jpg");
+    closure1Material.map = loader.load("/images/textures/white-paint.jpg");
     closure1Material.needsUpdate = true;
     closure1Material.map.wrapS = Three.RepeatWrapping;
     closure1Material.map.wrapT = Three.RepeatWrapping;
@@ -411,7 +408,7 @@ let buildStepCover = (width, height, depth) => {
   );
   assignUVs(planeGeometry3);
 
-  planeMaterial.map = loader.load("./textures/marble.jpg");
+  planeMaterial.map = loader.load("/images/textures/marble.jpg");
   planeMaterial.needsUpdate = true;
   planeMaterial.map.wrapS = Three.RepeatWrapping;
   planeMaterial.map.wrapT = Three.RepeatWrapping;
