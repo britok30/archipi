@@ -61,7 +61,6 @@ export const RulerX = (props) => {
   }
 
   let rulerContainer = {
-    gridTemplateRows: "100%",
     grdAutoColumns: `${elementW}px`,
   };
 
@@ -81,12 +80,12 @@ export const RulerX = (props) => {
     <div style={rulerStyle}>
       <div id="horizontalMarker" style={markerStyle}></div>
       <div
-        className="absolute h-[10px] top-[4px] grid gap-0"
+        className="absolute h-[10px] top-[4px] grid gap-0 grid-rows-[100%]"
         id="negativeRuler"
         style={negativeRulerContainer}
       ></div>
       <div
-        className="absolute h-[10px] top-[4px] grid gap-0"
+        className="absolute h-[10px] top-[4px] grid gap-0 grid-rows-[100%]"
         id="positiveRuler"
         style={positiveRulerContainer}
       >

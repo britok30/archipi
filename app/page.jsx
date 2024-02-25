@@ -16,8 +16,6 @@ let plugins = [
   PlannerPlugins.ConsoleDebugger(),
 ];
 
-let toolbarButtons = [ScreenshotToolbarButton];
-
 export default function Home() {
   const { height, width } = useWindowDimensions();
 
@@ -29,7 +27,6 @@ export default function Home() {
         width={width}
         height={height}
         plugins={plugins}
-        toolbarButtons={toolbarButtons}
         stateExtractor={(state) => state.get("archipi")}
       />
     </div>

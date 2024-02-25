@@ -1,13 +1,7 @@
 import React, { memo, useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-// import NewSVG from "./icons/new.svg";
-// import CatalogSVG from "./icons/catalog.svg";
-// import Icon2DSVG from "./icons/2D.svg";
-// import Icon3DSVG from "./icons/3D.svg";
-// import UndoSVG from "./icons/undo.svg";
-// import RedoSVG from "./icons/redo.svg";
-// import SettingsSVG from "./icons/settings.svg";
+import { IoIosDocument } from "react-icons/io";
 import ToolbarButton from "./toolbar-button";
 import ToolbarSaveButton from "./toolbar-save-button";
 import ToolbarLoadButton from "./toolbar-load-button";
@@ -20,6 +14,14 @@ import {
   MODE_CONFIGURING_PROJECT,
 } from "../../utils/constants";
 import * as SharedStyle from "../../styles/shared-style";
+import { FaBookOpen } from "react-icons/fa";
+import { FaCube } from "react-icons/fa";
+import { IoSquare } from "react-icons/io5";
+import { IoIosUndo } from "react-icons/io";
+import { IoIosRedo } from "react-icons/io";
+import { IoSettingsSharp } from "react-icons/io5";
+import { IoCamera } from "react-icons/io5";
+import ScreenshotToolbarButton from "../../ui/screenshot-toolbar-button";
 
 const sortButtonsCb = (a, b) => {
   if (a.index === undefined || a.index === null) {
@@ -63,7 +65,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
               : null
           }
         >
-          {/* <NewSVG /> */}
+          <IoIosDocument className="mb-0.5" size={25} />
           New
         </ToolbarButton>
       ),
@@ -87,7 +89,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("Open catalog")}
           onClick={(event) => projectActions.openCatalog()}
         >
-          {/* <CatalogSVG /> */}
+          <FaBookOpen className="mb-0.5" size={23} />
           Catalog
         </ToolbarButton>
       ),
@@ -101,7 +103,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("2D View")}
           onClick={(event) => projectActions.setMode(MODE_IDLE)}
         >
-          {/* <Icon2DSVG /> */}
+          <IoSquare className="mb-0.5" size={23} />
           2D
         </ToolbarButton>
       ),
@@ -115,7 +117,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("3D View")}
           onClick={(event) => viewer3DActions.selectTool3DView()}
         >
-          {/* <Icon3DSVG /> */}
+          <FaCube className="mb-0.5" size={23} />
           3D
         </ToolbarButton>
       ),
@@ -143,7 +145,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("Undo (CTRL-Z)")}
           onClick={(event) => projectActions.undo()}
         >
-          {/* <UndoSVG /> */}
+          <IoIosUndo className="mb-0.5" size={23} />
           Undo
         </ToolbarButton>
       ),
@@ -157,7 +159,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("Redo (CTRL-Y)")}
           onClick={(event) => projectActions.redo()}
         >
-          {/* <RedoSVG /> */}
+          <IoIosRedo className="mb-0.5" size={23} />
           Redo
         </ToolbarButton>
       ),
@@ -171,10 +173,15 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("Configure project")}
           onClick={(event) => projectActions.openProjectConfigurator()}
         >
-          {/* <SettingsSVG /> */}
+          <IoSettingsSharp className="mb-0.5" size={23} />
           Settings
         </ToolbarButton>
       ),
+    },
+    {
+      index: 9,
+      condition: true,
+      dom: <ScreenshotToolbarButton mode={mode} />,
     },
   ];
 
@@ -195,9 +202,9 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
   );
 
   return (
-    <aside className="fixed left-0 min-h-screen flex flex-col justify-start items-center text-[10px] bg-[#0d0d0d] p-2.5 z-[999]">
+    <div className="fixed bottom-8 left-1/2 -translate-x-[50%] z-[999] flex bg-[#292929] rounded-lg px-5 py-3 space-x-6">
       {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
-    </aside>
+    </div>
   );
 };
 

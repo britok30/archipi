@@ -49,12 +49,6 @@ export const RulerY = (props) => {
   };
 
   let rulerContainer = {
-    position: "absolute",
-    width: "100%",
-    display: "grid",
-    gridRowGap: "0",
-    gridColumnGap: "0",
-    gridTemplateColumns: "100%",
     grdAutoRows: `${elementH}px`,
     paddingLeft: "5px",
   };
@@ -99,8 +93,16 @@ export const RulerY = (props) => {
   return (
     <div style={rulerStyle}>
       <div id="verticalMarker" style={markerStyle}></div>
-      <div id="negativeRuler" style={negativeRulerContainer}></div>
-      <div id="positiveRuler" style={positiveRulerContainer}>
+      <div
+        className="absolute w-full grid gap-0 grid-cols-[100%] pl-[5px]"
+        id="negativeRuler"
+        style={negativeRulerContainer}
+      ></div>
+      <div
+        className="absolute w-full grid gap-0 grid-cols-[100%] pl-[5px]"
+        id="positiveRuler"
+        style={positiveRulerContainer}
+      >
         {positiveDomElements}
       </div>
     </div>

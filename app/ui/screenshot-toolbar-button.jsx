@@ -4,7 +4,7 @@ import ReactPlannerContext from "../context/ReactPlannerContext";
 import { ReactPlannerConstants } from "../utils";
 import { ReactPlannerComponents } from "../components";
 import { ReactPlannerUtils } from "../utils";
-import { FaCamera } from "react-icons/fa";
+import { IoCamera } from "react-icons/io5";
 
 const { imageBrowserDownload } = ReactPlannerUtils.BrowserUtils;
 const { saveSVGtoPngFile } = ReactPlannerUtils.ImageUtils;
@@ -65,8 +65,8 @@ export default function ScreenshotToolbarButton({ mode }) {
         tooltip={translator.t("Get Screenshot")}
         onClick={saveScreenshotToFile}
       >
-        <FaCamera />
-        Render
+        <IoCamera className="mb-0.5" size={23} />
+        Snap
       </ToolbarButton>
     );
   }
@@ -94,8 +94,8 @@ export default function ScreenshotToolbarButton({ mode }) {
         tooltip={translator.t("Get Screenshot")}
         onClick={saveSVGScreenshotToFile}
       >
-        <FaCamera />
-        Render
+        <IoCamera className="mb-0.5" size={23} />
+        Snap
       </ToolbarButton>
     );
   }

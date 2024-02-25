@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import ToolbarButton from "./toolbar-button";
 import { browserUpload } from "../../utils/browser";
-import { MdFrontLoader } from "react-icons/md";
+import { MdFileUpload } from "react-icons/md";
 
 export default function ToolbarLoadButton({ state }) {
   const { projectActions, translator } = useContext(ReactPlannerContext);
@@ -23,8 +23,8 @@ export default function ToolbarLoadButton({ state }) {
       tooltip={translator.t("Load project")}
       onClick={loadProjectFromFile}
     >
-      <MdFrontLoader />
-      Load
+      <MdFileUpload className="mb-0.5" size={25} />
+      Upload
     </ToolbarButton>
   );
 }

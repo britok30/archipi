@@ -62,7 +62,7 @@ export default function ToolbarSaveButton({ state }) {
       placement="topLeft"
     >
       <ToolbarButton active={false} tooltip={translator.t("Save project")}>
-        <FaSave />
+        <FaSave className="mb-0.5" size={20} />
         Save
       </ToolbarButton>
     </Dropdown>
