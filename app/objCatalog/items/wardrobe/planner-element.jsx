@@ -210,6 +210,7 @@ function makeObjectMinLOD() {
   return wardrobe;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "wardrobe",
   prototype: "items",
@@ -218,7 +219,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "wardrobe",
     description: "wardrobe",
-    image: require("./wardrobe.png"),
+    image: "/images/wardrobe.png",
   },
   properties: {
     altitude: {

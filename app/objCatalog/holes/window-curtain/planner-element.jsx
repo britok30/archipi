@@ -14,6 +14,7 @@ const STYLE_HOLE_SELECTED = {
 };
 const EPSILON = 3;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "window-curtain",
   prototype: "holes",
@@ -22,7 +23,7 @@ export default {
     tag: ["Finestre"],
     title: "Curtain window",
     description: "Curtain window",
-    image: require("./window-curtain.jpg"),
+    image: "/images/window-curtain.jpg",
   },
 
   properties: {
@@ -130,9 +131,9 @@ export default {
       return Promise.resolve(onLoadItem(cached3DWindow.clone()));
     }
 
-    let mtl = require("./window.mtl");
-    let obj = require("./window.obj");
-    let img = require("./texture.png");
+    let mtl = "/mtl/window.mtl";
+    let obj = "/obj/window.obj";
+    let img = "/images/textures/texture.png";
 
     return loadObjWithMaterial(mtl, obj, img).then((object) => {
       cached3DWindow = object;

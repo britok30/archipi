@@ -4,7 +4,7 @@ import * as Three from "three";
 import React from "react";
 
 const textureLoader = new Three.TextureLoader();
-const white = textureLoader.load("./white.jpg");
+const white = textureLoader.load("/images/textures/white.jpg");
 const whiteMaterial = new Three.MeshLambertMaterial({ color: 0x000000 });
 const wood = textureLoader.load("/images/textures/wood.jpg");
 const glassMaterial = new Three.MeshLambertMaterial({
@@ -557,7 +557,7 @@ export default {
     tag: ["furnishings", "wood"],
     title: "desk",
     description: "desk",
-    image: require("./desk.png"),
+    image: "/images/desk.png",
   },
 
   properties: {

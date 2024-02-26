@@ -16,7 +16,7 @@ export default {
     tag: ["furnishings", "optional"],
     title: "Coat hook",
     description: "Coat hook",
-    image: require("./coat-hook.png"),
+    image: "/images/coat-hook.png",
   },
 
   properties: {

@@ -8,7 +8,7 @@ const DEPTH = 40;
 const HEIGHT = 70;
 
 const textureLoader = new Three.TextureLoader();
-const Image = textureLoader.load("./bronze-texture.jpg");
+const Image = textureLoader.load("/images/textures/bronze-texture.jpg");
 const material = new Three.MeshLambertMaterial({ map: Image });
 
 const objectMaxLOD = makeObjectMaxLOD();
@@ -139,6 +139,7 @@ function makeObjectMinLOD() {
   return umbrellaStand;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "umbrella-stand",
   prototype: "items",
@@ -147,7 +148,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "umbrella stand",
     description: "umbrella stand",
-    image: require("./umbrellaStand.png"),
+    image: "/images/umbrellaStand.png",
   },
   properties: {
     altitude: {

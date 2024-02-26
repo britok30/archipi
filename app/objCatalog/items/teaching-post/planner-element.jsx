@@ -25,7 +25,7 @@ export default {
     tag: ["furnishings"],
     title: "Teaching post",
     description: "Teaching post",
-    image: require("./teaching-post.png"),
+    image: "/images/teaching-post.png",
   },
 
   properties: {

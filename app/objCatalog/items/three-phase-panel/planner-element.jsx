@@ -15,7 +15,7 @@ const black = new Three.MeshLambertMaterial({ color: 0x000000 });
 black.side = Three.DoubleSide;
 
 const textureLoader = new Three.TextureLoader();
-const quadro = textureLoader.load("./PanelTexture.png");
+const quadro = textureLoader.load("/images/textures/panel-texture.png");
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMiddleLOD = makeObjectMiddleLOD();
@@ -595,6 +595,7 @@ function makeObjectMinLOD() {
   return threePhasePanel;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "three- phase panel",
   prototype: "items",
@@ -603,7 +604,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "three-phase panel",
     description: "electric panel",
-    image: require("./threePhasePanel.png"),
+    image: "/images/three-phase-panel.png",
   },
   properties: {
     altitude: {

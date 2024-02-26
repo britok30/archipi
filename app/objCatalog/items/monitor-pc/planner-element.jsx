@@ -8,10 +8,10 @@ const DEPTH = 50;
 const HEIGHT = 50;
 
 const textureLoader = new Three.TextureLoader();
-const power = textureLoader.load("./power.jpg");
-const black = textureLoader.load("./black.jpg");
-const white = textureLoader.load("./white.jpg");
-const keyboard = textureLoader.load("./keyboard.jpg");
+const power = textureLoader.load("/images/textures/pc-power.jpg");
+const black = textureLoader.load("/images/textures/pc-black.jpg");
+const white = textureLoader.load("/images/textures/pc-white.jpg");
+const keyboard = textureLoader.load("/images/textures/keyboard.jpg");
 const blackMaterial = new Three.MeshLambertMaterial({ map: black });
 
 const objectMaxLOD = makeObjectMaxLOD();
@@ -141,6 +141,7 @@ function makeObjectMinLOD() {
   return monitorPC;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "monitor_pc",
   prototype: "items",
@@ -149,7 +150,7 @@ export default {
     tag: ["furnishings"],
     title: "pc monitor",
     description: "pc monitor",
-    image: require("./monitorPC.png"),
+    image: "/images/monitor-pc.png",
   },
 
   properties: {

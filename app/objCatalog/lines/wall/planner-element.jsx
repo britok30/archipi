@@ -6,7 +6,7 @@ const info = {
   title: "wall",
   tag: ["wall"],
   description: "Wall with bricks or painted",
-  image: require("./wall.png"),
+  image: "/images/wall.png",
   visibility: {
     catalog: true,
     layerElementsVisible: true,
@@ -16,11 +16,11 @@ const info = {
 const textures = {
   bricks: {
     name: "Bricks",
-    uri: require("./textures/bricks.jpg"),
+    uri: "/images/textures/bricks.jpg",
     lengthRepeatScale: 0.01,
     heightRepeatScale: 0.01,
     normal: {
-      uri: require("./textures/bricks-normal.jpg"),
+      uri: "/images/textures/bricks-normal.jpg",
       lengthRepeatScale: 0.01,
       heightRepeatScale: 0.01,
       normalScaleX: 0.8,
@@ -29,11 +29,11 @@ const textures = {
   },
   painted: {
     name: "Painted",
-    uri: require("./textures/painted.jpg"),
+    uri: "/images/textures/painted.jpg",
     lengthRepeatScale: 0.01,
     heightRepeatScale: 0.01,
     normal: {
-      uri: require("./textures/painted-normal.jpg"),
+      uri: "/images/textures/painted-normal.jpg",
       lengthRepeatScale: 0.01,
       heightRepeatScale: 0.01,
       normalScaleX: 0.4,

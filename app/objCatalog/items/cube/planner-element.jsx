@@ -4,6 +4,7 @@ import React from "react";
 import { BoxGeometry, MeshBasicMaterial, Mesh, BoxHelper } from "three";
 import { ReactPlannerSharedStyle } from "../../../styles";
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "cube",
   prototype: "items",
@@ -12,7 +13,7 @@ export default {
     title: "cube",
     tag: ["demo"],
     description: "Demo item",
-    image: require("./cube.png"),
+    image: "/images/cube.png",
   },
 
   properties: {

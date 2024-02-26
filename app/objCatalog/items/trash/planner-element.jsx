@@ -6,6 +6,7 @@ import React from "react";
 const RADIUS = 20;
 const HEIGHT = 40;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "trash",
   prototype: "items",
@@ -14,7 +15,7 @@ export default {
     tag: ["furnishings"],
     title: "Trash",
     description: "Trash",
-    image: require("./trash.png"),
+    image: "/images/trash.png",
   },
 
   properties: {

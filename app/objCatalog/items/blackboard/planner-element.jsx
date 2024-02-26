@@ -7,6 +7,7 @@ const WIDTH = 300;
 const DEPTH = 20;
 const HEIGHT = 150;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "blackboard",
   prototype: "items",
@@ -15,7 +16,7 @@ export default {
     tag: ["furnishings"],
     title: "Blackboard",
     description: "Blackboard",
-    image: require("./blackboard.png"),
+    image: "/images/blackboard.png",
   },
 
   properties: {

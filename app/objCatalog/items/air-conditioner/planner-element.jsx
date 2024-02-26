@@ -293,6 +293,7 @@ function makeObjectMinLOD() {
   return air_conditioner;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "conditioner",
   prototype: "items",
@@ -301,7 +302,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "air conditioner",
     description: "air conditioner",
-    image: require("./air_conditioner.png"),
+    image: "/images/air_conditioner.png",
   },
   properties: {
     altitude: {

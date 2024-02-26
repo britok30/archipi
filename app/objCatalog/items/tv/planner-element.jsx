@@ -7,6 +7,7 @@ import convert from "convert-units";
 
 let cached3DTV = null;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "tv",
   prototype: "items",
@@ -15,7 +16,7 @@ export default {
     title: "tv",
     tag: ["furnishing", "electronics"],
     description: "LCD TV",
-    image: require("./tv.png"),
+    image: "/images/tv.png",
   },
 
   properties: {
@@ -153,8 +154,8 @@ export default {
       return Promise.resolve(onLoadItem(cached3DTV.clone()));
     }
 
-    let mtl = require("./tv.mtl");
-    let obj = require("./tv.obj");
+    let mtl = "/mtl/tv.mtl";
+    let obj = "/obj/tv.obj";
 
     return loadObjWithMaterial(mtl, obj).then((object) => {
       cached3DTV = object;

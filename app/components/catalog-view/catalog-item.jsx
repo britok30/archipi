@@ -10,16 +10,16 @@ import Image from "next/image";
 const CatalogItem = ({ element }) => {
   const { linesActions, itemsActions, holesActions, projectActions } =
     useContext(ReactPlannerContext);
-  const [img, setImg] = useState("");
-
-  // TODO(pg): workaround to be able to use image in next.js app
-  useEffect(() => {
-    if (element.info.image && element.info.image.default) {
-      setImg(element.info.image.default.src);
-    } else {
-      setImg(element.info.image);
-    }
-  }, [element.info.image]);
+  // const [img, setImg] = useState("");
+  // console.log("element", element);
+  // // TODO(pg): workaround to be able to use image in next.js app
+  // useEffect(() => {
+  //   if (element.info.image && element.info.image.default) {
+  //     setImg(element.info.image.default.src);
+  //   } else {
+  //     setImg(element.info.image);
+  //   }
+  // }, [element.info.image]);
 
   const select = () => {
     switch (element.prototype) {
@@ -47,7 +47,7 @@ const CatalogItem = ({ element }) => {
       <div className="w-full h-[8rem] relative overflow-hidden m-0 p-0 mb-2">
         <Image
           className="object-contain object-center"
-          src={img}
+          src={element.info.image}
           fill
           alt={`catalog_item_${element.info.title}`}
         />

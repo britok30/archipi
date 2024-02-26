@@ -8,9 +8,9 @@ const DEPTH = 100;
 const HEIGHT = 80;
 
 let textureLoader = new Three.TextureLoader();
-let steel = textureLoader.load("./steel.jpg");
-let darkSteel = textureLoader.load("./darksteel.jpg");
-let logo = textureLoader.load("./logo.jpg");
+let steel = textureLoader.load("/images/textures/steel.jpg");
+let darkSteel = textureLoader.load("/images/textures/darksteel.jpg");
+let logo = textureLoader.load("/images/textures/logo.jpg");
 let steelTexture = new Three.MeshLambertMaterial({ map: steel });
 let darkSteelTexture = new Three.MeshLambertMaterial({ map: darkSteel });
 let logoTexture = new Three.MeshLambertMaterial({ map: logo });
@@ -462,6 +462,7 @@ function makeObjectMinLOD() {
   return kitchen;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "kitchen",
   prototype: "items",
@@ -470,7 +471,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "kitchen",
     description: "kitchen",
-    image: require("./kitchen.png"),
+    image: "/images/kitchen.png",
   },
 
   properties: {

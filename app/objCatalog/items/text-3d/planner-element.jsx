@@ -16,6 +16,7 @@ const font = fontLoader.parse(HELVETIKER);
 const defaultFontSize = 16;
 const defaultColor = "#000000";
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "text",
   prototype: "items",
@@ -24,7 +25,7 @@ export default {
     tag: ["text"],
     title: "Text 3D",
     description: "Text",
-    image: require("./img.png"),
+    image: "/images/text.png",
   },
 
   properties: {

@@ -98,6 +98,7 @@ function makeObjectMinLOD() {
   return detector;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "smoke-detector",
   prototype: "items",
@@ -106,7 +107,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "smoke detector",
     description: "smoke detector",
-    image: require("./smokeDetector.png"),
+    image: "/images/smoke-detector.png",
   },
   properties: {
     altitude: {

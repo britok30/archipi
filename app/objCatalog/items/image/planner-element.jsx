@@ -4,6 +4,7 @@ import * as Three from "three";
 import React from "react";
 import ImageFul from "./imageful";
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "image",
   prototype: "items",
@@ -12,7 +13,7 @@ export default {
     title: "image",
     tag: ["image"],
     description: "Image",
-    image: require("./image.png"),
+    image: "/images/image.png",
   },
 
   properties: {

@@ -1,80 +1,100 @@
-import React from 'react';
-import * as Three from 'three';
-import { loadObjWithMaterial } from '../../utils/load-obj';
+import React from "react";
+import * as Three from "three";
+import { loadObjWithMaterial } from "../../utils/load-obj";
 
 let cached3DDoor = null;
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  name: 'door',
-  prototype: 'holes',
+  name: "door",
+  prototype: "holes",
 
   info: {
-    title: 'door',
-    tag: ['door'],
-    description: 'Door',
-    image: require('./door.png')
+    title: "door",
+    tag: ["door"],
+    description: "Door",
+    image: "/images/door.png",
   },
 
   properties: {
     width: {
-      label: 'Width',
-      type: 'length-measure',
+      label: "Width",
+      type: "length-measure",
       defaultValue: {
-        length: 100
-      }
+        length: 100,
+      },
     },
     height: {
-      label: 'Height',
-      type: 'length-measure',
+      label: "Height",
+      type: "length-measure",
       defaultValue: {
-        length: 215
-      }
+        length: 215,
+      },
     },
     altitude: {
-      label: 'Altitude',
-      type: 'length-measure',
+      label: "Altitude",
+      type: "length-measure",
       defaultValue: {
-        length: 0
-      }
+        length: 0,
+      },
     },
     thickness: {
-      label: 'Thickness',
-      type: 'length-measure',
+      label: "Thickness",
+      type: "length-measure",
       defaultValue: {
-        length: 30
-      }
+        length: 30,
+      },
     },
     flip_horizontal: {
-      label: 'Horizontal Flip',
-      type: 'checkbox',
+      label: "Horizontal Flip",
+      type: "checkbox",
       defaultValue: false,
       values: {
-        'none': false,
-        'yes': true
-      }
+        none: false,
+        yes: true,
+      },
     },
     flip_vertical: {
-      label: 'Vertical Flip',
-      type: 'checkbox',
+      label: "Vertical Flip",
+      type: "checkbox",
       defaultValue: false,
       values: {
-        'none': false,
-        'yes': true
-      }
+        none: false,
+        yes: true,
+      },
     },
   },
 
   render2D: function (element, layer, scene) {
-    const STYLE_HOLE_BASE = { stroke: '#000', strokeWidth: '3px', fill: '#000' };
-    const STYLE_HOLE_SELECTED = { stroke: '#0096fd', strokeWidth: '4px', fill: '#0096fd', cursor: 'move' };
-    const STYLE_ARC_BASE = { stroke: '#000', strokeWidth: '3px', strokeDasharray: '5,5', fill: 'none' };
-    const STYLE_ARC_SELECTED = { stroke: '#0096fd', strokeWidth: '4px', strokeDasharray: '5,5', fill: 'none', cursor: 'move' };
+    const STYLE_HOLE_BASE = {
+      stroke: "#000",
+      strokeWidth: "3px",
+      fill: "#000",
+    };
+    const STYLE_HOLE_SELECTED = {
+      stroke: "#0096fd",
+      strokeWidth: "4px",
+      fill: "#0096fd",
+      cursor: "move",
+    };
+    const STYLE_ARC_BASE = {
+      stroke: "#000",
+      strokeWidth: "3px",
+      strokeDasharray: "5,5",
+      fill: "none",
+    };
+    const STYLE_ARC_SELECTED = {
+      stroke: "#0096fd",
+      strokeWidth: "4px",
+      strokeDasharray: "5,5",
+      fill: "none",
+      cursor: "move",
+    };
     const EPSILON = 3;
-    
-    let hFlip = element.properties.get('flip_horizontal');
-    let vFlip = element.properties.get('flip_vertical');
-    let length = element.properties.get('width').get('length');
+
+    let hFlip = element.properties.get("flip_horizontal");
+    let vFlip = element.properties.get("flip_vertical");
+    let length = element.properties.get("width").get("length");
     let holePath = `M${0} ${-EPSILON}  L${length} ${-EPSILON}  L${length} ${EPSILON}  L${0} ${EPSILON}  z`;
     let holeStyle = element.selected ? STYLE_HOLE_SELECTED : STYLE_HOLE_BASE;
     let arcPath = `M${0},${0}  A${length},${length} 0 0,1 ${length},${length}`;
@@ -96,8 +116,7 @@ export default {
         pY2 = length;
         rotateAngle = 180;
         scaleY = -1;
-      }
-      else {
+      } else {
         tX = 0;
         tY = -length;
         pX1 = 0;
@@ -107,8 +126,7 @@ export default {
         scaleY = 1;
         rotateAngle = 0;
       }
-    }
-    else {
+    } else {
       scaleX = -1;
       if (vFlip) {
         tX = 0;
@@ -119,8 +137,7 @@ export default {
         pY2 = length;
         rotateAngle = 90;
         scaleY = 1;
-      }
-      else {
+      } else {
         tX = length;
         tY = 0;
         pX1 = 0;
@@ -134,8 +151,19 @@ export default {
 
     return (
       <g transform={`translate(${-length / 2}, 0)`}>
-        <path d={arcPath} style={arcStyle} transform={`translate(${tX},${tY}) scale(${scaleX},${scaleY}) rotate(${rotateAngle})`} />
-        <line x1={pX1} y1={pY1 - EPSILON} x2={pX2} y2={pY2 - EPSILON} style={holeStyle} transform={`scale(${-scaleX},${scaleY})`} />
+        <path
+          d={arcPath}
+          style={arcStyle}
+          transform={`translate(${tX},${tY}) scale(${scaleX},${scaleY}) rotate(${rotateAngle})`}
+        />
+        <line
+          x1={pX1}
+          y1={pY1 - EPSILON}
+          x2={pX2}
+          y2={pY2 - EPSILON}
+          style={holeStyle}
+          transform={`scale(${-scaleX},${scaleY})`}
+        />
         <path d={holePath} style={holeStyle} />
       </g>
     );
@@ -157,12 +185,15 @@ export default {
         object.add(box);
       }
 
-      let width = element.properties.get('width').get('length');
-      let height = element.properties.get('height').get('length');
-      let thickness = element.properties.get('thickness').get('length');
+      let width = element.properties.get("width").get("length");
+      let height = element.properties.get("height").get("length");
+      let thickness = element.properties.get("thickness").get("length");
 
-      object.scale.set(width / initialWidth, height / initialHeight,
-        thickness / initialThickness);
+      object.scale.set(
+        width / initialWidth,
+        height / initialHeight,
+        thickness / initialThickness
+      );
 
       return object;
     };
@@ -171,14 +202,13 @@ export default {
       return Promise.resolve(onLoadItem(cached3DDoor.clone()));
     }
 
-    let mtl = require('./door.mtl');
-    let obj = require('./door.obj');
-    let img = require('./texture.jpg');
+    let mtl = "/mtl/door.mtl";
+    let obj = "/obj/door.obj";
+    let img = "/images/textures/door-texture.jpg";
 
-    return loadObjWithMaterial(mtl, obj, img)
-      .then(object => {
-        cached3DDoor = object;
-        return onLoadItem(cached3DDoor.clone())
-      })
-  }
+    return loadObjWithMaterial(mtl, obj, img).then((object) => {
+      cached3DDoor = object;
+      return onLoadItem(cached3DDoor.clone());
+    });
+  },
 };

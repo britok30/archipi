@@ -94,6 +94,7 @@ function makeObjectMinLOD(newWidth, newHeight, newDepth) {
   return table;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "table",
   prototype: "items",
@@ -102,7 +103,7 @@ export default {
     tag: ["furnishings", "wood"],
     title: "table",
     description: "table",
-    image: require("./table.png"),
+    image: "/images/table.png",
   },
 
   properties: {

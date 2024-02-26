@@ -335,6 +335,7 @@ function makeObjectMinLOD(newWidth, newDepth) {
   return sink;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "sink",
   prototype: "items",
@@ -343,7 +344,7 @@ export default {
     tag: ["furnishings", "metal"],
     title: "sink",
     description: "sink",
-    image: require("./sink.png"),
+    image: "/images/sink.png",
   },
   properties: {
     width: {
