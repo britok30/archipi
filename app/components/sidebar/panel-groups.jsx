@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useContext, memo } from "react";
 import PropTypes from "prop-types";
 import Panel from "./panel";
@@ -69,187 +67,145 @@ const tablegroupStyle = {
 const iconColStyle = { width: "2em", textAlign: "center" };
 const styleHoverColor = { color: SharedStyle.SECONDARY_COLOR.main };
 const styleEditButtonHover = { ...styleEditButton, ...styleHoverColor };
-const styleAddLabel = { fontSize: "10px", marginLeft: "5px" };
 const styleEyeVisible = { fontSize: "1.25em" };
 const styleEyeHidden = { ...styleEyeVisible, color: "#a5a1a1" };
-const newLayerLableStyle = {
-  fontSize: "1.3em",
-  cursor: "pointer",
-  textAlign: "center",
-};
-const newLayerLableHoverStyle = { ...newLayerLableStyle, ...styleHoverColor };
 
-const PanelGroups = ({ mode, groups, layers }) => {
+const areEqual = (prevProps, nextProps) => {
+  return (
+    prevProps.groups.hashCode() === nextProps.groups.hashCode() &&
+    prevProps.layers.hashCode() === nextProps.layers.hashCode() &&
+    prevProps.mode === nextProps.mode
+  );
+};
+
+const PanelGroups = memo(({ mode, groups, layers }) => {
   const { translator, groupsActions } = useContext(ReactPlannerContext);
-  const [newEmptyHover, setNewEmptyHover] = useState(false);
-  const [newSelectedHover, setNewSelectedHover] = useState(false);
 
   if (!VISIBILITY_MODE[mode]) return null;
 
+  const selectClick = (groupID) => groupsActions.selectGroup(groupID);
+
+  const swapVisibility = (e, groupID, group) => {
+    e.stopPropagation();
+    groupsActions.setGroupProperties(
+      groupID,
+      new Map({ visible: !group.get("visible") })
+    );
+  };
+
+  const chainToGroup = (groupID) => {
+    layers.forEach((layer) => {
+      let layerID = layer.get("id");
+      let layerElements = {
+        lines: layer.get("lines"),
+        items: layer.get("items"),
+        holes: layer.get("holes"),
+        areas: layer.get("areas"),
+      };
+
+      for (let elementPrototype in layerElements) {
+        let ElementList = layerElements[elementPrototype];
+        ElementList.filter((el) => el.get("selected")).forEach((element) => {
+          groupsActions.addToGroup(
+            groupID,
+            layerID,
+            elementPrototype,
+            element.get("id")
+          );
+        });
+      }
+    });
+
+    selectClick(groupID);
+  };
+
   return (
     <Panel name={translator.t("Groups")} opened={groups.size > 0}>
-      {groups.size ? (
-        <table style={tablegroupStyle}>
-          <thead>
-            <tr>
-              <th colSpan="4"></th>
-              <th>{translator.t("Elements")}</th>
-              <th>{translator.t("Name")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groups.entrySeq().map(([groupID, group]) => {
-              let selectClick = (e) => groupsActions.selectGroup(groupID);
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        <h3>Elements</h3>
+        <h3>Names</h3>
+      </div>
 
-              let swapVisibility = (e) => {
-                e.stopPropagation();
-                groupsActions.setGroupProperties(
-                  groupID,
-                  new Map({ visible: !group.get("visible") })
-                );
-              };
+      <div className="mb-2">
+        {groups.entrySeq().map(([groupID, group]) => {
+          let isCurrentgroup = group.get("selected");
+          let shouldHighlight = isCurrentgroup;
 
-              let chainToGroup = (e) => {
-                layers.forEach((layer) => {
-                  let layerID = layer.get("id");
-                  let layerElements = {
-                    lines: layer.get("lines"),
-                    items: layer.get("items"),
-                    holes: layer.get("holes"),
-                    areas: layer.get("areas"),
-                  };
+          let dimension = group.get("elements").reduce((sum, layer) => {
+            return sum + layer.reduce((lSum, elProt) => lSum + elProt.size, 0);
+          }, 0);
 
-                  for (let elementPrototype in layerElements) {
-                    let ElementList = layerElements[elementPrototype];
-                    ElementList.filter((el) => el.get("selected")).forEach(
-                      (element) => {
-                        groupsActions.addToGroup(
-                          groupID,
-                          layerID,
-                          elementPrototype,
-                          element.get("id")
-                        );
-                      }
-                    );
+          return (
+            <div className="grid grid-cols-2 mb-3" key={group}>
+              <div className="flex items-center space-x-3">
+                <button onClick={(e) => swapVisibility(e, groupID, group)}>
+                  <FaEye
+                    style={
+                      !group.get("visible") ? styleEyeHidden : styleEyeVisible
+                    }
+                  />
+                </button>
+
+                <button onClick={() => chainToGroup(groupID)}>
+                  <FaLink
+                    style={
+                      !shouldHighlight ? styleEditButton : styleEditButtonHover
+                    }
+                  />
+                </button>
+
+                <button onClick={() => groupsActions.removeGroup(groupID)}>
+                  <FaUnlink
+                    style={
+                      !shouldHighlight ? styleEditButton : styleEditButtonHover
+                    }
+                  />
+                </button>
+
+                <button
+                  onClick={() =>
+                    groupsActions.removeGroupAndDeleteElements(groupID)
                   }
-                });
+                >
+                  <FaTrash
+                    style={
+                      !shouldHighlight ? styleEditButton : styleEditButtonHover
+                    }
+                  />
+                </button>
+              </div>
 
-                selectClick(e);
-              };
+              <div className="flex items-center space-x-3">
+                {dimension}
+                {group.get("name")}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-              let isCurrentgroup = group.get("selected");
-              let shouldHighlight = isCurrentgroup;
-              let rowStyle = !shouldHighlight ? null : styleHoverColor;
+      <div className="grid grid-cols-2">
+        <button
+          className="flex items-center space-x-3"
+          onClick={(e) => groupsActions.addGroup()}
+        >
+          <TiPlus />
+          New Empty Group
+        </button>
 
-              let dimension = group.get("elements").reduce((sum, layer) => {
-                return (
-                  sum + layer.reduce((lSum, elProt) => lSum + elProt.size, 0)
-                );
-              }, 0);
-
-              return (
-                <tr key={groupID} style={rowStyle}>
-                  <td
-                    style={iconColStyle}
-                    title={translator.t("Toggle Group Visibility")}
-                  >
-                    <FaEye
-                      onClick={swapVisibility}
-                      style={
-                        !group.get("visible") ? styleEyeHidden : styleEyeVisible
-                      }
-                    />
-                  </td>
-                  <td
-                    style={iconColStyle}
-                    title={translator.t("Chain selected Elements to Group")}
-                  >
-                    <FaLink
-                      onClick={chainToGroup}
-                      style={
-                        !shouldHighlight
-                          ? styleEditButton
-                          : styleEditButtonHover
-                      }
-                    />
-                  </td>
-                  <td
-                    style={iconColStyle}
-                    title={translator.t(
-                      "Un-chain all Group's Elements and remove Group"
-                    )}
-                  >
-                    <FaUnlink
-                      onClick={(e) => groupsActions.removeGroup(groupID)}
-                      style={
-                        !shouldHighlight
-                          ? styleEditButton
-                          : styleEditButtonHover
-                      }
-                    />
-                  </td>
-                  <td
-                    style={iconColStyle}
-                    title={translator.t("Delete group and all Elements")}
-                  >
-                    <FaTrash
-                      onClick={(e) =>
-                        groupsActions.removeGroupAndDeleteElements(groupID)
-                      }
-                      style={
-                        !shouldHighlight
-                          ? styleEditButton
-                          : styleEditButtonHover
-                      }
-                    />
-                  </td>
-                  <td
-                    onClick={selectClick}
-                    style={{ width: "0em", textAlign: "center" }}
-                  >
-                    {dimension}
-                  </td>
-                  <td onClick={selectClick}>{group.get("name")}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      ) : null}
-
-      <table style={{ width: "100%", marginTop: "0.1em" }}>
-        <tbody>
-          <tr>
-            <td
-              style={
-                !newEmptyHover ? newLayerLableStyle : newLayerLableHoverStyle
-              }
-              onMouseOver={() => setNewEmptyHover(true)}
-              onMouseOut={() => setNewEmptyHover(false)}
-              onClick={(e) => groupsActions.addGroup()}
-            >
-              <TiPlus />
-              <b style={styleAddLabel}>{translator.t("New Empty Group")}</b>
-            </td>
-            <td
-              style={
-                !newSelectedHover ? newLayerLableStyle : newLayerLableHoverStyle
-              }
-              onMouseOver={() => setNewSelectedHover(true)}
-              onMouseOut={() => setNewSelectedHover(false)}
-              onClick={(e) => groupsActions.addGroupFromSelected()}
-            >
-              <TiPlus />
-              <b style={styleAddLabel}>
-                {translator.t("New Group from selected")}
-              </b>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <button
+          className="flex items-center space-x-3"
+          onClick={(e) => groupsActions.addGroupFromSelected()}
+        >
+          <TiPlus />
+          New Group from selected
+        </button>
+      </div>
     </Panel>
   );
-};
+}, areEqual);
+
+PanelGroups.displayName = "PanelGroups";
 
 PanelGroups.propTypes = {
   mode: PropTypes.string.isRequired,
@@ -257,10 +213,4 @@ PanelGroups.propTypes = {
   layers: PropTypes.object.isRequired,
 };
 
-export default memo(PanelGroups, (prevProps, nextProps) => {
-  return (
-    prevProps.groups.hashCode() !== nextProps.groups.hashCode() ||
-    prevProps.layers.hashCode() !== nextProps.layers.hashCode() ||
-    prevProps.mode !== nextProps.mode
-  );
-});
+export default PanelGroups;

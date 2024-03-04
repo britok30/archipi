@@ -120,7 +120,7 @@ function makeObjectMaxLOD() {
   let planeMaterialFront = new Three.MeshLambertMaterial({
     map: lcdTexture,
     transparent: true,
-    overdraw: true,
+    // overdraw: true,
   });
 
   let planeGeometryFront1 = new Three.PlaneGeometry(width / 8, height / 3);
@@ -242,7 +242,7 @@ function makeObjectMinLOD() {
   let planeMaterialFront = new Three.MeshLambertMaterial({
     map: lcdTexture,
     transparent: true,
-    overdraw: true,
+    // overdraw: true,
   });
 
   let planeGeometryFront1 = new Three.PlaneGeometry(width / 8, height / 3);

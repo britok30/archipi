@@ -1,7 +1,9 @@
 import * as Three from "three";
 import { List } from "immutable";
 import { COLORS } from "../../../styles/shared-style";
+import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default function (width, height, grid, font) {
   let step = grid.properties.get("step");
   let colors = grid.properties.has("color")
@@ -14,14 +16,24 @@ export default function (width, height, grid, font) {
   let counter = 0;
 
   for (let i = 0; i <= width; i += step) {
-    let geometry = new Three.Geometry();
-    geometry.vertices.push(new Three.Vector3(i, 0, 0));
-    geometry.vertices.push(new Three.Vector3(i, 0, -height));
+    // Using BufferGeometry instead of Geometry
+    let geometry = new Three.BufferGeometry();
+    const vertices = new Float32Array([
+      i,
+      0,
+      0, // vertex 1
+      i,
+      0,
+      -height, // vertex 2
+    ]);
+    // itemSize = 3 because there are 3 values (components) per vertex
+    geometry.setAttribute("position", new Three.BufferAttribute(vertices, 3));
     let color = colors.get(counter % colors.size);
     let material = new Three.LineBasicMaterial({ color });
 
     if (counter % 5 === 0) {
-      let shape = new Three.TextGeometry("" + counter * step, {
+      // Assuming TextGeometry is available and used as before
+      let shape = new TextGeometry("" + counter * step, {
         size: 16,
         height: 1,
         font: font,

@@ -6,6 +6,7 @@ import * as SharedStyle from "../../styles/shared-style";
 import { MdUpdate } from "react-icons/md";
 import { KEYBOARD_BUTTON_CODE } from "../../utils/constants";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
+import classNames from "classnames";
 
 const STYLE_INPUT = {
   display: "block",
@@ -121,6 +122,13 @@ export default function FormNumberInput({
           if (different) saveFn(e);
         }}
         title={translator.t("Confirm")}
+        className={classNames(
+          "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500",
+          {
+            "visible opacity-100": different,
+            "hidden opacity-0": !different,
+          }
+        )}
         style={{
           ...confirmStyle,
           visibility: different ? "visible" : "hidden",

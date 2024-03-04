@@ -33,81 +33,64 @@ const LineAttributesEditor = ({
     : null;
 
   return (
-    <div>
-      <table style={tableStyle}>
-        <tbody>
-          <tr>
-            <td style={firstTdStyle}>{translator.t("Name")}</td>
-            <td>
-              <FormTextInput
-                value={name}
-                onChange={(event) => onUpdate("name", event.target.value)}
-                style={inputStyle}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td style={firstTdStyle}>X1</td>
-            <td>
-              <FormNumberInput
-                value={vertexOne.get("x")}
-                onChange={(event) =>
-                  onUpdate("vertexOne", { x: event.target.value })
-                }
-                style={inputStyle}
-                state={state}
-                precision={2}
-                {...rest}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td style={firstTdStyle}>Y1</td>
-            <td>
-              <FormNumberInput
-                value={vertexOne.get("y")}
-                onChange={(event) =>
-                  onUpdate("vertexOne", { y: event.target.value })
-                }
-                style={inputStyle}
-                state={state}
-                precision={2}
-                {...rest}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td style={firstTdStyle}>X2</td>
-            <td>
-              <FormNumberInput
-                value={vertexTwo.get("x")}
-                onChange={(event) =>
-                  onUpdate("vertexTwo", { x: event.target.value })
-                }
-                style={inputStyle}
-                state={state}
-                precision={2}
-                {...rest}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td style={firstTdStyle}>Y2</td>
-            <td>
-              <FormNumberInput
-                value={vertexTwo.get("y")}
-                onChange={(event) =>
-                  onUpdate("vertexTwo", { y: event.target.value })
-                }
-                style={inputStyle}
-                state={state}
-                precision={2}
-                {...rest}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="flex flex-col space-y-3">
+      <div className="flex flex-col space-y-2">
+        <label>Name</label>
+        <FormTextInput
+          value={name}
+          onChange={(event) => onUpdate("name", event.target.value)}
+          style={inputStyle}
+        />
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <label>X1</label>
+        <FormNumberInput
+          value={vertexOne.get("x")}
+          onChange={(event) => onUpdate("vertexOne", { x: event.target.value })}
+          style={inputStyle}
+          state={state}
+          precision={2}
+          {...rest}
+        />
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <label>Y1</label>
+        <FormNumberInput
+          value={vertexOne.get("y")}
+          onChange={(event) => onUpdate("vertexOne", { y: event.target.value })}
+          style={inputStyle}
+          state={state}
+          precision={2}
+          {...rest}
+        />
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <label>X2</label>
+        <FormNumberInput
+          value={vertexTwo.get("x")}
+          onChange={(event) => onUpdate("vertexTwo", { x: event.target.value })}
+          style={inputStyle}
+          state={state}
+          precision={2}
+          {...rest}
+        />
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <label>Y2</label>
+        <FormNumberInput
+          value={vertexTwo.get("y")}
+          onChange={(event) => onUpdate("vertexTwo", { y: event.target.value })}
+          style={inputStyle}
+          state={state}
+          precision={2}
+          {...rest}
+        />
+      </div>
+
       <PropertyLengthMeasure
         value={lineLength}
         onUpdate={(mapped) => onUpdate("lineLength", mapped)}

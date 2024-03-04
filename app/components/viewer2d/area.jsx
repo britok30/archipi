@@ -5,92 +5,93 @@ import PropTypes from "prop-types";
 import polylabel from "polylabel";
 import areapolygon from "area-polygon";
 
-const STYLE_TEXT = {
+const styleText = {
   textAnchor: "middle",
   fontSize: "12px",
-  fontFamily: '"Courier New", Courier, monospace',
+  fontFamily: "'Helvetica', 'Arial', sans-serif",
   pointerEvents: "none",
   fontWeight: "bold",
-
-  //http://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting-using-css
-  WebkitTouchCallout: "none" /* iOS Safari */,
-  WebkitUserSelect: "none" /* Chrome/Safari/Opera */,
-  MozUserSelect: "none" /* Firefox */,
-  MsUserSelect: "none" /* Internet Explorer/Edge */,
+  WebkitTouchCallout: "none", // iOS Safari
+  WebkitUserSelect: "none", // Chrome/Safari/Opera
+  MozUserSelect: "none", // Firefox
+  MsUserSelect: "none", // Internet Explorer/Edge
   userSelect: "none",
 };
 
-export const Area = ({ layer, area, catalog }) => {
-  let rendered = catalog.getElement(area.type).render2D(area, layer);
-
-  let renderedAreaSize = null;
-
-  let polygon = area.vertices.toArray().map((vertexID) => {
-    let { x, y } = layer.vertices.get(vertexID);
+const calculatePolygonWithHoles = (area, layer) => {
+  let polygonWithHoles = area.vertices.toArray().map((vertexID) => {
+    const { x, y } = layer.vertices.get(vertexID);
     return [x, y];
   });
 
-  let polygonWithHoles = polygon;
-
   area.holes.forEach((holeID) => {
-    let polygonHole = layer.areas
+    const holePolygon = layer.areas
       .get(holeID)
       .vertices.toArray()
       .map((vertexID) => {
-        let { x, y } = layer.vertices.get(vertexID);
+        const { x, y } = layer.vertices.get(vertexID);
         return [x, y];
       });
 
-    polygonWithHoles = polygonWithHoles.concat(polygonHole.reverse());
+    polygonWithHoles = polygonWithHoles.concat(holePolygon.reverse());
   });
 
-  let center = polylabel([polygonWithHoles], 1.0);
+  return polygonWithHoles;
+};
 
-  // TODO(pg): review area calculation to take into account wall thickness
-  // so that we can have a more accurate area calculation brutto/netto
+const calculateAreaSize = (area, layer) => {
+  const polygon = area.vertices.toArray().map((vertexID) => {
+    const { x, y } = layer.vertices.get(vertexID);
+    return [x, y];
+  });
+
   let areaSize = areapolygon(polygon, false);
 
-  //subtract holes area
   area.holes.forEach((areaID) => {
-    let hole = layer.areas.get(areaID);
-    let holePolygon = hole.vertices.toArray().map((vertexID) => {
-      let { x, y } = layer.vertices.get(vertexID);
+    const hole = layer.areas.get(areaID);
+    const holePolygon = hole.vertices.toArray().map((vertexID) => {
+      const { x, y } = layer.vertices.get(vertexID);
       return [x, y];
     });
     areaSize -= areapolygon(holePolygon, false);
   });
 
-  renderedAreaSize = (
-    <>
-      <text
-        x="0"
-        y="0"
-        transform={`translate(${center[0]} ${center[1]}) scale(1, -1)`}
-        style={STYLE_TEXT}
-      >
-        {area.name}
-      </text>
-      <text
-        x="0"
-        y="14"
-        transform={`translate(${center[0]} ${center[1]}) scale(1, -1)`}
-        style={STYLE_TEXT}
-      >
-        ({(areaSize / 10000).toFixed(2)} m{String.fromCharCode(0xb2)})
-      </text>
-    </>
-  );
+  return areaSize;
+};
+
+export const Area = ({ layer, area, catalog }) => {
+  const rendered = catalog.getElement(area.type).render2D(area, layer);
+  const polygonWithHoles = calculatePolygonWithHoles(area, layer);
+  const center = polylabel([polygonWithHoles], 1.0);
+  const areaSize = calculateAreaSize(area, layer);
 
   return (
     <g
       data-element-root
       data-prototype={area.prototype}
       data-id={area.id}
-      data-selected={area.selected}
+      data-selected={area.selected ? "true" : "false"}
       data-layer={layer.id}
     >
-      {rendered}
-      {renderedAreaSize}
+      {rendered} HELLO
+      <>
+        <text
+          x="0"
+          y="0"
+          transform={`translate(${center[0]} ${center[1]}) scale(1, -1)`}
+          style={styleText}
+        >
+          {area.name}
+        </text>
+        <text
+          x="0"
+          y="14"
+          transform={`translate(${center[0]} ${center[1]}) scale(1, -1)`}
+          style={styleText}
+        >
+          ({(areaSize / 10000).toFixed(2)} m²)
+        </text>
+      </>
     </g>
   );
 };

@@ -30,7 +30,7 @@ function ReactPlannerContent(props) {
   const contentH = height - footerBarH;
 
   const extractedState = stateExtractor(state);
-  const contextValue = useContext(ReactPlannerContext); // Step 3: Access the context value using useContext
+  const contextValue = useContext(ReactPlannerContext);
 
   useEffect(() => {
     let { store } = contextValue;
@@ -62,7 +62,6 @@ function ReactPlannerContent(props) {
         height={contentH}
         state={extractedState}
         {...otherProps}
-        onWheel={(event) => event.preventDefault()}
       />
       <Sidebar state={extractedState} {...otherProps} />
       <FooterBar

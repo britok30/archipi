@@ -9,12 +9,21 @@ import {
   Object3D,
   Mesh,
   MeshBasicMaterial,
+  MeshStandardMaterial,
   RepeatWrapping,
   Vector2,
   DoubleSide,
+  BufferAttribute,
 } from "three";
 import * as SharedStyle from "../../styles/shared-style";
 
+/**
+ * Apply a texture to a wall face
+ * @param material: The material of the face
+ * @param texture: The texture to load
+ * @param length: The length of the face
+ * @param height: The height of the face
+ */
 /**
  * Apply a texture to a wall face
  * @param material: The material of the face
@@ -26,38 +35,31 @@ const applyTexture = (material, texture, length, height) => {
   let loader = new TextureLoader();
 
   if (texture) {
-    // TODO(pg): workaround so that we can load the file in a next.js app
-    if (texture.uri && texture.uri.default) {
-      material.map = loader.load(texture.uri.default.src);
-    } else {
-      material.map = loader.load(texture.uri);
-    }
-    material.needsUpdate = true;
-    material.map.wrapS = RepeatWrapping;
-    material.map.wrapT = RepeatWrapping;
-    material.map.repeat.set(
-      length * texture.lengthRepeatScale,
-      height * texture.heightRepeatScale
-    );
+    loader.load(texture.uri, (loadedTexture) => {
+      material.map = loadedTexture;
+      material.needsUpdate = true;
+      material.map.wrapS = RepeatWrapping;
+      material.map.wrapT = RepeatWrapping;
+      material.map.repeat.set(
+        length * texture.lengthRepeatScale,
+        height * texture.heightRepeatScale
+      );
+    });
 
     if (texture.normal) {
-      // TODO(pg): workaround so that we can load the file in a next.js app
-      if (texture.normal.uri && texture.normal.uri.default) {
-        material.normalMap = loader.load(texture.normal.uri.default.src);
-      } else {
-        material.normalMap = loader.load(texture.normal.uri);
-      }
-      material.normalMap = loader.load(texture.normal.uri);
-      material.normalScale = new Vector2(
-        texture.normal.normalScaleX,
-        texture.normal.normalScaleY
-      );
-      material.normalMap.wrapS = RepeatWrapping;
-      material.normalMap.wrapT = RepeatWrapping;
-      material.normalMap.repeat.set(
-        length * texture.normal.lengthRepeatScale,
-        height * texture.normal.heightRepeatScale
-      );
+      loader.load(texture.normal.uri, (loadedTexture) => {
+        material.normalMap = loadedTexture;
+        material.normalScale = new Vector2(
+          texture.normal.normalScaleX,
+          texture.normal.normalScaleY
+        );
+        material.normalMap.wrapS = RepeatWrapping;
+        material.normalMap.wrapT = RepeatWrapping;
+        material.normalMap.repeat.set(
+          length * texture.normal.lengthRepeatScale,
+          height * texture.normal.heightRepeatScale
+        );
+      });
     }
   }
 };
@@ -74,19 +76,23 @@ const assignUVs = (geometry) => {
   let offset = new Vector2(0 - min.x, 0 - min.y);
   let range = new Vector2(max.x - min.x, max.y - min.y);
 
-  geometry.faceVertexUvs[0] = geometry.faces.map((face) => {
-    let v1 = geometry.vertices[face.a];
-    let v2 = geometry.vertices[face.b];
-    let v3 = geometry.vertices[face.c];
+  const positions = geometry.getAttribute("position");
+  const uvs = new Float32Array(positions.count * 2); // Initialize a new array for UV coordinates
 
-    return [
-      new Vector2((v1.x + offset.x) / range.x, (v1.y + offset.y) / range.y),
-      new Vector2((v2.x + offset.x) / range.x, (v2.y + offset.y) / range.y),
-      new Vector2((v3.x + offset.x) / range.x, (v3.y + offset.y) / range.y),
-    ];
-  });
+  for (let i = 0; i < positions.count; i++) {
+    const x = positions.getX(i);
+    const y = positions.getY(i);
 
-  geometry.uvsNeedUpdate = true;
+    const uvx = (x + offset.x) / range.x;
+    const uvy = (y + offset.y) / range.y;
+
+    uvs[i * 2] = uvx;
+    uvs[i * 2 + 1] = uvy;
+  }
+
+  // Update the geometry with the new UVs
+  geometry.setAttribute("uv", new BufferAttribute(uvs, 2));
+  geometry.attributes.uv.needsUpdate = true;
 };
 
 export function createArea(element, layer, scene, textures) {
