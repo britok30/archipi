@@ -11,13 +11,16 @@ function disposeTexture(texture) {
   texture.dispose();
 }
 
-function disposeMultimaterial(material) {
-  if (!(material instanceof Three.MultiMaterial)) {
-    return;
+function disposeMultimaterial(materials) {
+  if (Array.isArray(materials)) {
+    // Handle an array of materials
+    materials.forEach((material) => {
+      disposeMaterial(material);
+    });
+  } else {
+    // Handle a single material
+    disposeMaterial(materials);
   }
-  material.materials.forEach((material) => {
-    disposeMaterial(material);
-  });
 }
 
 function disposeMaterial(material) {
@@ -49,7 +52,7 @@ function disposeMesh(mesh) {
 }
 
 export function disposeScene(scene3D) {
-  scene3D.traverse((child) => {
+  scene3D?.traverse((child) => {
     disposeMesh(child);
     child = null;
   });

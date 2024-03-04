@@ -1,21 +1,22 @@
 "use client";
 
-import * as Three from 'three';
-import React from 'react';
+import * as Three from "three";
+import React from "react";
 
 const WIDTH = 40;
 const DEPTH = 40;
 const HEIGHT = 70;
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "recycling-bins",
   prototype: "items",
 
   info: {
-    tag: ['furnishings'],
+    tag: ["furnishings"],
     title: "recycling bins",
     description: "Recycling-bins",
-    image: require('./recycling-bins.png')
+    image: "/images/recycling-bins.png",
   },
 
   properties: {
@@ -24,46 +25,112 @@ export default {
       type: "length-measure",
       defaultValue: {
         length: 0,
-        unit: 'cm'
-      }
-    }
+        unit: "cm",
+      },
+    },
   },
 
   render2D: function (element, layer, scene) {
-
     let angle = element.rotation + 90;
 
     let textRotation = 0;
-    if (Math.sin(angle * Math.PI / 180) < 0) {
+    if (Math.sin((angle * Math.PI) / 180) < 0) {
       textRotation = 180;
     }
 
-    let rect_style = {stroke: element.selected ? '#0096fd' : '#000', strokeWidth: "2px", fill: "#84e1ce"};
-    let arrow_style = {stroke: element.selected ? '#0096fd' : null, strokeWidth: "2px", fill: "#84e1ce"};
+    let rect_style = {
+      stroke: element.selected ? "#0096fd" : "#000",
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
+    let arrow_style = {
+      stroke: element.selected ? "#0096fd" : null,
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
 
     return (
-
       <g transform={`translate(${-WIDTH * 3},${-DEPTH / 2})`}>
-        <rect key="1" x="0" y="0" width={WIDTH} height={DEPTH} style={rect_style}/>
-        <rect key="2" x="50" y="0" width={WIDTH} height={DEPTH} style={rect_style}/>
-        <rect key="3" x="100" y="0" width={WIDTH} height={DEPTH} style={rect_style}/>
-        <rect key="4" x="150" y="0" width={WIDTH} height={DEPTH} style={rect_style}/>
-        <rect key="5" x="200" y="0" width={WIDTH} height={DEPTH} style={rect_style}/>
-        <line key="7" x1={3*WIDTH} x2={3*WIDTH} y1={DEPTH}  y2={1.5*DEPTH} style={arrow_style}/>
-        <line key="8" x1={2.75*WIDTH} x2={3*WIDTH} y1={1.2*DEPTH} y2={1.5*DEPTH} style={arrow_style} />
-        <line key="9" x1={3*WIDTH} x2={3.25*WIDTH} y1={1.5*DEPTH} y2={1.2*DEPTH} style={arrow_style} />
-        <text key="10" x="0" y="0" transform={`translate(${WIDTH * 3}, ${DEPTH / 2}) scale(1,-1) rotate(${textRotation})`}
-              style={{textAnchor: "middle", fontSize: "11px"}}>
+        <rect
+          key="1"
+          x="0"
+          y="0"
+          width={WIDTH}
+          height={DEPTH}
+          style={rect_style}
+        />
+        <rect
+          key="2"
+          x="50"
+          y="0"
+          width={WIDTH}
+          height={DEPTH}
+          style={rect_style}
+        />
+        <rect
+          key="3"
+          x="100"
+          y="0"
+          width={WIDTH}
+          height={DEPTH}
+          style={rect_style}
+        />
+        <rect
+          key="4"
+          x="150"
+          y="0"
+          width={WIDTH}
+          height={DEPTH}
+          style={rect_style}
+        />
+        <rect
+          key="5"
+          x="200"
+          y="0"
+          width={WIDTH}
+          height={DEPTH}
+          style={rect_style}
+        />
+        <line
+          key="7"
+          x1={3 * WIDTH}
+          x2={3 * WIDTH}
+          y1={DEPTH}
+          y2={1.5 * DEPTH}
+          style={arrow_style}
+        />
+        <line
+          key="8"
+          x1={2.75 * WIDTH}
+          x2={3 * WIDTH}
+          y1={1.2 * DEPTH}
+          y2={1.5 * DEPTH}
+          style={arrow_style}
+        />
+        <line
+          key="9"
+          x1={3 * WIDTH}
+          x2={3.25 * WIDTH}
+          y1={1.5 * DEPTH}
+          y2={1.2 * DEPTH}
+          style={arrow_style}
+        />
+        <text
+          key="10"
+          x="0"
+          y="0"
+          transform={`translate(${WIDTH * 3}, ${
+            DEPTH / 2
+          }) scale(1,-1) rotate(${textRotation})`}
+          style={{ textAnchor: "middle", fontSize: "11px" }}
+        >
           {this.info.description}
         </text>
       </g>
-    )
+    );
   },
 
-
   render3D: function (element, layer, scene) {
-
-
     let makeBin = (color) => {
       var cestino_carta = new Three.Object3D();
 
@@ -71,19 +138,24 @@ export default {
       var newDepth = 1;
       var newHeight = 1.5;
 
-      var grey = new Three.MeshLambertMaterial({color: 0xd9d7d7});
+      var grey = new Three.MeshLambertMaterial({ color: 0xd9d7d7 });
 
-      let coloredMaterial = new Three.MeshLambertMaterial({color: color});
+      let coloredMaterial = new Three.MeshLambertMaterial({ color: color });
 
       var geometry = new Three.BoxGeometry(newWidth, newHeight, newDepth);
       var plane1 = new Three.Mesh(geometry, coloredMaterial);
       plane1.position.y = newHeight / 2;
       cestino_carta.add(plane1);
 
-      var geometry_legs = new Three.CylinderGeometry(newWidth / 2, newWidth / 2, newWidth, 32);
+      var geometry_legs = new Three.CylinderGeometry(
+        newWidth / 2,
+        newWidth / 2,
+        newWidth,
+        32
+      );
       var p1 = new Three.Mesh(geometry_legs, coloredMaterial);
       p1.rotation.x += Math.PI / 2;
-      p1.position.set(0, .75, 0);
+      p1.position.set(0, 0.75, 0);
       plane1.add(p1);
 
       var points = [];
@@ -97,16 +169,21 @@ export default {
       var etichetta = new Three.Mesh(geometry, grey);
       etichetta.rotation.y += Math.PI;
       etichetta.rotation.x += Math.PI / 2;
-      etichetta.position.set(-.1, .8, 0);
+      etichetta.position.set(-0.1, 0.8, 0);
       plane1.add(etichetta);
 
-      var texture = new Three.TextureLoader().load('./recycle.png');
+      var texture = new Three.TextureLoader().load(
+        "/images/textures/recycle.png"
+      );
 
-      var planeGeometry2 = new Three.PlaneGeometry(.5, .5);
-      var planeMaterial2 = new Three.MeshLambertMaterial({map: texture, transparent: true});
+      var planeGeometry2 = new Three.PlaneGeometry(0.5, 0.5);
+      var planeMaterial2 = new Three.MeshLambertMaterial({
+        map: texture,
+        transparent: true,
+      });
       var plane2 = new Three.Mesh(planeGeometry2, planeMaterial2);
       plane2.rotation.y += -Math.PI / 2;
-      plane2.position.set(-.51, .3, 0);
+      plane2.position.set(-0.51, 0.3, 0);
 
       plane1.add(plane2);
 
@@ -116,16 +193,14 @@ export default {
       let deltaY = Math.abs(value.max.y - value.min.y);
       let deltaZ = Math.abs(value.max.z - value.min.z);
 
-
-      let newAltitude = element.properties.get('altitude').get('length');
+      let newAltitude = element.properties.get("altitude").get("length");
 
       cestino_carta.position.y += newAltitude;
       cestino_carta.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
 
-      cestino_carta.rotation.y -= Math.PI/2;
+      cestino_carta.rotation.y -= Math.PI / 2;
 
       return cestino_carta;
-
     };
 
     let bins = new Three.Object3D();
@@ -149,7 +224,6 @@ export default {
     bins.add(paperBin);
     bins.add(glassBin);
 
-
     if (element.selected) {
       let bbox = new Three.BoxHelper(bins, 0x99c3fb);
       bbox.material.linewidth = 5;
@@ -161,7 +235,5 @@ export default {
     bins.position.x -= 100;
 
     return Promise.resolve(bins);
-  }
-
+  },
 };
-

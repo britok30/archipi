@@ -45,6 +45,9 @@ export const Scene = React.memo(
   }
 );
 
+// Explicitly setting the display name for the component
+Scene.displayName = "Scene";
+
 Scene.propTypes = {
   scene: PropTypes.object.isRequired,
   catalog: PropTypes.object.isRequired,

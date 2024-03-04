@@ -1009,7 +1009,7 @@ class Group {
   static removeAndDeleteElements(state, groupID) {
     let layerList = state.getIn(["scene", "groups", groupID, "elements"]);
 
-    layerList.entrySeq().forEach(([groupLayerID, groupLayerElements]) => {
+    layerList?.entrySeq().forEach(([groupLayerID, groupLayerElements]) => {
       state = Layer.unselectAll(state, groupLayerID).updatedState;
 
       let lines = groupLayerElements.get("lines");

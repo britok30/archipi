@@ -727,7 +727,7 @@ function addHole(sceneData, planData, layer, holeID, catalog, holesActions) {
 
   // Create the hole object
   return catalog
-    .getElement(holeData.type)
+    ?.getElement(holeData.type)
     .render3D(holeData, layer, sceneData)
     .then((object) => {
       if (object instanceof Three.LOD) {
@@ -813,7 +813,7 @@ function updateHole(
   if (!mesh) return null;
 
   return catalog
-    .getElement(hole.type)
+    ?.getElement(hole.type)
     .updateRender3D(
       hole,
       layer,
@@ -850,7 +850,7 @@ function addLine(sceneData, planData, layer, lineID, catalog, linesActions) {
   }
 
   return catalog
-    .getElement(line.type)
+    ?.getElement(line.type)
     .render3D(line, layer, sceneData)
     .then((line3D) => {
       if (line3D instanceof Three.LOD) {
@@ -900,7 +900,7 @@ function updateLine(
   if (!mesh) return null;
 
   return catalog
-    .getElement(line.type)
+    ?.getElement(line.type)
     .updateRender3D(
       line,
       layer,
@@ -928,7 +928,7 @@ function addArea(sceneData, planData, layer, areaID, catalog, areaActions) {
   let interactFunction = () => areaActions.selectArea(layer.id, areaID);
 
   return catalog
-    .getElement(area.type)
+    ?.getElement(area.type)
     .render3D(area, layer, sceneData)
     .then((area3D) => {
       if (area3D instanceof Three.LOD) {
@@ -973,7 +973,7 @@ function updateArea(
   if (!mesh) return null;
 
   return catalog
-    .getElement(area.type)
+    ?.getElement(area.type)
     .updateRender3D(
       area,
       layer,
@@ -990,7 +990,7 @@ function addItem(sceneData, planData, layer, itemID, catalog, itemsActions) {
   let item = layer.getIn(["items", itemID]);
 
   return catalog
-    .getElement(item.type)
+    ?.getElement(item.type)
     .render3D(item, layer, sceneData)
     .then((item3D) => {
       if (item3D instanceof Three.LOD) {
@@ -1041,7 +1041,7 @@ function updateItem(
   if (!mesh) return null;
 
   return catalog
-    .getElement(item.type)
+    ?.getElement(item.type)
     .updateRender3D(
       item,
       layer,
@@ -1063,40 +1063,31 @@ function applyInteract(object, interactFunction) {
   });
 }
 
+function updateMaterialOpacity(material, opacity) {
+  material.transparent = true;
+  if (material.maxOpacity) {
+    material.opacity = Math.min(material.maxOpacity, opacity);
+  } else if (material.opacity && material.opacity > opacity) {
+    material.maxOpacity = material.opacity;
+    material.opacity = opacity;
+  }
+}
+
 // Apply opacity to children of an Object3D
 function applyOpacity(object, opacity) {
   object.traverse((child) => {
-    if (child instanceof Three.Mesh) {
-      if (child.material instanceof Three.MultiMaterial) {
-        child.material.materials.forEach((materialChild) => {
-          materialChild.transparent = true;
-          if (materialChild.maxOpacity) {
-            materialChild.opacity = Math.min(materialChild.maxOpacity, opacity);
-          } else if (materialChild.opacity && materialChild.opacity > opacity) {
-            materialChild.maxOpacity = materialChild.opacity;
-            materialChild.opacity = opacity;
-          }
-        });
-      } else if (child.material instanceof Array) {
+    // Iterate through the child objects of your scene or object
+    child.traverse((child) => {
+      if (Array.isArray(child.material)) {
+        // Handle objects with multiple materials (array of materials)
         child.material.forEach((material) => {
-          material.transparent = true;
-          if (material.maxOpacity) {
-            material.opacity = Math.min(material.maxOpacity, opacity);
-          } else if (material.opacity && material.opacity > opacity) {
-            material.maxOpacity = material.opacity;
-            material.opacity = opacity;
-          }
+          updateMaterialOpacity(material, opacity);
         });
-      } else {
-        child.material.transparent = true;
-        if (child.material.maxOpacity) {
-          child.material.opacity = Math.min(child.material.maxOpacity, opacity);
-        } else if (child.material.opacity && child.material.opacity > opacity) {
-          child.material.maxOpacity = child.material.opacity;
-          child.material.opacity = opacity;
-        }
+      } else if (child.material) {
+        // Handle objects with a single material
+        updateMaterialOpacity(child.material, opacity);
       }
-    }
+    });
   });
 }
 

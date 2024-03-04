@@ -5,10 +5,13 @@ import {
   Vector2,
   BoxGeometry,
   MeshBasicMaterial,
+  MeshStandardMaterial,
   Group,
 } from "three";
 
-import ThreeBSP from "../../utils/threeCSG.es6";
+// import ThreeBSP from "../../utils/threeCSG.es6";
+
+import { CSG } from "three-csg-ts";
 import { verticesDistance } from "../../utils/geometry";
 import * as SharedStyle from "../../styles/shared-style";
 
@@ -25,37 +28,33 @@ const applyTexture = (material, texture, length, height) => {
   let loader = new TextureLoader();
 
   if (texture) {
-    // TODO(pg): workaround so that we can load the file in a next.js app
-    if (texture.uri && texture.uri.default) {
-      material.map = loader.load(texture.uri.default.src);
-    } else {
-      material.map = loader.load(texture.uri);
-    }
-    material.needsUpdate = true;
-    material.map.wrapS = RepeatWrapping;
-    material.map.wrapT = RepeatWrapping;
-    material.map.repeat.set(
-      length * texture.lengthRepeatScale,
-      height * texture.heightRepeatScale
-    );
+    loader.load(texture.uri, (loadedTexture) => {
+      material.map = loadedTexture;
+      material.needsUpdate = true;
+      material.map.wrapS = RepeatWrapping;
+      material.map.wrapT = RepeatWrapping;
+      material.map.repeat.set(
+        length * texture.lengthRepeatScale,
+        height * texture.heightRepeatScale
+      );
+    });
 
     if (texture.normal) {
-      // TODO(pg): workaround so that we can load the file in a next.js app
-      if (texture.normal.uri && texture.normal.uri.default) {
-        material.normalMap = loader.load(texture.normal.uri.default.src);
-      } else {
-        material.normalMap = loader.load(texture.normal.uri);
-      }
-      material.normalScale = new Vector2(
-        texture.normal.normalScaleX,
-        texture.normal.normalScaleY
-      );
-      material.normalMap.wrapS = RepeatWrapping;
-      material.normalMap.wrapT = RepeatWrapping;
-      material.normalMap.repeat.set(
-        length * texture.normal.lengthRepeatScale,
-        height * texture.normal.heightRepeatScale
-      );
+      loader.load(texture.normal.uri, (loadedNormalMap) => {
+        if (!loadedNormalMap) return;
+
+        material.normalMap = loadedNormalMap;
+        material.normalScale = new Vector2(
+          texture.normal.normalScaleX,
+          texture.normal.normalScaleY
+        );
+        material.normalMap.wrapS = RepeatWrapping;
+        material.normalMap.wrapT = RepeatWrapping;
+        material.normalMap.repeat.set(
+          length * texture.normal.lengthRepeatScale,
+          height * texture.normal.heightRepeatScale
+        );
+      });
     }
   }
 };
@@ -84,8 +83,8 @@ export function buildWall(element, layer, scene, textures) {
   let distance = verticesDistance(vertex0, vertex1);
   let halfDistance = distance / 2;
 
-  let soulMaterial = new MeshBasicMaterial({
-    color: element.selected ? SharedStyle.MESH_SELECTED : 0xd3d3d3,
+  let soulMaterial = new MeshStandardMaterial({
+    color: element.selected ? SharedStyle.MESH_SELECTED : 0xD3D3D3,
   });
   let soul = new Mesh(
     new BoxGeometry(distance, height, thickness),
@@ -121,17 +120,24 @@ export function buildWall(element, layer, scene, textures) {
 
     holeMesh.rotation.y = alpha;
 
-    let wallBSP = new ThreeBSP(soul);
-    let holeBSP = new ThreeBSP(holeMesh);
+    soul.updateMatrix();
+    holeMesh.updateMatrix();
+
+    let wallBSP = CSG.fromMesh(soul);
+    let holeBSP = CSG.fromMesh(holeMesh);
+
+    // let wallBSP = new ThreeBSP(soul);
+    // let holeBSP = new ThreeBSP(holeMesh);
 
     let wallWithHoleBSP = wallBSP.subtract(holeBSP);
-    soul = wallWithHoleBSP.toMesh(soulMaterial);
+    // soul = wallWithHoleBSP.toMesh(soulMaterial);
+    soul = CSG.toMesh(wallWithHoleBSP, soul.matrix, soulMaterial);
   });
 
   soul.name = "soul";
 
-  let frontMaterial = new MeshBasicMaterial();
-  let backMaterial = new MeshBasicMaterial();
+  let frontMaterial = new MeshStandardMaterial();
+  let backMaterial = new MeshStandardMaterial();
 
   applyTexture(
     frontMaterial,
@@ -190,8 +196,8 @@ export function updatedWall(
   let backFace = mesh.getObjectByName("backFace");
 
   if (differences[0] === "selected") {
-    soul.material = new MeshBasicMaterial({
-      color: element.selected ? SharedStyle.MESH_SELECTED : 0xd3d3d3,
+    soul.material = new MeshStandardMaterial({
+      color: element.selected ? SharedStyle.MESH_SELECTED : 0xD3D3D3,
     });
   } else if (differences[0] === "properties") {
     if (differences[1] === "thickness") {

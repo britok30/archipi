@@ -1,12 +1,10 @@
-"use client";
-
 import React, { useContext, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import * as Three from "three";
-import diff from "immutablediff";
 import { parseData, updateScene } from "./scene-creator";
 import { disposeScene } from "./three-memory-cleaner";
-import OrbitControls from "./libs/orbit-controls";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import diff from "immutablediff";
 import * as SharedStyle from "../../styles/shared-style";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { usePrevious } from "@uidotdev/usehooks";
@@ -18,7 +16,7 @@ let scene3DP = null;
 let planDataP = null;
 let orbitControllerP = null;
 const lastMousePosition = {};
-let renderingID = "";
+let renderingID = 0;
 
 const Scene3DViewer = (props) => {
   const previousProps = usePrevious(props);
@@ -28,7 +26,12 @@ const Scene3DViewer = (props) => {
 
   const [renderer, _setRenderer] = useState(
     window.__threeRenderer ||
-      new Three.WebGLRenderer({ preserveDrawingBuffer: true })
+      new Three.WebGLRenderer({
+        preserveDrawingBuffer: true,
+        antialias: true,
+        powerPreference: "high-performance",
+        outputColorSpace: Three.LinearSRGBColorSpace,
+      })
   );
   window.__threeRenderer = renderer;
 
@@ -40,7 +43,7 @@ const Scene3DViewer = (props) => {
     const scene3D = new Three.Scene();
 
     //RENDERER
-    renderer.setClearColor(new Three.Color(SharedStyle.COLORS.white));
+    renderer.setClearColor(new Three.Color(SharedStyle.COLORS));
     renderer.setSize(width, height);
 
     // LOAD DATA
@@ -70,7 +73,7 @@ const Scene3DViewer = (props) => {
     // scene3D.add(axisHelper);
 
     // LIGHT
-    let light = new Three.AmbientLight(0xafafaf); // soft white light
+    let light = new Three.AmbientLight("#fff"); // soft white light
     scene3D.add(light);
 
     // Add another light
@@ -88,6 +91,7 @@ const Scene3DViewer = (props) => {
       let y = (-event.offsetY / props.height) * 2 + 1;
       Object.assign(lastMousePosition, { x: x, y: y });
     };
+
     mouseUpEvent = (event) => {
       event.preventDefault();
       mouse.x = (event.offsetX / props.width) * 2 - 1;
@@ -146,7 +150,6 @@ const Scene3DViewer = (props) => {
       }
 
       renderer.render(scene3D, camera);
-
       renderingID = requestAnimationFrame(render);
     };
 

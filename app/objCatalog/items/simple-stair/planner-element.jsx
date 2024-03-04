@@ -356,30 +356,26 @@ function assignUVs(geometry) {
   let offset = new Three.Vector2(0 - min.x, 0 - min.y);
   let range = new Three.Vector2(max.x - min.x, max.y - min.y);
 
-  geometry.faceVertexUvs[0] = [];
-  let faces = geometry.faces;
+  // Accessing position attribute of the BufferGeometry
+  const positions = geometry.getAttribute("position");
+  const uvs = new Float32Array(positions.count * 2); // two UV coordinates for each vertex
 
-  for (let i = 0; i < geometry.faces.length; i++) {
-    let v1 = geometry.vertices[faces[i].a];
-    let v2 = geometry.vertices[faces[i].b];
-    let v3 = geometry.vertices[faces[i].c];
+  for (let i = 0; i < positions.count; i++) {
+    const x = positions.getX(i);
+    const y = positions.getY(i);
 
-    geometry.faceVertexUvs[0].push([
-      new Three.Vector2(
-        (v1.x + offset.x) / range.x,
-        (v1.y + offset.y) / range.y
-      ),
-      new Three.Vector2(
-        (v2.x + offset.x) / range.x,
-        (v2.y + offset.y) / range.y
-      ),
-      new Three.Vector2(
-        (v3.x + offset.x) / range.x,
-        (v3.y + offset.y) / range.y
-      ),
-    ]);
+    // Calculating UVs based on vertex positions
+    const uvx = (x + offset.x) / range.x;
+    const uvy = (y + offset.y) / range.y;
+
+    // Assigning calculated UVs to the UVs array
+    uvs[i * 2] = uvx;
+    uvs[i * 2 + 1] = uvy;
   }
-  geometry.uvsNeedUpdate = true;
+
+  // Updating the geometry with the new UVs
+  geometry.setAttribute("uv", new Three.BufferAttribute(uvs, 2));
+  geometry.attributes.uv.needsUpdate = true;
 }
 
 let buildStepCover = (width, height, depth) => {

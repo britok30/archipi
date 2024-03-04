@@ -12,7 +12,7 @@ import { store } from "./components/Providers";
 
 let plugins = [
   PlannerPlugins.Keyboard(),
-  PlannerPlugins.Autosave("archipi_v0"),
+  PlannerPlugins.Autosave("archipi"),
   PlannerPlugins.ConsoleDebugger(),
 ];
 

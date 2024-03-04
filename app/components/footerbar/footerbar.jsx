@@ -37,7 +37,7 @@ const FooterBar = ({
 
   return (
     <div
-      className="fixed bottom-0 leading-[14px] text-xs bg-[#292929] text-white py-1 px-2 m-0 box-border cursor-default select-none z-[9001]"
+      className="fixed bottom-0 leading-[14px] text-xs bg-black text-white py-1 px-2 m-0 box-border cursor-default select-none z-[9001]"
       style={{ width, height }}
     >
       {MODE_SNAPPING.includes(mode) && (

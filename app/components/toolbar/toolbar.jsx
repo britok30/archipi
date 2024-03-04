@@ -14,7 +14,7 @@ import {
   MODE_CONFIGURING_PROJECT,
 } from "../../utils/constants";
 import * as SharedStyle from "../../styles/shared-style";
-import { FaBookOpen } from "react-icons/fa";
+import { FaBookOpen, FaMousePointer } from "react-icons/fa";
 import { FaCube } from "react-icons/fa";
 import { IoSquare } from "react-icons/io5";
 import { IoIosUndo } from "react-icons/io";
@@ -103,7 +103,11 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
           tooltip={translator.t("2D View")}
           onClick={(event) => projectActions.setMode(MODE_IDLE)}
         >
-          <IoSquare className="mb-0.5" size={23} />
+          {[MODE_3D_FIRST_PERSON, MODE_3D_VIEW].includes(mode) ? (
+            <IoSquare className="mb-0.5" size={23} />
+          ) : (
+            <FaMousePointer className="mb-0.5" size={23} />
+          )}
           2D
         </ToolbarButton>
       ),
@@ -202,7 +206,7 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
   );
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-[50%] z-[999] flex bg-[#292929] rounded-lg px-5 py-3 space-x-6">
+    <div className="fixed bottom-8 left-1/2 -translate-x-[50%] z-[999] flex bg-black rounded-lg px-5 py-3 space-x-6">
       {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
     </div>
   );

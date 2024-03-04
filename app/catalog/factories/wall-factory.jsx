@@ -1161,7 +1161,7 @@ export default function WallFactory(name, info, textures) {
     },
   };
 
-  if (textures && textures !== {}) {
+  if (textures && Object.keys(textures).length !== 0) {
     let textureValues = { none: "None" };
 
     for (let textureName in textures) {
