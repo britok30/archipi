@@ -25,7 +25,14 @@ const tableTabStyle = {
   textAlign: "center",
 };
 
-const PanelGuides = ({ state }) => {
+const shouldUpdate = (prevProps, nextProps) => {
+  return (
+    prevProps.state.getIn(["scene", "guides"]).hashCode() !==
+    nextProps.state.getIn(["scene", "guides"]).hashCode()
+  );
+};
+
+const PanelGuides = memo(({ state }) => {
   const { projectActions, translator } = useContext(ReactPlannerContext);
   const { guides } = state.scene;
 
@@ -162,15 +169,12 @@ const PanelGuides = ({ state }) => {
       </Tabs>
     </Panel>
   );
-};
+}, shouldUpdate);
+
+PanelGuides.displayName = "PanelGuides";
 
 PanelGuides.propTypes = {
   state: PropTypes.object.isRequired,
 };
 
-export default memo(PanelGuides, (prevProps, nextProps) => {
-  return (
-    prevProps.state.getIn(["scene", "guides"]).hashCode() !==
-    nextProps.state.getIn(["scene", "guides"]).hashCode()
-  );
-});
+export default PanelGuides;

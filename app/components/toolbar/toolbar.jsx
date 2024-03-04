@@ -43,7 +43,11 @@ const mapButtonsCb = (el, ind) => {
   );
 };
 
-const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
+const shouldUpdate = (prevProps, nextProps) => {
+  return prevProps.state.hashCode() === nextProps.state.hashCode();
+};
+
+const Toolbar = memo(({ state, toolbarButtons, allowProjectFileSupport }) => {
   const { projectActions, viewer3DActions, translator } =
     useContext(ReactPlannerContext);
 
@@ -210,7 +214,9 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
       {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
     </div>
   );
-};
+}, shouldUpdate);
+
+Toolbar.displayName = "Toolbar";
 
 Toolbar.propTypes = {
   state: PropTypes.object.isRequired,
@@ -218,6 +224,4 @@ Toolbar.propTypes = {
   toolbarButtons: PropTypes.array,
 };
 
-export default memo(Toolbar, (prevProps, nextProps) => {
-  return prevProps.state.hashCode() === nextProps.state.hashCode();
-});
+export default Toolbar;

@@ -34,7 +34,14 @@ const iconHeadStyle = {
   fontSize: "1.4em",
 };
 
-const ElementEditor = ({ state: appState, element, layer }) => {
+const shouldUpdate = (prevProps, nextProps) => {
+  return (
+    prevProps.state.clipboardProperties.hashCode() !==
+    nextProps.state.clipboardProperties.hashCode()
+  );
+};
+
+const ElementEditor = memo(({ state: appState, element, layer }) => {
   const { projectActions, catalog, translator } =
     useContext(ReactPlannerContext);
 
@@ -438,7 +445,9 @@ const ElementEditor = ({ state: appState, element, layer }) => {
       })}
     </div>
   );
-};
+}, shouldUpdate);
+
+ElementEditor.displayName = "ElementEditor";
 
 ElementEditor.propTypes = {
   state: PropTypes.object.isRequired,
@@ -446,9 +455,4 @@ ElementEditor.propTypes = {
   layer: PropTypes.object.isRequired,
 };
 
-export default memo(ElementEditor, (prevProps, nextProps) => {
-  return (
-    prevProps.state.clipboardProperties.hashCode() !==
-    nextProps.state.clipboardProperties.hashCode()
-  );
-});
+export default ElementEditor;

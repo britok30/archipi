@@ -70,7 +70,7 @@ const styleEditButtonHover = { ...styleEditButton, ...styleHoverColor };
 const styleEyeVisible = { fontSize: "1.25em" };
 const styleEyeHidden = { ...styleEyeVisible, color: "#a5a1a1" };
 
-const areEqual = (prevProps, nextProps) => {
+const shouldUpdate = (prevProps, nextProps) => {
   return (
     prevProps.groups.hashCode() === nextProps.groups.hashCode() &&
     prevProps.layers.hashCode() === nextProps.layers.hashCode() &&
@@ -203,7 +203,7 @@ const PanelGroups = memo(({ mode, groups, layers }) => {
       </div>
     </Panel>
   );
-}, areEqual);
+}, shouldUpdate);
 
 PanelGroups.displayName = "PanelGroups";
 

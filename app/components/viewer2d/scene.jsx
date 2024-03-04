@@ -1,49 +1,48 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import PropTypes from "prop-types";
 import { Layer } from "./layer";
 import { Grids } from "./grids/grids";
 
-export const Scene = React.memo(
-  ({ scene, catalog }) => {
-    const { layers } = scene;
-    const selectedLayer = layers.get(scene.selectedLayer);
+const shouldUpdate = (prevProps, nextProps) => {
+  return prevProps.scene.hashCode() === nextProps.scene.hashCode();
+};
 
-    return (
-      <g>
-        <Grids scene={scene} />
+export const Scene = memo(({ scene, catalog }) => {
+  const { layers } = scene;
+  const selectedLayer = layers.get(scene.selectedLayer);
 
-        <g style={{ pointerEvents: "none" }}>
-          {layers
-            .entrySeq()
-            .filter(
-              ([layerID, layer]) =>
-                layerID !== scene.selectedLayer && layer.visible
-            )
-            .map(([layerID, layer]) => (
-              <Layer
-                key={layerID}
-                layer={layer}
-                scene={scene}
-                catalog={catalog}
-              />
-            ))}
-        </g>
+  return (
+    <g>
+      <Grids scene={scene} />
 
-        <Layer
-          key={selectedLayer.id}
-          layer={selectedLayer}
-          scene={scene}
-          catalog={catalog}
-        />
+      <g style={{ pointerEvents: "none" }}>
+        {layers
+          .entrySeq()
+          .filter(
+            ([layerID, layer]) =>
+              layerID !== scene.selectedLayer && layer.visible
+          )
+          .map(([layerID, layer]) => (
+            <Layer
+              key={layerID}
+              layer={layer}
+              scene={scene}
+              catalog={catalog}
+            />
+          ))}
       </g>
-    );
-  },
-  (prevProps, nextProps) => {
-    return prevProps.scene.hashCode() === nextProps.scene.hashCode();
-  }
-);
+
+      <Layer
+        key={selectedLayer.id}
+        layer={selectedLayer}
+        scene={scene}
+        catalog={catalog}
+      />
+    </g>
+  );
+}, shouldUpdate);
 
 // Explicitly setting the display name for the component
 Scene.displayName = "Scene";

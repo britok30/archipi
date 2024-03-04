@@ -101,7 +101,15 @@ const inputTableButtonStyle = {
   borderSpacing: "0",
 };
 
-const PanelLayers = ({ state }) => {
+const shouldUpdate = (prevProps, nextProps) => {
+  return (
+    prevProps.state.scene.layers.size === nextProps.state.scene.layers.size &&
+    prevProps.state.sceneHistory.hashCode() ===
+      nextProps.state.sceneHistory.hashCode()
+  );
+};
+
+const PanelLayers = memo(({ state }) => {
   const { sceneActions, translator } = useContext(ReactPlannerContext);
   const [headHovered, setHeadHovered] = useState(false);
   const [layerAddUIVisible, setLayerAddUIVisible] = useState(false);
@@ -319,16 +327,12 @@ const PanelLayers = ({ state }) => {
       ) : null}
     </Panel>
   );
-};
+}, shouldUpdate);
+
+PanelLayers.displayName = "PanelLayers";
 
 PanelLayers.propTypes = {
   state: PropTypes.object.isRequired,
 };
 
-export default memo(PanelLayers, (prevProps, nextProps) => {
-  return (
-    prevProps.state.scene.layers.size === nextProps.state.scene.layers.size &&
-    prevProps.state.sceneHistory.hashCode() ===
-      nextProps.state.sceneHistory.hashCode()
-  );
-});
+export default PanelLayers;
