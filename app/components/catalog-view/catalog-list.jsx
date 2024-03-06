@@ -11,13 +11,6 @@ import ContentContainer from "../style/content-container";
 import ContentTitle from "../style/content-title";
 import * as SharedStyle from "../../styles/shared-style";
 
-const itemsStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(14em, 1fr))",
-  gridGap: "10px",
-  marginTop: "1em",
-};
-
 const searchContainer = {
   width: "100%",
   height: "3em",
@@ -33,37 +26,16 @@ const searchContainer = {
   marginBottom: "1em",
 };
 
-const searchText = {
-  width: "8em",
-  display: "inline-block",
-};
-
-const searchInput = {
-  width: "calc( 100% - 10em )",
-  height: "2em",
-  margin: "0",
-  padding: "0 1em",
-  border: "1px solid #EEE",
-};
-
 const historyContainer = {
   ...searchContainer,
   padding: "0.2em 0.625em",
 };
 
-const historyElementStyle = {
-  width: "auto",
-  height: "2em",
-  lineHeight: "2em",
-  textAlign: "center",
-  borderRadius: "1em",
-  display: "inline-block",
-  cursor: "pointer",
-  backgroundColor: SharedStyle.PRIMARY_COLOR.alt,
-  color: SharedStyle.PRIMARY_COLOR.text_main,
-  textTransform: "capitalize",
-  margin: "0.25em",
-  padding: "0 1em",
+const itemsStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(14em, 1fr))",
+  gridGap: "10px",
+  marginTop: "1em",
 };
 
 const CatalogList = ({ state, width, height, style }) => {
@@ -161,17 +133,7 @@ const CatalogList = ({ state, width, height, style }) => {
       />
     ) : null;
 
-  let selectedHistory = state.get("selectedElementsHistory");
-  let selectedHistoryElements = selectedHistory.map((el, ind) => (
-    <div
-      key={ind}
-      style={historyElementStyle}
-      title={el.name}
-      onClick={() => select(el)}
-    >
-      {el.name}
-    </div>
-  ));
+  const selectedHistory = state.get("selectedElementsHistory");
 
   return (
     <div className="bg-black w-full min-h-screen p-4 ">
@@ -193,13 +155,24 @@ const CatalogList = ({ state, width, height, style }) => {
       </div>
 
       {selectedHistory.size ? (
-        <div style={historyContainer}>
-          <span>{translator.t("Last Selected")}</span>
-          {selectedHistoryElements}
+        <div className="w-full h-[3rem] mt-4 flex items-center bg-[#292929] border border-white relative px-2 rounded-lg">
+          <span className="inline-block mr-5">
+            {translator.t("Last Selected")}
+          </span>
+          {selectedHistory.map((el, ind) => (
+            <div
+              key={ind}
+              className="bg-white mr-3 last-of-type:mr-0 text-black rounded-xl cursor-pointer capitalize py-0 px-[1rem] inline-block text-center leading-8 w-auto"
+              title={el.name}
+              onClick={() => select(el)}
+            >
+              {el.name}
+            </div>
+          ))}
         </div>
       ) : null}
 
-      <div className="!no-scrollbar" style={itemsStyle}>
+      <div style={itemsStyle}>
         {matchString === ""
           ? [
               turnBackButton,

@@ -30,7 +30,6 @@ const Scene3DViewer = (props) => {
         preserveDrawingBuffer: true,
         antialias: true,
         powerPreference: "high-performance",
-        outputColorSpace: Three.LinearSRGBColorSpace,
       })
   );
   window.__threeRenderer = renderer;
@@ -43,7 +42,7 @@ const Scene3DViewer = (props) => {
     const scene3D = new Three.Scene();
 
     //RENDERER
-    renderer.setClearColor(new Three.Color(SharedStyle.COLORS));
+    renderer.setClearColor(new Three.Color(SharedStyle.COLORS.white));
     renderer.setSize(width, height);
 
     // LOAD DATA
@@ -73,7 +72,7 @@ const Scene3DViewer = (props) => {
     // scene3D.add(axisHelper);
 
     // LIGHT
-    let light = new Three.AmbientLight("#fff"); // soft white light
+    let light = new Three.AmbientLight(0xafafaf, 1.3); // soft white light
     scene3D.add(light);
 
     // Add another light
@@ -105,7 +104,7 @@ const Scene3DViewer = (props) => {
         let intersects = raycaster.intersectObjects(toIntersect, true);
 
         if (intersects.length > 0 && !isNaN(intersects[0].distance)) {
-          intersects[0].object.interact && intersects[0].object.interact();
+          intersects[0].object?.interact && intersects[0].object.interact();
         } else {
           projectActions.unselectAll();
         }

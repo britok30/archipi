@@ -143,7 +143,7 @@ export default function Sidebar({ state, sidebarComponents }) {
     <>
       {isVisible && (
         <aside
-          className="sidebar overflow-y-auto w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
+          className="sidebar overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
           onKeyDown={(event) => event.stopPropagation()}
           onKeyUp={(event) => event.stopPropagation()}
         >

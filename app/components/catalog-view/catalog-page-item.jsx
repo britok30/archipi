@@ -65,7 +65,6 @@ const CONTAINER_DIV = {
 };
 
 const CatalogPageItem = ({ page, oldPage }) => {
-  const [hover, setHover] = useState(false);
   const { projectActions } = useContext(ReactPlannerContext);
 
   const changePage = (newPage) => {
@@ -74,21 +73,10 @@ const CatalogPageItem = ({ page, oldPage }) => {
 
   return (
     <div
-      style={hover ? STYLE_BOX_HOVER : STYLE_BOX}
+      className="w-[14rem] h-[14rem] flex items-center justify-center p-2 bg-[#292929] border border-transparent hover:border-white rounded-lg cursor-pointer relative transition duration-300 ease-in-out self-center justify-self-center"
       onClick={() => changePage(page.name)}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
     >
-      {hover ? (
-        <div style={CONTAINER_DIV}>
-          <b style={STYLE_TITLE_HOVERED}>{page.label}</b>
-          <MdNavigateNext style={STYLE_NEXT_HOVER} />
-        </div>
-      ) : (
-        <div style={CONTAINER_DIV}>
-          <b style={STYLE_TITLE}>{page.label}</b>
-        </div>
-      )}
+      <h3 className="text-2xl text-white mb-4">{page.label}</h3>
     </div>
   );
 };

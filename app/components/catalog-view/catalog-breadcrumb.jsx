@@ -4,6 +4,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { MdArrowBack as Arrow } from "react-icons/md";
 import * as SharedStyle from "../../styles/shared-style";
+import classNames from "classnames";
 
 const breadcrumbStyle = {
   margin: "1.5em",
@@ -33,14 +34,18 @@ const CatalogBreadcrumb = ({ names }) => {
     let lastElement = ind === names.length - 1;
 
     return (
-      <div key={ind} style={{ display: "flex" }}>
+      <div className="flex" key={ind}>
         <div
-          style={!lastElement ? breadcrumbTextStyle : breadcrumbLastTextStyle}
+          className={classNames("text-lg cursor-pointer text-white", {
+            "font-bold": lastElement,
+          })}
           onClick={name.action || null}
         >
           {name.name}
         </div>
-        {!lastElement ? <Arrow style={breadcrumbTabStyle} /> : null}
+        {!lastElement ? (
+          <Arrow className="fill-black text-2xl mx-[10px]" />
+        ) : null}
       </div>
     );
   });

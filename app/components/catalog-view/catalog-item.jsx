@@ -10,16 +10,6 @@ import Image from "next/image";
 const CatalogItem = ({ element }) => {
   const { linesActions, itemsActions, holesActions, projectActions } =
     useContext(ReactPlannerContext);
-  // const [img, setImg] = useState("");
-  // console.log("element", element);
-  // // TODO(pg): workaround to be able to use image in next.js app
-  // useEffect(() => {
-  //   if (element.info.image && element.info.image.default) {
-  //     setImg(element.info.image.default.src);
-  //   } else {
-  //     setImg(element.info.image);
-  //   }
-  // }, [element.info.image]);
 
   const select = () => {
     switch (element.prototype) {

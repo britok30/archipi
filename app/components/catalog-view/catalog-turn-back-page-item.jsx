@@ -59,14 +59,10 @@ const CatalogTurnBackPageItem = ({ page }) => {
 
   return (
     <div
-      style={hover ? STYLE_BOX_HOVER : STYLE_BOX}
+      className="w-[14rem] h-[14rem] flex items-center justify-center p-2 bg-[#292929] border border-transparent hover:border-white rounded-lg cursor-pointer relative transition duration-300 ease-in-out self-center justify-self-center"
       onClick={() => changePage(page.name)}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
     >
-      <div style={CONTAINER_DIV}>
-        <MdNavigateBefore style={!hover ? STYLE_BACK : STYLE_BACK_HOVER} />
-      </div>
+      <MdNavigateBefore size={50} className="text-white" />
     </div>
   );
 };

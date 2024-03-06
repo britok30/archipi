@@ -21,7 +21,7 @@ function makeObjectMaxLOD() {
 
   //Bookcase
   let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
-  let wood = new Three.MeshPhongMaterial({ map: woodMaterial });
+  let wood = new Three.MeshStandardMaterial({ map: woodMaterial });
   let backside = new Three.Mesh(backGeometry, wood);
   backside.position.set(0, 1, 0);
   bookcase.add(backside);
@@ -61,9 +61,9 @@ function makeObjectMaxLOD() {
   let bookGeometry = new Three.BoxGeometry(0.24, 0.32, 0.76);
 
   let bookMaterial = [
-    new Three.MeshLambertMaterial({ map: bookTexture1 }),
-    new Three.MeshLambertMaterial({ map: bookTexture2 }),
-    new Three.MeshLambertMaterial({ map: bookTexture3 }),
+    new Three.MeshStandardMaterial({ map: bookTexture1 }),
+    new Three.MeshStandardMaterial({ map: bookTexture2 }),
+    new Three.MeshStandardMaterial({ map: bookTexture3 }),
   ];
 
   let book1 = new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
@@ -98,7 +98,7 @@ function makeObjectMinLOD() {
 
   //Bookcase
   let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
-  let wood = new Three.MeshPhongMaterial({ map: woodMaterial });
+  let wood = new Three.MeshStandardMaterial({ map: woodMaterial });
   let backside = new Three.Mesh(backGeometry, wood);
   backside.position.set(0, 1, 0);
   bookcase.add(backside);
