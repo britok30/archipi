@@ -1,4 +1,4 @@
-import React, { useState, useContext, memo } from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import Panel from "./panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
@@ -70,15 +70,7 @@ const styleEditButtonHover = { ...styleEditButton, ...styleHoverColor };
 const styleEyeVisible = { fontSize: "1.25em" };
 const styleEyeHidden = { ...styleEyeVisible, color: "#a5a1a1" };
 
-const shouldUpdate = (prevProps, nextProps) => {
-  return (
-    prevProps.groups.hashCode() === nextProps.groups.hashCode() &&
-    prevProps.layers.hashCode() === nextProps.layers.hashCode() &&
-    prevProps.mode === nextProps.mode
-  );
-};
-
-const PanelGroups = memo(({ mode, groups, layers }) => {
+const PanelGroups = ({ mode, groups, layers }) => {
   const { translator, groupsActions } = useContext(ReactPlannerContext);
 
   if (!VISIBILITY_MODE[mode]) return null;
@@ -203,7 +195,7 @@ const PanelGroups = memo(({ mode, groups, layers }) => {
       </div>
     </Panel>
   );
-}, shouldUpdate);
+};
 
 PanelGroups.displayName = "PanelGroups";
 

@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useContext, memo } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import PropTypes from "prop-types";
 import { Map, fromJS } from "immutable";
 import AttributesEditor from "./attributes-editor/attributes-editor";
 import { GeometryUtils, MathUtils } from "../../../utils/export";
-import * as SharedStyle from "../../../styles/shared-style";
 import convert from "convert-units";
 import { MdContentCopy, MdContentPaste } from "react-icons/md";
 import ReactPlannerContext from "../../../context/ReactPlannerContext";
@@ -27,7 +26,7 @@ const shouldUpdate = (prevProps, nextProps) => {
   );
 };
 
-const ElementEditor = memo(({ state: appState, element, layer }) => {
+const ElementEditor = ({ state: appState, element, layer }) => {
   const { projectActions, catalog, translator } =
     useContext(ReactPlannerContext);
 
@@ -431,9 +430,7 @@ const ElementEditor = memo(({ state: appState, element, layer }) => {
       })}
     </div>
   );
-}, shouldUpdate);
-
-ElementEditor.displayName = "ElementEditor";
+};
 
 ElementEditor.propTypes = {
   state: PropTypes.object.isRequired,

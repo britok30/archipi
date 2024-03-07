@@ -1,4 +1,4 @@
-import React, { memo, useContext } from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { IoIosDocument } from "react-icons/io";
@@ -13,14 +13,12 @@ import {
   MODE_VIEWING_CATALOG,
   MODE_CONFIGURING_PROJECT,
 } from "../../utils/constants";
-import * as SharedStyle from "../../styles/shared-style";
 import { FaBookOpen, FaMousePointer } from "react-icons/fa";
 import { FaCube } from "react-icons/fa";
 import { IoSquare } from "react-icons/io5";
 import { IoIosUndo } from "react-icons/io";
 import { IoIosRedo } from "react-icons/io";
 import { IoSettingsSharp } from "react-icons/io5";
-import { IoCamera } from "react-icons/io5";
 import ScreenshotToolbarButton from "../../ui/screenshot-toolbar-button";
 import { CiCircleInfo } from "react-icons/ci";
 
@@ -44,11 +42,7 @@ const mapButtonsCb = (el, ind) => {
   );
 };
 
-const shouldUpdate = (prevProps, nextProps) => {
-  return prevProps.state.hashCode() === nextProps.state.hashCode();
-};
-
-const Toolbar = memo(({ state, toolbarButtons, allowProjectFileSupport }) => {
+const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
   const { projectActions, viewer3DActions, translator } =
     useContext(ReactPlannerContext);
 
@@ -253,7 +247,7 @@ const Toolbar = memo(({ state, toolbarButtons, allowProjectFileSupport }) => {
       {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
     </div>
   );
-}, shouldUpdate);
+};
 
 Toolbar.displayName = "Toolbar";
 

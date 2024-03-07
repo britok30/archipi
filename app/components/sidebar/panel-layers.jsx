@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, memo } from "react";
+import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { Map } from "immutable";
 import Panel from "./panel";
@@ -101,15 +101,7 @@ const inputTableButtonStyle = {
   borderSpacing: "0",
 };
 
-const shouldUpdate = (prevProps, nextProps) => {
-  return (
-    prevProps.state.scene.layers.size === nextProps.state.scene.layers.size &&
-    prevProps.state.sceneHistory.hashCode() ===
-      nextProps.state.sceneHistory.hashCode()
-  );
-};
-
-const PanelLayers = memo(({ state }) => {
+const PanelLayers = ({ state }) => {
   const { sceneActions, translator } = useContext(ReactPlannerContext);
   const [headHovered, setHeadHovered] = useState(false);
   const [layerAddUIVisible, setLayerAddUIVisible] = useState(false);
@@ -327,9 +319,7 @@ const PanelLayers = memo(({ state }) => {
       ) : null}
     </Panel>
   );
-}, shouldUpdate);
-
-PanelLayers.displayName = "PanelLayers";
+};
 
 PanelLayers.propTypes = {
   state: PropTypes.object.isRequired,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, memo } from "react";
+import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import Panel from "./panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
@@ -112,7 +112,7 @@ const PanelGuides = ({ state }) => {
                   }}
                   min={0}
                   max={state.getIn(["scene", "width"])}
-                  className="w-[300px] mr-3"
+                  className="w-[280px] mr-3"
                 />
 
                 <button onClick={(e) => setAddHGVisible(true)}>
@@ -170,7 +170,7 @@ const PanelGuides = ({ state }) => {
                   }}
                   min={0}
                   max={state.getIn(["scene", "height"])}
-                  className="w-[300px] mr-3"
+                  className="w-[280px] mr-3"
                 />
 
                 <button onClick={(e) => setAddVGVisible(true)}>
