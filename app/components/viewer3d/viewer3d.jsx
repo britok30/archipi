@@ -176,6 +176,7 @@ const Scene3DViewer = (props) => {
       cameraP = null;
       orbitControllerP = null;
       renderer.renderLists.dispose();
+      renderer.dispose();
     };
   }, []);
 
