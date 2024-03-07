@@ -56,23 +56,6 @@ const contentArea = {
   userSelect: "none",
 };
 
-const elementStyle = {
-  width: "auto",
-  height: "2.5em",
-  margin: "0.25em 0.25em 0 0",
-  padding: "0.5em",
-  textAlign: "center",
-  display: "inline-block",
-  border: "1px solid #CCC",
-  borderRadius: "0.2em",
-};
-
-const elementSelectedStyle = {
-  ...elementStyle,
-  color: SharedStyle.SECONDARY_COLOR.main,
-  borderColor: SharedStyle.SECONDARY_COLOR.main,
-};
-
 const categoryDividerStyle = {
   paddingBottom: "0.5em",
   borderBottom: "1px solid #888",
@@ -163,15 +146,26 @@ const PanelLayerElement = ({ mode, layers, selectedLayer }) => {
           </tbody>
         </table>
 
+        {/* const elementSelectedStyle = {
+  ...elementStyle,
+  color: SharedStyle.SECONDARY_COLOR.main,
+  borderColor: SharedStyle.SECONDARY_COLOR.main,
+};
+ */}
+
         {matchedElements.lines.size ? (
           <div>
             <p style={categoryDividerStyle}>{translator.t("Lines")}</p>
             {matchedElements.lines.entrySeq().map(([lineID, line]) => {
               return (
                 <div
+                  className={`w-auto mt-[.25rem] mr-[.25rem] p-1 mb-0 ml-0 text-center inline-block border rounded-md transition duration-200 ${
+                    line.selected
+                      ? "border-blue-500 text-blue-500"
+                      : "border-gray-300"
+                  } `}
                   key={lineID}
                   onClick={(e) => linesActions.selectLine(layer.id, line.id)}
-                  style={line.selected ? elementSelectedStyle : elementStyle}
                 >
                   {line.name}
                 </div>
@@ -186,9 +180,13 @@ const PanelLayerElement = ({ mode, layers, selectedLayer }) => {
             {matchedElements.holes.entrySeq().map(([holeID, hole]) => {
               return (
                 <div
+                  className={`w-auto mt-[.25rem] mr-[.25rem] p-1 mb-0 ml-0 text-center inline-block border rounded-md transition duration-200 ${
+                    hole.selected
+                      ? "border-blue-500 text-blue-500"
+                      : "border-gray-300"
+                  } `}
                   key={holeID}
                   onClick={(e) => holesActions.selectHole(layer.id, hole.id)}
-                  style={hole.selected ? elementSelectedStyle : elementStyle}
                 >
                   {hole.name}
                 </div>
@@ -203,9 +201,13 @@ const PanelLayerElement = ({ mode, layers, selectedLayer }) => {
             {matchedElements.items.entrySeq().map(([itemID, item]) => {
               return (
                 <div
+                  className={`w-auto mt-[.25rem] mr-[.25rem] p-1 mb-0 ml-0 text-center inline-block border rounded-md transition duration-200 ${
+                    item.selected
+                      ? "border-blue-500 text-blue-500"
+                      : "border-gray-300"
+                  } `}
                   key={itemID}
                   onClick={(e) => itemsActions.selectItem(layer.id, item.id)}
-                  style={item.selected ? elementSelectedStyle : elementStyle}
                 >
                   {item.name}
                 </div>

@@ -7,7 +7,8 @@ import ReactPlannerContext from "../../context/ReactPlannerContext";
 import * as SharedStyle from "../../styles/shared-style";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { FaPencil, FaTrash, FaTimes } from "react-icons/fa";
-import { FormNumberInput } from "../../components/style/export";
+import { Button, FormNumberInput } from "../../components/style/export";
+import classNames from "classnames";
 
 const iconStyle = {
   fontSize: "14px",
@@ -25,16 +26,11 @@ const tableTabStyle = {
   textAlign: "center",
 };
 
-const shouldUpdate = (prevProps, nextProps) => {
-  return (
-    prevProps.state.getIn(["scene", "guides"]).hashCode() !==
-    nextProps.state.getIn(["scene", "guides"]).hashCode()
-  );
-};
-
-const PanelGuides = memo(({ state }) => {
+const PanelGuides = ({ state }) => {
   const { projectActions, translator } = useContext(ReactPlannerContext);
   const { guides } = state.scene;
+
+  const [selectedTab, setSelectedTab] = useState("Horizontal");
 
   const [addHGVisible, setAddHGVisible] = useState(true);
   const [addVGVisible, setAddVGVisible] = useState(true);
@@ -42,136 +38,152 @@ const PanelGuides = memo(({ state }) => {
 
   return (
     <Panel name={translator.t("Guides")}>
-      <Tabs className="m-[1rem]" id="guidesTabs">
-        <TabList>
-          <Tab>{translator.t("Horizontal")}</Tab>
-          <Tab>{translator.t("Vertical")}</Tab>
-          {/*<Tab>{translator.t('Circular')}</Tab>*/}
-        </TabList>
+      <div className="flex items-center space-x-3">
+        <div
+          className={classNames(
+            "px-3 py-2 rounded-md border border-white transition-all duration-300 ease-in-out cursor-pointer",
+            {
+              "border-blue-500 text-blue-500": selectedTab === "Horizontal",
+            }
+          )}
+          onClick={() => setSelectedTab("Horizontal")}
+        >
+          {translator.t("Horizontal")}
+        </div>
+        <div
+          className={classNames(
+            "px-3 py-2 rounded-md border border-white transition-all duration-300 ease-in-out cursor-pointer",
+            {
+              "border-blue-500 text-blue-500": selectedTab === "Vertical",
+            }
+          )}
+          onClick={() => setSelectedTab("Vertical")}
+        >
+          {translator.t("Vertical")}
+        </div>
+      </div>
 
-        <TabPanel>
-          <table style={tableTabStyle}>
-            <tbody>
-              {guides
-                .get("horizontal")
-                .entrySeq()
-                .map(([hgKey, hgVal], ind) => {
-                  return (
-                    <tr key={hgKey}>
-                      <td className="w-[2rem]">{ind + 1}</td>
-                      <td>{hgVal}</td>
-                      <td className="w-[5rem]">
-                        {/*<FaPencil style={iconStyle} />*/}
-                        <FaTrash
-                          style={iconStyle}
-                          onClick={(e) =>
-                            projectActions.removeHorizontalGuide(hgKey)
-                          }
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              {addHGVisible ? (
-                <tr>
-                  <td
-                    colSpan="3"
-                    style={addGuideStyle}
-                    onClick={(e) => setAddHGVisible(false)}
+      {selectedTab === "Horizontal" && (
+        <>
+          <div className="my-4">
+            {guides
+              ?.getIn(["horizontal"])
+              ?.entrySeq()
+              .map(([hgKey, hgValue], index) => {
+                return (
+                  <div
+                    key={hgKey}
+                    className="flex items-center justify-between mb-2"
                   >
-                    {translator.t("+ Add Horizontal Giude")}
-                  </td>
-                </tr>
-              ) : (
-                <tr>
-                  <td colSpan="2">
-                    <FormNumberInput
-                      value={0}
-                      onChange={(e) => {
-                        projectActions.addHorizontalGuide(e.target.value);
-                        return setAddHGVisible(true);
-                      }}
-                      min={0}
-                      max={state.getIn(["scene", "height"])}
+                    <span>{index + 1}</span>
+                    <span>{hgValue}</span>
+                    <FaTrash
+                      size={14}
+                      className="cursor-pointer"
+                      onClick={(e) =>
+                        projectActions.removeHorizontalGuide(hgKey)
+                      }
                     />
-                  </td>
-                  <td>
-                    <FaTimes
-                      style={iconStyle}
-                      onClick={(e) => setAddHGVisible(true)}
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </TabPanel>
-        <TabPanel>
-          <table style={tableTabStyle}>
-            <tbody>
-              {guides
-                .get("vertical")
-                .entrySeq()
-                .map(([hgKey, hgVal], ind) => {
-                  return (
-                    <tr key={hgKey}>
-                      <td className="w-[2rem]">{ind + 1}</td>
-                      <td>{hgVal}</td>
-                      <td className="w-[5rem]">
-                        {/*<FaPencil style={iconStyle} />*/}
-                        <FaTrash
-                          style={iconStyle}
-                          onClick={(e) =>
-                            projectActions.removeVerticalGuide(hgKey)
-                          }
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              {addVGVisible ? (
-                <tr>
-                  <td
-                    colSpan="3"
-                    style={addGuideStyle}
-                    onClick={(e) => setAddVGVisible(false)}
+                  </div>
+                );
+              })}
+          </div>
+
+          {addHGVisible && (
+            <button
+              onClick={(e) => setAddHGVisible(false)}
+              className="bg-white text-black px-3 py-2 rounded-md"
+            >
+              Add Horizontal Guide
+            </button>
+          )}
+
+          {!addHGVisible && (
+            <>
+              <span className="text-xs mb-4 inline-block">{`Value must be between 0 and ${state.getIn(
+                ["scene", "width"]
+              )} `}</span>
+              <div classNames="flex items-center justify-between">
+                <FormNumberInput
+                  value={0}
+                  onChange={(e) => {
+                    projectActions.addHorizontalGuide(e.target.value);
+                    setAddHGVisible(true);
+                  }}
+                  min={0}
+                  max={state.getIn(["scene", "width"])}
+                  className="w-[300px] mr-3"
+                />
+
+                <button onClick={(e) => setAddHGVisible(true)}>
+                  <FaTimes />
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {selectedTab === "Vertical" && (
+        <>
+          <div className="my-4">
+            {guides
+              .get("vertical")
+              .entrySeq()
+              .map(([vgKey, vgValue], index) => {
+                return (
+                  <div
+                    key={vgKey}
+                    className="flex items-center justify-between mb-2"
                   >
-                    {translator.t("+ Add Vertical Giude")}
-                  </td>
-                </tr>
-              ) : (
-                <tr>
-                  <td colSpan="2">
-                    <FormNumberInput
-                      value={0}
-                      onChange={(e) => {
-                        projectActions.addVerticalGuide(e.target.value);
-                        return setAddVGVisible(true);
-                      }}
-                      min={0}
-                      max={state.getIn(["scene", "height"])}
+                    <span>{index + 1}</span>
+                    <span>{vgValue}</span>
+                    <FaTrash
+                      size={14}
+                      onClick={(e) => projectActions.removeVerticalGuide(vgKey)}
                     />
-                  </td>
-                  <td>
-                    <FaTimes
-                      style={iconStyle}
-                      onClick={(e) => setAddVGVisible(true)}
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </TabPanel>
-        {/*<TabPanel>
-          <b>TODO Circular Guides</b>
-        </TabPanel>*/}
-      </Tabs>
+                  </div>
+                );
+              })}
+          </div>
+
+          {addVGVisible && (
+            <button
+              onClick={(e) => setAddVGVisible(false)}
+              className="bg-white text-black px-3 py-2 rounded-md"
+            >
+              Add Vertical Guide
+            </button>
+          )}
+
+          {!addVGVisible && (
+            <>
+              <span className="text-xs mb-4 inline-block">{`Value must be between 0 and ${state.getIn(
+                ["scene", "height"]
+              )}`}</span>
+              <div classNames="flex items-center justify-between">
+                <FormNumberInput
+                  value={0}
+                  onChange={(e) => {
+                    projectActions.addVerticalGuide(e.target.value);
+                    setAddVGVisible(true);
+                  }}
+                  min={0}
+                  max={state.getIn(["scene", "height"])}
+                  className="w-[300px] mr-3"
+                />
+
+                <button onClick={(e) => setAddVGVisible(true)}>
+                  <FaTimes />
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      )}
     </Panel>
   );
-}, shouldUpdate);
-
-PanelGuides.displayName = "PanelGuides";
+};
 
 PanelGuides.propTypes = {
   state: PropTypes.object.isRequired,

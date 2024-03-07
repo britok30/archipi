@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import polylabel from "polylabel";
 import areapolygon from "area-polygon";
@@ -60,10 +60,19 @@ const calculateAreaSize = (area, layer) => {
 };
 
 export const Area = ({ layer, area, catalog }) => {
-  const rendered = catalog.getElement(area.type).render2D(area, layer);
-  const polygonWithHoles = calculatePolygonWithHoles(area, layer);
-  const center = polylabel([polygonWithHoles], 1.0);
-  const areaSize = calculateAreaSize(area, layer);
+  const rendered = useMemo(
+    () => catalog.getElement(area.type).render2D(area, layer),
+    [area, catalog, layer]
+  );
+  const polygonWithHoles = useMemo(
+    () => calculatePolygonWithHoles(area, layer),
+    [area, layer]
+  );
+  const center = useMemo(
+    () => polylabel([polygonWithHoles], 1.0),
+    [polygonWithHoles]
+  );
+  const areaSize = useMemo(() => calculateAreaSize(area, layer), [area, layer]);
 
   return (
     <g
@@ -73,7 +82,7 @@ export const Area = ({ layer, area, catalog }) => {
       data-selected={area.selected ? "true" : "false"}
       data-layer={layer.id}
     >
-      {rendered} HELLO
+      {rendered}
       <>
         <text
           x="0"

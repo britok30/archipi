@@ -22,6 +22,7 @@ import { IoIosRedo } from "react-icons/io";
 import { IoSettingsSharp } from "react-icons/io5";
 import { IoCamera } from "react-icons/io5";
 import ScreenshotToolbarButton from "../../ui/screenshot-toolbar-button";
+import { CiCircleInfo } from "react-icons/ci";
 
 const sortButtonsCb = (a, b) => {
   if (a.index === undefined || a.index === null) {
@@ -190,6 +191,44 @@ const Toolbar = memo(({ state, toolbarButtons, allowProjectFileSupport }) => {
       index: 9,
       condition: true,
       dom: <ScreenshotToolbarButton mode={mode} />,
+    },
+    {
+      index: 10,
+      condition: true,
+      dom: (
+        <ToolbarButton
+          active={false}
+          tooltip={
+            <>
+              <div className="mb-3">
+                <h3 className="mb-1">2D View Controls</h3>
+                <ul className="flex flex-col space-y-1">
+                  <li>Move View: Click and drag the mouse in any direction.</li>
+                  <li>Zoom: Scroll the mouse wheel up or down.</li>
+                  <li>Cancel Action: Press the &apos;Esc&apos; key.</li>
+                  <li>Delete item: Select and press Backspace/Delete</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="mb-1">3D View Controls</h3>
+                <ul className="flex flex-col space-y-1">
+                  <li>
+                    - Rotate: Click and drag with the mouse in any direction.
+                  </li>
+                  <li>- Zoom: Scroll the mouse wheel up or down.</li>
+                  <li>
+                    - Move Camera: Hold CMD/CTRL and click, then drag to
+                    reposition the camera.
+                  </li>
+                </ul>
+              </div>
+            </>
+          }
+        >
+          <CiCircleInfo className="mb-0.5" size={23} />
+          Tips
+        </ToolbarButton>
+      ),
     },
   ];
 

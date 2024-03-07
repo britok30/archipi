@@ -72,7 +72,7 @@ const Scene3DViewer = (props) => {
     // scene3D.add(axisHelper);
 
     // LIGHT
-    let light = new Three.AmbientLight(0xafafaf, 1.3); // soft white light
+    let light = new Three.AmbientLight(0xafafaf, Math.PI); // soft white light
     scene3D.add(light);
 
     // Add another light

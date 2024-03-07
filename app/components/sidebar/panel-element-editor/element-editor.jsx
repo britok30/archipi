@@ -12,20 +12,6 @@ import ReactPlannerContext from "../../../context/ReactPlannerContext";
 
 const PRECISION = 2;
 
-const attrPorpSeparatorStyle = {
-  margin: "0.5em 0.25em 0.5em 0",
-  border: "2px solid " + SharedStyle.SECONDARY_COLOR.alt,
-  position: "relative",
-  height: "2.5em",
-  borderRadius: "2px",
-};
-
-const headActionStyle = {
-  position: "absolute",
-  right: "0.5em",
-  top: "0.5em",
-};
-
 const iconHeadStyle = {
   float: "right",
   margin: "-3px 4px 0px 0px",
@@ -402,8 +388,8 @@ const ElementEditor = memo(({ state: appState, element, layer }) => {
         state={appState}
       />
 
-      <div style={attrPorpSeparatorStyle}>
-        <div style={headActionStyle}>
+      <div className="relative my-1 mx-2 border border-white rounded-md">
+        <div className="flex items-center justify-end space-x-3 py-2">
           <div
             title={translator.t("Copy")}
             style={iconHeadStyle}

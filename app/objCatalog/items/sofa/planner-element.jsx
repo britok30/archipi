@@ -90,7 +90,7 @@ export default {
     );
   },
 
-  render3D: function (element, layer, scene) {
+  render3D: async function (element, layer, scene) {
     let onLoadItem = (object) => {
       let newWidth = convert(width.length).from(width.unit).to(scene.unit);
       let newHeight = convert(height.length).from(height.unit).to(scene.unit);
@@ -129,7 +129,7 @@ export default {
     if (cachedJSONSofa) {
       let loader = new ObjectLoader();
       let object = loader.parse(cachedJSONSofa);
-      return Promise.resolve(onLoadItem(object));
+      return await Promise.resolve(onLoadItem(object));
     }
 
     return loadObjWithMaterial(mtl, obj, img).then((object) => {
