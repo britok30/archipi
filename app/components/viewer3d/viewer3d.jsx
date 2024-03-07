@@ -200,7 +200,7 @@ const Scene3DViewer = (props) => {
     renderer.setSize(props.width, props.height);
   }, [props]);
 
-  return <div ref={canvasWrapper} />;
+  return <div className="saturate-150" ref={canvasWrapper} />;
 };
 
 Scene3DViewer.propTypes = {

@@ -33,7 +33,7 @@
     "react-tabs": "^6.0.2",
     "redux": "4.0.1",
     "shortid": "^2.2.16",
-    "three": "^0.161.0",
+    "three": "^0.162.0",
     "three-bvh-csg": "^0.0.16",
     "three-csg-ts": "^3.1.13"
   },
