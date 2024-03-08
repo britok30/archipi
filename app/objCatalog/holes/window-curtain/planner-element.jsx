@@ -2,6 +2,7 @@ import React from "react";
 import * as Three from "three";
 import { loadObjWithMaterial } from "../../utils/load-obj";
 import path from "path";
+import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.js";
 
 let cached3DWindow = null;
 
@@ -155,7 +156,7 @@ export default {
 
       let Tenda = new Three.Object3D();
 
-      let mesh = createMesh(new Three.ParametricGeometry(radialWave, 20, 20));
+      let mesh = createMesh(new ParametricGeometry(radialWave, 20, 20));
       mesh.rotation.x += Math.PI / 2;
       mesh.rotation.y += Math.PI / 2;
       mesh.position.y += 3.1;
@@ -230,7 +231,7 @@ export default {
     }
 
     function createMesh(geom) {
-      geom.applyMatrix(new Three.Matrix4().makeTranslation(-25, 0, -25));
+      geom.applyMatrix4(new Three.Matrix4().makeTranslation(-25, 0, -25));
       let meshMaterial = new Three.MeshLambertMaterial({
         color: 0xffffff,
         opacity: 0.9,
