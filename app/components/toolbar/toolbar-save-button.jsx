@@ -10,6 +10,7 @@ import { OBJExporter } from "./OBJExporter";
 import Dropdown from "rc-dropdown";
 import Menu, { Item as MenuItem } from "rc-menu";
 import { parseData } from "../viewer3d/scene-creator";
+
 import * as Three from "three";
 import { FaSave } from "react-icons/fa";
 
