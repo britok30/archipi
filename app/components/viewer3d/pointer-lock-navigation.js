@@ -1,5 +1,5 @@
 import * as Three from "three";
-import PointerLockControls from "./libs/pointer-lock-controls";
+import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 
 export function initPointerLock(camera, rendererElement) {
   let havePointerLock =
