@@ -1,3 +1,4 @@
+import React from "react";
 import Providers from "./components/Providers";
 import "./globals.css";
 
