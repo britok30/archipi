@@ -1,9 +1,10 @@
 "use client";
 
-import { TextGeometry, MeshBasicMaterial, Mesh, BoxHelper } from "three";
+import { MeshBasicMaterial, Mesh, BoxHelper } from "three";
 import React from "react";
 import { HELVETIKER } from "./helvetiker_regular.typeface.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
+import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 
 const fontLoader = new FontLoader();
 const font = fontLoader.parse(HELVETIKER);
