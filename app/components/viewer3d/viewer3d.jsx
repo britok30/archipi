@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import * as Three from "three";
@@ -201,7 +203,7 @@ const Scene3DViewer = (props) => {
     renderer.setSize(props.width, props.height);
   }, [props]);
 
-  return <div className="saturate-150" ref={canvasWrapper} />;
+  return <div className="saturate-[1.8] contrast-125" ref={canvasWrapper} />;
 };
 
 Scene3DViewer.propTypes = {

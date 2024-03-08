@@ -4,8 +4,9 @@ import "./globals.css";
 import localFont from "next/font/local";
 
 export const metadata = {
-  title: "ArchiPi | Online Floor Plan Editor",
-  description: "ArchiPi lets you create 2D & 3D floorplans for free",
+  title: "ArchiPi: Online Floor Plan Design & 3D Visualization Tool",
+  description:
+    "ArchiPi lets you draw 2D floor plans and navigate them in 3D, offering a drag & drop catalog of customizable objects. Transform your design ideas into reality, from 2D wireframes to detailed 3D models. Experience architectural design in your browser for free!",
 };
 
 const gtWalsheim = localFont({ src: "../app/fonts/GT-Walsheim-Regular.otf" });

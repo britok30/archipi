@@ -149,7 +149,7 @@ ReactPlanner.defaultProps = {
   customContents: {},
   customOverlays: [],
   customActions: {},
-  softwareSignature: `ArchiPi`,
+  softwareSignature: `ArchiPi | next v14.1 | threejs r162`,
 };
 
 //redux connect
