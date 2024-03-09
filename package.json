@@ -11,6 +11,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.18",
     "@tippyjs/react": "^4.2.6",
+    "@types/react-svg-pan-zoom": "^3.3.9",
     "@types/three": "^0.161.2",
     "@uidotdev/usehooks": "^2.4.1",
     "area-polygon": "^1.0.1",
