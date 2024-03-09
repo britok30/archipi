@@ -7,117 +7,117 @@ const WIDTH = 150;
 const DEPTH = 50;
 const HEIGHT = 50;
 const RADIUS = 10;
+let grey;
+let black;
+let woodTexture;
 
 if (typeof window !== "undefined") {
-  const grey = new Three.MeshLambertMaterial({ color: 0xc0c0c0 });
-  const black = new Three.MeshLambertMaterial({ color: 0x00000 });
+  grey = new Three.MeshLambertMaterial({ color: 0xc0c0c0 });
+  black = new Three.MeshLambertMaterial({ color: 0x00000 });
   const textureLoader = new Three.TextureLoader();
-  const woodTexture = textureLoader.load("/images/textures/wood.jpg");
-
-  const objectMaxLOD = makeObjectMaxLOD();
-  const objectMinLOD = makeObjectMinLOD();
-
-  function makeObjectMaxLOD() {
-    let bench = new Three.Mesh();
-
-    // axis
-    let axis1 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
-    axis1.position.set(0, 0, 0);
-    bench.add(axis1);
-
-    let axi2 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
-    axi2.position.set(0, 0, 3);
-    bench.add(axi2);
-
-    //beams
-    for (let lx = -5; lx <= 5; lx += 5) {
-      let beam = new Three.Mesh(new Three.BoxGeometry(0.5, 0.5, 3.5), grey);
-      beam.position.set(lx, 0, 1.5);
-      bench.add(beam);
-    }
-
-    //legs
-    for (let gx = -5; gx <= 5; gx += 5) {
-      for (let gz = 0; gz <= 3; gz += 3) {
-        let leg = new Three.Mesh(new Three.BoxGeometry(3, 0.5, 0.5), grey);
-        leg.rotation.z = 0.5 * Math.PI;
-        leg.position.set(gx, -1.5, gz);
-        bench.add(leg);
-
-        // foot
-        let foot = new Three.Mesh(new Three.BoxGeometry(0.5, 0.25, 0.5), black);
-        foot.rotation.z = 0.5 * Math.PI;
-        foot.position.x = -1.625;
-        leg.add(foot);
-      }
-    }
-
-    // wood axis
-    for (let z = 0; z <= 3; z += 0.75) {
-      let woodAxis = new Three.Mesh(
-        new Three.BoxGeometry(12, 0.25, 0.5),
-        new Three.MeshPhongMaterial({ map: woodTexture })
-      );
-      woodAxis.position.set(0, 0.5, z);
-      bench.add(woodAxis);
-    }
-
-    //nuts
-    for (let z = 0; z <= 3; z += 0.75) {
-      for (let dy = -5; dy <= 5; dy += 5) {
-        let nut = new Three.Mesh(
-          new Three.CylinderGeometry(0.1, 0.1, 0.8, 6),
-          black
-        );
-        nut.position.set(dy, 0.3, z);
-        bench.add(nut);
-      }
-    }
-
-    return bench;
-  }
-
-  function makeObjectMinLOD() {
-    let bench = new Three.Mesh();
-    // axis
-    let axis1 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
-    axis1.position.set(0, 0, 0);
-    bench.add(axis1);
-
-    let axi2 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
-    axi2.position.set(0, 0, 3);
-    bench.add(axi2);
-
-    //beams
-    for (let lx = -5; lx <= 5; lx += 5) {
-      let beam = new Three.Mesh(new Three.BoxGeometry(0.5, 0.5, 3.5), grey);
-      beam.position.set(lx, 0, 1.5);
-      bench.add(beam);
-    }
-
-    //legs
-    for (let gx = -5; gx <= 5; gx += 5) {
-      for (let gz = 0; gz <= 3; gz += 3) {
-        let leg = new Three.Mesh(new Three.BoxGeometry(3, 0.5, 0.5), grey);
-        leg.rotation.z = 0.5 * Math.PI;
-        leg.position.set(gx, -1.5, gz);
-        bench.add(leg);
-      }
-    }
-
-    // wood axis
-    for (let z = 0; z <= 3; z += 0.75) {
-      let woodAxis = new Three.Mesh(
-        new Three.BoxGeometry(12, 0.25, 0.5),
-        new Three.MeshPhongMaterial({ map: woodTexture })
-      );
-      woodAxis.position.set(0, 0.5, z);
-      bench.add(woodAxis);
-    }
-
-    return bench;
-  }
+  woodTexture = textureLoader.load("/images/textures/wood.jpg");
 }
+
+let objectMaxLOD = function makeObjectMaxLOD() {
+  let bench = new Three.Mesh();
+
+  // axis
+  let axis1 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
+  axis1.position.set(0, 0, 0);
+  bench.add(axis1);
+
+  let axi2 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
+  axi2.position.set(0, 0, 3);
+  bench.add(axi2);
+
+  //beams
+  for (let lx = -5; lx <= 5; lx += 5) {
+    let beam = new Three.Mesh(new Three.BoxGeometry(0.5, 0.5, 3.5), grey);
+    beam.position.set(lx, 0, 1.5);
+    bench.add(beam);
+  }
+
+  //legs
+  for (let gx = -5; gx <= 5; gx += 5) {
+    for (let gz = 0; gz <= 3; gz += 3) {
+      let leg = new Three.Mesh(new Three.BoxGeometry(3, 0.5, 0.5), grey);
+      leg.rotation.z = 0.5 * Math.PI;
+      leg.position.set(gx, -1.5, gz);
+      bench.add(leg);
+
+      // foot
+      let foot = new Three.Mesh(new Three.BoxGeometry(0.5, 0.25, 0.5), black);
+      foot.rotation.z = 0.5 * Math.PI;
+      foot.position.x = -1.625;
+      leg.add(foot);
+    }
+  }
+
+  // wood axis
+  for (let z = 0; z <= 3; z += 0.75) {
+    let woodAxis = new Three.Mesh(
+      new Three.BoxGeometry(12, 0.25, 0.5),
+      new Three.MeshPhongMaterial({ map: woodTexture })
+    );
+    woodAxis.position.set(0, 0.5, z);
+    bench.add(woodAxis);
+  }
+
+  //nuts
+  for (let z = 0; z <= 3; z += 0.75) {
+    for (let dy = -5; dy <= 5; dy += 5) {
+      let nut = new Three.Mesh(
+        new Three.CylinderGeometry(0.1, 0.1, 0.8, 6),
+        black
+      );
+      nut.position.set(dy, 0.3, z);
+      bench.add(nut);
+    }
+  }
+
+  return bench;
+};
+
+let objectMinLOD = function makeObjectMinLOD() {
+  let bench = new Three.Mesh();
+  // axis
+  let axis1 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
+  axis1.position.set(0, 0, 0);
+  bench.add(axis1);
+
+  let axi2 = new Three.Mesh(new Three.BoxGeometry(10, 0.5, 0.5), grey);
+  axi2.position.set(0, 0, 3);
+  bench.add(axi2);
+
+  //beams
+  for (let lx = -5; lx <= 5; lx += 5) {
+    let beam = new Three.Mesh(new Three.BoxGeometry(0.5, 0.5, 3.5), grey);
+    beam.position.set(lx, 0, 1.5);
+    bench.add(beam);
+  }
+
+  //legs
+  for (let gx = -5; gx <= 5; gx += 5) {
+    for (let gz = 0; gz <= 3; gz += 3) {
+      let leg = new Three.Mesh(new Three.BoxGeometry(3, 0.5, 0.5), grey);
+      leg.rotation.z = 0.5 * Math.PI;
+      leg.position.set(gx, -1.5, gz);
+      bench.add(leg);
+    }
+  }
+
+  // wood axis
+  for (let z = 0; z <= 3; z += 0.75) {
+    let woodAxis = new Three.Mesh(
+      new Three.BoxGeometry(12, 0.25, 0.5),
+      new Three.MeshPhongMaterial({ map: woodTexture })
+    );
+    woodAxis.position.set(0, 0.5, z);
+    bench.add(woodAxis);
+  }
+
+  return bench;
+};
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -181,7 +181,7 @@ export default {
 
     /************ lod max *****************/
     let benchMaxLOD = new Three.Object3D();
-    benchMaxLOD.add(objectMaxLOD.clone());
+    benchMaxLOD.add(objectMaxLOD().clone());
 
     let value = new Three.Box3().setFromObject(benchMaxLOD);
 
@@ -195,7 +195,7 @@ export default {
     /************ lod min *****************/
 
     let benchMinLOD = new Three.Object3D();
-    benchMinLOD.add(objectMinLOD.clone());
+    benchMinLOD.add(objectMinLOD().clone());
     benchMinLOD.position.y += HEIGHT + newAltitude;
     benchMinLOD.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
 
