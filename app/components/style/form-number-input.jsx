@@ -14,7 +14,7 @@ export default function FormNumberInput({
   placeholder,
   className = "",
 }) {
-  const [inputValue, setInputValue] = useState(value.toString());
+  const [inputValue, setInputValue] = useState(value?.toString());
   const [isValid, setIsValid] = useState(true);
 
   const regexp = useMemo(
@@ -23,7 +23,7 @@ export default function FormNumberInput({
   );
 
   useEffect(() => {
-    let newValue = value.toString();
+    let newValue = value?.toString();
     if (!isNaN(min) && isFinite(min) && parseFloat(newValue) < min) {
       newValue = min.toString();
     }
