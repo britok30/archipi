@@ -1,6 +1,7 @@
 import React from "react";
 import Providers from "./components/Providers";
 import GoogleAdsense from "./components/adsense/GoogleAdsense";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 import localFont from "next/font/local";
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
         <Providers>{children}</Providers>
       </body>
       <GoogleAdsense pId="6672834098859869" />
+      <Analytics />
     </html>
   );
 }

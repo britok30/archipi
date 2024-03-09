@@ -16,6 +16,7 @@
     "@types/redux": "^3.6.0",
     "@types/three": "^0.161.2",
     "@uidotdev/usehooks": "^2.4.1",
+    "@vercel/analytics": "^1.2.2",
     "area-polygon": "^1.0.1",
     "classnames": "^2.5.1",
     "convert-units": "^2.3.4",
