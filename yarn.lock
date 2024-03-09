@@ -58,14 +58,6 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.57.0.tgz"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
-"@headlessui/react@^1.7.18":
-  version "1.7.18"
-  resolved "https://registry.npmjs.org/@headlessui/react/-/react-1.7.18.tgz"
-  integrity sha512-4i5DOrzwN4qSgNsL4Si61VMkUcWbcSKueUV7sFhpHzQcSShdlHENE5+QBntMSRvHt8NyoFO2AGG8si9lq+w4zQ==
-  dependencies:
-    "@tanstack/react-virtual" "^3.0.0-beta.60"
-    client-only "^0.0.1"
-
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
   resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.14.tgz"
@@ -363,18 +355,6 @@
   dependencies:
     tslib "^2.4.0"
 
-"@tanstack/react-virtual@^3.0.0-beta.60":
-  version "3.1.3"
-  resolved "https://registry.npmjs.org/@tanstack/react-virtual/-/react-virtual-3.1.3.tgz"
-  integrity sha512-YCzcbF/Ws/uZ0q3Z6fagH+JVhx4JLvbSflgldMgLsuvB8aXjZLLb3HvrEVxY480F9wFlBiXlvQxOyXb5ENPrNA==
-  dependencies:
-    "@tanstack/virtual-core" "3.1.3"
-
-"@tanstack/virtual-core@3.1.3":
-  version "3.1.3"
-  resolved "https://registry.npmjs.org/@tanstack/virtual-core/-/virtual-core-3.1.3.tgz"
-  integrity sha512-Y5B4EYyv1j9V8LzeAoOVeTg0LI7Fo5InYKgAjkY1Pu9GjtUwX/EKxNcU7ng3sKr99WEf+bPTcktAeybyMOYo+g==
-
 "@tippyjs/react@^4.2.6":
   version "4.2.6"
   resolved "https://registry.npmjs.org/@tippyjs/react/-/react-4.2.6.tgz"
@@ -412,9 +392,9 @@
   resolved "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.11.tgz"
   integrity sha512-ga8y9v9uyeiLdpKddhxYQkxNDrfvuPrlFb0N1qnZZByvcElJaXthF1UhvCh9TLWJBEHeNtdnbysW7Y6Uq8CVng==
 
-"@types/react-redux@^7.1.20":
+"@types/react-redux@^7.1.20", "@types/react-redux@^7.1.33":
   version "7.1.33"
-  resolved "https://registry.npmjs.org/@types/react-redux/-/react-redux-7.1.33.tgz"
+  resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.1.33.tgz#53c5564f03f1ded90904e3c90f77e4bd4dc20b15"
   integrity sha512-NF8m5AjWCkert+fosDsN3hAlHzpjSiXlVy9EgQEmLoBhaNXbmyeGs/aj5dQzKuF+/q+S7JQagorGDW8pJ28Hmg==
   dependencies:
     "@types/hoist-non-react-statics" "^3.3.0"
@@ -437,6 +417,13 @@
     "@types/prop-types" "*"
     "@types/scheduler" "*"
     csstype "^3.0.2"
+
+"@types/redux@^3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@types/redux/-/redux-3.6.0.tgz#f1ebe1e5411518072e4fdfca5c76e16e74c1399a"
+  integrity sha512-ic+60DXHW5seNyqFvfr7Sk5cnXs+HsF9tIeIaxjOuSP5kzgDXC+AzKTYmjAfuLx4Sccm/0vjwBQj3OOkUkwOqg==
+  dependencies:
+    redux "*"
 
 "@types/scheduler@*":
   version "0.16.8"
@@ -843,7 +830,7 @@ classnames@2.x, classnames@^2.2.1, classnames@^2.2.6, classnames@^2.3.2, classna
   resolved "https://registry.npmjs.org/classnames/-/classnames-2.5.1.tgz"
   integrity sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==
 
-client-only@0.0.1, client-only@^0.0.1:
+client-only@0.0.1:
   version "0.0.1"
   resolved "https://registry.npmjs.org/client-only/-/client-only-0.0.1.tgz"
   integrity sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==
@@ -2708,6 +2695,11 @@ readdirp@~3.6.0:
   dependencies:
     picomatch "^2.2.1"
 
+redux@*:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/redux/-/redux-5.0.1.tgz#97fa26881ce5746500125585d5642c77b6e9447b"
+  integrity sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==
+
 redux@4.0.1, redux@^4.0.0:
   version "4.0.1"
   resolved "https://registry.npmjs.org/redux/-/redux-4.0.1.tgz"
@@ -2951,6 +2943,7 @@ streamsearch@^1.1.0:
   integrity sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
+  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -3122,11 +3115,6 @@ thenify-all@^1.0.0:
   integrity sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==
   dependencies:
     any-promise "^1.0.0"
-
-three-bvh-csg@^0.0.16:
-  version "0.0.16"
-  resolved "https://registry.npmjs.org/three-bvh-csg/-/three-bvh-csg-0.0.16.tgz"
-  integrity sha512-RgC5dY0hAKdfd1bmD3o2CDfmK9GTkvsA1ECzoqTMhSkjSc2zp1z4Wpa5+emLi/EosF5P6+aK2veTxTLZA9+Mhw==
 
 three-csg-ts@^3.1.13:
   version "3.1.14"

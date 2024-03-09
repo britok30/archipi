@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -20,7 +20,7 @@ import * as SharedStyle from "../../styles/shared-style";
 import { RulerX } from "./rulerX";
 import { RulerY } from "./rulerY";
 
-function mode2Tool(mode) {
+const mode2Tool = (mode) => {
   switch (mode) {
     case constants.MODE_2D_PAN:
       return TOOL_PAN;
@@ -33,9 +33,9 @@ function mode2Tool(mode) {
     default:
       return TOOL_NONE;
   }
-}
+};
 
-function mode2PointerEvents(mode) {
+const mode2PointerEvents = (mode) => {
   switch (mode) {
     case constants.MODE_DRAWING_LINE:
     case constants.MODE_DRAWING_HOLE:
@@ -49,9 +49,9 @@ function mode2PointerEvents(mode) {
     default:
       return {};
   }
-}
+};
 
-function mode2Cursor(mode) {
+const mode2Cursor = (mode) => {
   switch (mode) {
     case constants.MODE_DRAGGING_HOLE:
     case constants.MODE_DRAGGING_LINE:
@@ -68,9 +68,9 @@ function mode2Cursor(mode) {
     default:
       return { cursor: "default" };
   }
-}
+};
 
-function mode2DetectAutopan(mode) {
+const mode2DetectAutopan = (mode) => {
   switch (mode) {
     case constants.MODE_DRAWING_LINE:
     case constants.MODE_DRAGGING_LINE:
@@ -84,9 +84,9 @@ function mode2DetectAutopan(mode) {
     default:
       return false;
   }
-}
+};
 
-function extractElementData(node) {
+const extractElementData = (node) => {
   while (
     !node.attributes.getNamedItem("data-element-root") &&
     node.tagName !== "svg"
@@ -104,7 +104,7 @@ function extractElementData(node) {
     selected: node.attributes.getNamedItem("data-selected").value === "true",
     id: node.attributes.getNamedItem("data-id").value,
   };
-}
+};
 
 export const Viewer2D = ({ state, width, height }) => {
   let {

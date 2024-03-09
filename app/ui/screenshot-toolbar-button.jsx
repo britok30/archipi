@@ -4,9 +4,9 @@ import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../context/ReactPlannerContext";
 import { ReactPlannerConstants } from "../utils";
-import { ReactPlannerComponents } from "../components";
 import { ReactPlannerUtils } from "../utils";
 import { IoCamera } from "react-icons/io5";
+import ToolbarButton from "../components/toolbar/toolbar-button";
 
 const { imageBrowserDownload } = ReactPlannerUtils.BrowserUtils;
 const { saveSVGtoPngFile } = ReactPlannerUtils.ImageUtils;
@@ -28,8 +28,6 @@ const {
   MODE_3D_FIRST_PERSON,
   MODE_3D_VIEW,
 } = ReactPlannerConstants;
-
-const { ToolbarButton } = ReactPlannerComponents.ToolbarComponents;
 
 export default function ScreenshotToolbarButton({ mode }) {
   let { translator } = useContext(ReactPlannerContext);

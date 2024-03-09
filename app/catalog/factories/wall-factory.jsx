@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { buildWall, updatedWall } from "./wall-factory-3d";
 import * as SharedStyle from "../../styles/shared-style";

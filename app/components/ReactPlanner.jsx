@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
@@ -24,7 +24,7 @@ const { FooterBar } = FooterBarComponents;
 
 const footerBarH = 20;
 
-function ReactPlannerContent(props) {
+const ReactPlannerContent = (props) => {
   const { width, height, state, stateExtractor, ...otherProps } = props;
 
   const contentH = height - footerBarH;
@@ -72,7 +72,7 @@ function ReactPlannerContent(props) {
       />
     </div>
   );
-}
+};
 
 ReactPlannerContent.propTypes = {
   translator: PropTypes.instanceOf(Translator),

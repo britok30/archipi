@@ -1,10 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { FormLabel, FormNumberInput } from '../../components/style/export';
-import PropertyStyle from './shared-property-style';
+"use client";
 
-export default function PropertyNumber({value, onUpdate, onValid, configs, sourceElement, internalState, state}) {
+import React from "react";
+import PropTypes from "prop-types";
+import { FormLabel, FormNumberInput } from "../../components/style/export";
+import PropertyStyle from "./shared-property-style";
 
+export default function PropertyNumber({
+  value,
+  onUpdate,
+  onValid,
+  configs,
+  sourceElement,
+  internalState,
+  state,
+}) {
   let update = (val) => {
     let number = parseFloat(val);
 
@@ -13,9 +22,11 @@ export default function PropertyNumber({value, onUpdate, onValid, configs, sourc
     }
 
     if (configs.hook) {
-      return configs.hook(number, sourceElement, internalState, state).then(_val => {
-        return onUpdate(_val);
-      });
+      return configs
+        .hook(number, sourceElement, internalState, state)
+        .then((_val) => {
+          return onUpdate(_val);
+        });
     }
 
     return onUpdate(number);
@@ -24,21 +35,23 @@ export default function PropertyNumber({value, onUpdate, onValid, configs, sourc
   return (
     <table className="PropertyNumber" style={PropertyStyle.tableStyle}>
       <tbody>
-      <tr>
-        <td style={PropertyStyle.firstTdStyle}><FormLabel>{configs.label}</FormLabel></td>
-        <td>
-          <FormNumberInput
-            value={value}
-            onChange={event => update(event.target.value)}
-            onValid={onValid}
-            min={configs.min}
-            max={configs.max}/>
-        </td>
-      </tr>
+        <tr>
+          <td style={PropertyStyle.firstTdStyle}>
+            <FormLabel>{configs.label}</FormLabel>
+          </td>
+          <td>
+            <FormNumberInput
+              value={value}
+              onChange={(event) => update(event.target.value)}
+              onValid={onValid}
+              min={configs.min}
+              max={configs.max}
+            />
+          </td>
+        </tr>
       </tbody>
     </table>
   );
-
 }
 
 PropertyNumber.propTypes = {
@@ -48,5 +61,5 @@ PropertyNumber.propTypes = {
   configs: PropTypes.object.isRequired,
   sourceElement: PropTypes.object,
   internalState: PropTypes.object,
-  state: PropTypes.object.isRequired
+  state: PropTypes.object.isRequired,
 };

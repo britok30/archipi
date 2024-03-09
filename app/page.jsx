@@ -2,19 +2,13 @@
 
 import React from "react";
 import MyCatalog from "./objCatalog/mycatalog";
-import ScreenshotToolbarButton from "./ui/screenshot-toolbar-button";
-
 import "./styles/react-planner.css";
 import ReactPlanner from "./components/ReactPlanner";
 import { Plugins as PlannerPlugins } from "./plugins";
 import useWindowDimensions from "./hooks/useWindowDimensions";
 import { store } from "./components/Providers";
 
-let plugins = [
-  PlannerPlugins.Keyboard(),
-  PlannerPlugins.Autosave("archipi"),
-  PlannerPlugins.ConsoleDebugger(),
-];
+let plugins = [PlannerPlugins.Keyboard(), PlannerPlugins.Autosave("archipi")];
 
 export default function Home() {
   const { height, width } = useWindowDimensions();

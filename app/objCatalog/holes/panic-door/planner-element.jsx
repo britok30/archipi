@@ -1,15 +1,20 @@
-import React from 'react';
-import * as Three from 'three';
+"use client";
+
+import React from "react";
+import * as Three from "three";
 
 const black = new Three.MeshLambertMaterial({ color: 0x000000 });
 const green = new Three.MeshLambertMaterial({ color: 0x348781 });
-const red = new Three.MeshLambertMaterial({ color: 0xFF0000 });
-const turquoise = new Three.MeshLambertMaterial({ color: 0x43C6DB, opacity: 0.7, transparent: true });
-const metalBlue = new Three.MeshLambertMaterial({ color: 0xB7CEEC });
-const metalBlueGrey = new Three.MeshLambertMaterial({ color: 0x566D7E });
+const red = new Three.MeshLambertMaterial({ color: 0xff0000 });
+const turquoise = new Three.MeshLambertMaterial({
+  color: 0x43c6db,
+  opacity: 0.7,
+  transparent: true,
+});
+const metalBlue = new Three.MeshLambertMaterial({ color: 0xb7ceec });
+const metalBlueGrey = new Three.MeshLambertMaterial({ color: 0x566d7e });
 
 function makePanicDoor(handleSide) {
-
   let panicDoor = new Three.Mesh();
   let leftDoor = makeDoorStructure();
   let handle = makeHandle(handleSide);
@@ -24,8 +29,7 @@ function makePanicDoor(handleSide) {
 
   if (handleSide) {
     leftDoorPivot.position.set(0.595 / 2, 0, -0.06 / 2);
-  }
-  else {
+  } else {
     leftDoorPivot.position.set(-0.595 / 2, 0, -0.06 / 2);
   }
   rightDoorPivot.position.set(0.6 / 2, 0, 0.077 / 2);
@@ -38,14 +42,23 @@ function makePanicDoor(handleSide) {
   panicDoor.add(leftDoor);
   leftDoor.add(doorLock);
 
-  return panicDoor
+  return panicDoor;
 }
 
 function makeDoorLock() {
-
   let DoorLock = new Three.Object3D();
-  let doorLockGeometry1 = new Three.CylinderGeometry(0.012, 0.012, 1.905, Math.round(32));
-  let doorLockGeometry2 = new Three.CylinderGeometry(0.007, 0.007, 1.907, Math.round(32));
+  let doorLockGeometry1 = new Three.CylinderGeometry(
+    0.012,
+    0.012,
+    1.905,
+    Math.round(32)
+  );
+  let doorLockGeometry2 = new Three.CylinderGeometry(
+    0.007,
+    0.007,
+    1.907,
+    Math.round(32)
+  );
   let doorLock1 = new Three.Mesh(doorLockGeometry1, metalBlue);
   let doorLock2 = new Three.Mesh(doorLockGeometry2, metalBlueGrey);
   DoorLock.position.set(-0.275, 0.7 / 2, 0);
@@ -56,7 +69,6 @@ function makeDoorLock() {
 }
 
 function makeLock() {
-
   let mechanism = new Three.Object3D();
   let BaseGeometry = new Three.BoxGeometry(0.01, 0.1, 0.02);
   let PieceGeometry1 = new Three.BoxGeometry(0.01, 0.02, 0.01);
@@ -74,11 +86,20 @@ function makeLock() {
 }
 
 function makeSafetyHandle() {
-
   let handle = new Three.Object3D();
   let HandleSupportGeometry = new Three.BoxGeometry(0.5, 0.1, 0.005);
-  let PushGeometry = new Three.CylinderGeometry(0.04, 0.04, 0.48, Math.round(32));
-  let CoverPushGeometry = new Three.CylinderGeometry(0.042, 0.042, 0.01, Math.round(32));
+  let PushGeometry = new Three.CylinderGeometry(
+    0.04,
+    0.04,
+    0.48,
+    Math.round(32)
+  );
+  let CoverPushGeometry = new Three.CylinderGeometry(
+    0.042,
+    0.042,
+    0.01,
+    Math.round(32)
+  );
   let handleSupport = new Three.Mesh(HandleSupportGeometry, black);
   let PushButton = new Three.Mesh(PushGeometry, red);
   let CoverPush1 = new Three.Mesh(CoverPushGeometry, black);
@@ -96,10 +117,19 @@ function makeSafetyHandle() {
 }
 
 function makePivot() {
-
   let DoorPivot = new Three.Object3D();
-  let DownPivotGeometry = new Three.CylinderGeometry(0.009, 0.009, 0.04, Math.round(32));
-  let UpPivotGeometry = new Three.CylinderGeometry(0.01, 0.01, 0.04, Math.round(32));
+  let DownPivotGeometry = new Three.CylinderGeometry(
+    0.009,
+    0.009,
+    0.04,
+    Math.round(32)
+  );
+  let UpPivotGeometry = new Three.CylinderGeometry(
+    0.01,
+    0.01,
+    0.04,
+    Math.round(32)
+  );
   let downPivot1 = new Three.Mesh(DownPivotGeometry, green);
   let upPivot1 = new Three.Mesh(UpPivotGeometry, green);
   let downPivot2 = new Three.Mesh(DownPivotGeometry, green);
@@ -117,7 +147,6 @@ function makePivot() {
 }
 
 function makeHandle(handleSide_value) {
-
   let handle = new Three.Object3D();
   let handleBase = makeHandleBase(handleSide_value);
   let hilt = makeHilt();
@@ -125,8 +154,7 @@ function makeHandle(handleSide_value) {
 
   if (handleSide_value) {
     hilt.position.set(0, 0.04, -0.03 / 2 - 0.01 / 2);
-  }
-  else {
+  } else {
     hilt.position.set(0.4, 0.04, -0.03 / 2 - 0.01 / 2);
     hilt.rotation.y = Math.PI;
   }
@@ -137,11 +165,24 @@ function makeHandle(handleSide_value) {
 }
 
 function makeHilt() {
-
   let hilt = new Three.Object3D();
-  let Geometry_p1 = new Three.CylinderGeometry(0.01, 0.01, 0.03, Math.round(32));
-  let Geometry_p2 = new Three.SphereGeometry(0.01, Math.round(32), Math.round(32));
-  let Geometry_p3 = new Three.CylinderGeometry(0.01, 0.01, 0.07, Math.round(32));
+  let Geometry_p1 = new Three.CylinderGeometry(
+    0.01,
+    0.01,
+    0.03,
+    Math.round(32)
+  );
+  let Geometry_p2 = new Three.SphereGeometry(
+    0.01,
+    Math.round(32),
+    Math.round(32)
+  );
+  let Geometry_p3 = new Three.CylinderGeometry(
+    0.01,
+    0.01,
+    0.07,
+    Math.round(32)
+  );
   let piece1 = new Three.Mesh(Geometry_p1, black);
   let piece2 = new Three.Mesh(Geometry_p2, black);
   let piece3 = new Three.Mesh(Geometry_p3, black);
@@ -161,7 +202,12 @@ function makeHilt() {
 function makeHandleBase(handleSide_value) {
   let base = new Three.Object3D();
   let BaseGeometry1 = new Three.BoxGeometry(0.038, 0.14, 0.01);
-  let BaseGeometry2 = new Three.CylinderGeometry(0.023, 0.023, 0.01, Math.round(32));
+  let BaseGeometry2 = new Three.CylinderGeometry(
+    0.023,
+    0.023,
+    0.01,
+    Math.round(32)
+  );
   let lock = makeLockKey();
   let base1 = new Three.Mesh(BaseGeometry1, black);
   let base2 = new Three.Mesh(BaseGeometry2, black);
@@ -169,8 +215,7 @@ function makeHandleBase(handleSide_value) {
   base2.rotation.x = Math.PI / 2;
   lock.position.y = -0.03;
   base2.position.y = -0.033;
-  if (!handleSide_value)
-    base1.position.x = 0.4;
+  if (!handleSide_value) base1.position.x = 0.4;
   base2.scale.z = 1.5;
   base1.add(lock);
   base1.add(base2);
@@ -179,9 +224,13 @@ function makeHandleBase(handleSide_value) {
 }
 
 function makeLockKey() {
-
   let Lock = new Three.Object3D();
-  let geometry1 = new Three.CylinderGeometry(0.005, 0.005, 0.02, Math.round(32));
+  let geometry1 = new Three.CylinderGeometry(
+    0.005,
+    0.005,
+    0.02,
+    Math.round(32)
+  );
   let geometry2 = new Three.BoxGeometry(0.008, 0.02, 0.02);
   let geometry3 = new Three.BoxGeometry(0.007, 0.0203, 0.0018);
   let LockPiece1 = new Three.Mesh(geometry1, metalBlue);
@@ -196,12 +245,16 @@ function makeLockKey() {
 }
 
 function makeDoorStructure() {
-
   let door = new Three.Object3D();
   let lowBaseDoorGeometry = new Three.BoxGeometry(0.6, 1.2, 0.01);
   let middleBaseDoorGeometry = new Three.BoxGeometry(0.2, 0.7, 0.01);
   let highBaseDoorGeometry = new Three.BoxGeometry(0.2, 0.2, 0.01);
-  let BorderCoverDoorGeometry1 = new Three.CylinderGeometry(0.005, 0.005, 1.9, Math.round(32));
+  let BorderCoverDoorGeometry1 = new Three.CylinderGeometry(
+    0.005,
+    0.005,
+    1.9,
+    Math.round(32)
+  );
   let BorderCoverDoorGeometry2 = new Three.BoxGeometry(0.03, 1.9, 0.01);
   let MiddleDoorGeometry2 = new Three.BoxGeometry(0.2, 0.7, 0.06);
   let MiddleDoorGeometry1 = new Three.BoxGeometry(0.19, 0.7, 0.06);
@@ -259,78 +312,97 @@ function makeDoorStructure() {
   return door;
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  name: 'panic door',
-  prototype: 'holes',
+  name: "panic door",
+  prototype: "holes",
 
   info: {
-    tag: ['door'],
-    title: 'panic door',
-    description: 'Panic Door',
-    image: require('./panicDoor.png')
+    tag: ["door"],
+    title: "panic door",
+    description: "Panic Door",
+    image: "/images/panicDoor.png",
   },
 
   properties: {
     width: {
-      label: 'Width',
-      type: 'length-measure',
+      label: "Width",
+      type: "length-measure",
       defaultValue: {
-        length: 100
-      }
+        length: 100,
+      },
     },
     height: {
-      label: 'Height',
-      type: 'length-measure',
+      label: "Height",
+      type: "length-measure",
       defaultValue: {
-        length: 215
-      }
+        length: 215,
+      },
     },
     altitude: {
-      label: 'Altitude',
-      type: 'length-measure',
+      label: "Altitude",
+      type: "length-measure",
       defaultValue: {
-        length: 0
-      }
+        length: 0,
+      },
     },
     thickness: {
-      label: 'Thickness',
-      type: 'length-measure',
+      label: "Thickness",
+      type: "length-measure",
       defaultValue: {
-        length: 30
-      }
+        length: 30,
+      },
     },
     flip_horizontal: {
-      label: 'Horizontal Flip',
-      type: 'checkbox',
+      label: "Horizontal Flip",
+      type: "checkbox",
       defaultValue: false,
       values: {
-        'none': false,
-        'yes': true
-      }
+        none: false,
+        yes: true,
+      },
     },
     flip_vertical: {
-      label: 'Vertical Flip',
-      type: 'checkbox',
+      label: "Vertical Flip",
+      type: "checkbox",
       defaultValue: false,
       values: {
-        'none': false,
-        'yes': true
-      }
+        none: false,
+        yes: true,
+      },
     },
   },
 
-
   render2D: function (element, layer, scene) {
-
-    const STYLE_HOLE_BASE = { stroke: '#ff0000', strokeWidth: '3px', fill: '#ff0000' };
-    const STYLE_HOLE_SELECTED = { stroke: '#0096fd', strokeWidth: '4px', fill: '#0096fd', cursor: 'move' };
-    const STYLE_ARC_BASE = { stroke: '#ff0000', strokeWidth: '3px', strokeDasharray: '5,5', fill: 'none' };
-    const STYLE_ARC_SELECTED = { stroke: '#0096fd', strokeWidth: '4px', strokeDasharray: '5,5', fill: 'none', cursor: 'move' };
+    const STYLE_HOLE_BASE = {
+      stroke: "#ff0000",
+      strokeWidth: "3px",
+      fill: "#ff0000",
+    };
+    const STYLE_HOLE_SELECTED = {
+      stroke: "#0096fd",
+      strokeWidth: "4px",
+      fill: "#0096fd",
+      cursor: "move",
+    };
+    const STYLE_ARC_BASE = {
+      stroke: "#ff0000",
+      strokeWidth: "3px",
+      strokeDasharray: "5,5",
+      fill: "none",
+    };
+    const STYLE_ARC_SELECTED = {
+      stroke: "#0096fd",
+      strokeWidth: "4px",
+      strokeDasharray: "5,5",
+      fill: "none",
+      cursor: "move",
+    };
     const EPSILON = 3;
 
-    let hFlip = element.properties.get('flip_horizontal');
-    let vFlip = element.properties.get('flip_vertical');
-    let length = element.properties.get('width').get('length');
+    let hFlip = element.properties.get("flip_horizontal");
+    let vFlip = element.properties.get("flip_vertical");
+    let length = element.properties.get("width").get("length");
     let holePath = `M${0} ${-EPSILON}  L${length} ${-EPSILON}  L${length} ${EPSILON}  L${0} ${EPSILON}  z`;
     let holeStyle = element.selected ? STYLE_HOLE_SELECTED : STYLE_HOLE_BASE;
     let arcPath = `M${0},${0}  A${length},${length} 0 0,1 ${length},${length}`;
@@ -352,8 +424,7 @@ export default {
         pY2 = length;
         rotateAngle = 180;
         scaleY = -1;
-      }
-      else {
+      } else {
         tX = 0;
         tY = -length;
         pX1 = 0;
@@ -363,8 +434,7 @@ export default {
         scaleY = 1;
         rotateAngle = 0;
       }
-    }
-    else {
+    } else {
       scaleX = -1;
       if (vFlip) {
         tX = 0;
@@ -375,8 +445,7 @@ export default {
         pY2 = length;
         rotateAngle = 90;
         scaleY = 1;
-      }
-      else {
+      } else {
         tX = length;
         tY = 0;
         pX1 = 0;
@@ -390,23 +459,31 @@ export default {
 
     return (
       <g transform={`translate(${-length / 2}, 0)`}>
-        <path d={arcPath} style={arcStyle}
-          transform={`translate(${tX},${tY}) scale(${scaleX},${scaleY}) rotate(${rotateAngle})`} />
-        <line x1={pX1} y1={pY1 - EPSILON} x2={pX2} y2={pY2 - EPSILON} style={holeStyle}
-          transform={`scale(${-scaleX},${scaleY})`} />
+        <path
+          d={arcPath}
+          style={arcStyle}
+          transform={`translate(${tX},${tY}) scale(${scaleX},${scaleY}) rotate(${rotateAngle})`}
+        />
+        <line
+          x1={pX1}
+          y1={pY1 - EPSILON}
+          x2={pX2}
+          y2={pY2 - EPSILON}
+          style={holeStyle}
+          transform={`scale(${-scaleX},${scaleY})`}
+        />
         <path d={holePath} style={holeStyle} />
       </g>
     );
   },
 
   render3D: function (element, layer, scene) {
-
-    let flip = element.properties.get('flip_horizontal');
-    let handleSide = element.properties.get('flip_vertical');
-    let width = element.properties.get('width').get('length');
-    let height = element.properties.get('height').get('length');
-    let thickness = element.properties.get('thickness').get('length');
-    let newAltitude = element.properties.get('altitude').get('length');
+    let flip = element.properties.get("flip_horizontal");
+    let handleSide = element.properties.get("flip_vertical");
+    let width = element.properties.get("width").get("length");
+    let height = element.properties.get("height").get("length");
+    let thickness = element.properties.get("thickness").get("length");
+    let newAltitude = element.properties.get("altitude").get("length");
 
     let panicDoor = new Three.Object3D();
     panicDoor.add(makePanicDoor(handleSide).clone());
@@ -425,12 +502,11 @@ export default {
     let deltaY = Math.abs(valuePosition.max.y - valuePosition.min.y);
     let deltaZ = Math.abs(valuePosition.max.z - valuePosition.min.z);
 
-    if (flip)
-      panicDoor.rotation.y += Math.PI;
+    if (flip) panicDoor.rotation.y += Math.PI;
 
     panicDoor.position.y += newAltitude;
     panicDoor.scale.set(width / deltaX, height / deltaY, thickness / deltaZ);
 
     return Promise.resolve(panicDoor);
-  }
+  },
 };

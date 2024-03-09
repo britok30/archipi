@@ -1,3 +1,5 @@
+"use client";
+
 import { ElementsFactories } from "../../catalog";
 
 let info = {

@@ -22,7 +22,7 @@ let reducer = (state, action) => {
 };
 
 // Init store
-export let store = createStore(reducer, null, (f) => f);
+export let store = createStore(reducer, undefined, (f) => f);
 
 function Providers({ children }) {
   return <Provider store={store}>{children}</Provider>;

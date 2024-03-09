@@ -9,9 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.18",
     "@tippyjs/react": "^4.2.6",
+    "@types/react-redux": "^7.1.33",
     "@types/react-svg-pan-zoom": "^3.3.9",
+    "@types/redux": "^3.6.0",
     "@types/three": "^0.161.2",
     "@uidotdev/usehooks": "^2.4.1",
     "area-polygon": "^1.0.1",
@@ -36,7 +37,6 @@
     "sharp": "^0.33.2",
     "shortid": "^2.2.16",
     "three": "^0.162.0",
-    "three-bvh-csg": "^0.0.16",
     "three-csg-ts": "^3.1.13"
   },
   "devDependencies": {

@@ -2,15 +2,6 @@
 
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
-import {
-  ContentTitle,
-  ContentContainer,
-  FormLabel,
-  FormBlock,
-  FormNumberInput,
-  FormSubmitButton,
-  CancelButton,
-} from "../style/export";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 
 const ProjectConfigurator = ({ state }) => {
