@@ -6,10 +6,13 @@ import React from "react";
 const WIDTH = 30;
 const DEPTH = 40;
 const HEIGHT = 70;
+let material;
 
-const textureLoader = new Three.TextureLoader();
-const Image = textureLoader.load("/images/textures/bronze-texture.jpg");
-const material = new Three.MeshLambertMaterial({ map: Image });
+if (typeof window !== "undefined") {
+  const textureLoader = new Three.TextureLoader();
+  const Image = textureLoader.load("/images/textures/bronze-texture.jpg");
+  material = new Three.MeshLambertMaterial({ map: Image });
+}
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();

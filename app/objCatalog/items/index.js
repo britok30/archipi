@@ -47,5 +47,5 @@ export { default as text3D } from "./text-3d/planner-element.jsx";
 // export { default as threePhasePanel } from "./three-phase-panel/planner-element.jsx";
 export { default as trash } from "./trash/planner-element.jsx";
 export { default as tv } from "./tv/planner-element.jsx";
-// export { default as umbrellaStand } from "./umbrella-stand/planner-element.jsx";
+export { default as umbrellaStand } from "./umbrella-stand/planner-element.jsx";
 export { default as wardRobe } from "./wardrobe/planner-element.jsx";
