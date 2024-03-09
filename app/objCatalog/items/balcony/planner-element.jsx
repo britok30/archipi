@@ -9,9 +9,10 @@ const brickTexture = "/images/textures/bricks.jpg";
 const scale = 100;
 let mat;
 let mat2;
+let textureLoader;
 
 if (typeof window !== "undefined") {
-  let textureLoader = new Three.TextureLoader();
+  textureLoader = new Three.TextureLoader();
   textureLoader.setPath("./");
   mat = textureLoader.load(paintedTexture);
   mat2 = textureLoader.load(brickTexture);
