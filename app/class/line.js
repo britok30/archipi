@@ -1,5 +1,5 @@
 import { Map, List, fromJS } from "immutable";
-import { Layer, Hole, Vertex, Group } from "./export";
+import { Layer, Hole, Vertex, Group } from "./index";
 
 import {
   IDBroker,
@@ -263,11 +263,11 @@ export class Line {
 
     state = Line.remove(state, layerID, lineID).updatedState;
 
-    return { updatedState: state, lines: new List([line0, line1]) };
+    return { updatedState: state, lines: List([line0, line1]) };
   }
 
   static addFromPoints(state, layerID, type, points, properties, holes) {
-    points = new List(points).sort(({ x: x1, y: y1 }, { x: x2, y: y2 }) =>
+    points = List(points).sort(({ x: x1, y: y1 }, { x: x2, y: y2 }) =>
       x1 === x2 ? y1 - y2 : x1 - x2
     );
 
@@ -434,10 +434,10 @@ export class Line {
             reducedState,
             layerID,
             line.id,
-            intersection.point.x,
-            intersection.point.y
+            intersection.point?.x,
+            intersection.point?.y
           ).updatedState;
-          points.push(intersection.point);
+          points.push(intersection?.point);
         }
 
         return reducedState;
