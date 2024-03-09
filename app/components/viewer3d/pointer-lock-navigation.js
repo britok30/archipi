@@ -17,9 +17,9 @@ export function initPointerLock(camera, rendererElement) {
   };
 
   if (havePointerLock) {
-    document.addEventListener("pointerlockchange", pointerlockchange, false);
-    document.addEventListener("mozpointerlockchange", pointerlockchange, false);
-    document.addEventListener(
+    window.addEventListener("pointerlockchange", pointerlockchange, false);
+    window.addEventListener("mozpointerlockchange", pointerlockchange, false);
+    window.addEventListener(
       "webkitpointerlockchange",
       pointerlockchange,
       false

@@ -117,7 +117,7 @@ const Scene3DViewer = (props) => {
     renderer.domElement.addEventListener("mouseup", mouseUpEvent);
     renderer.domElement.style.display = "block";
 
-    canvasWrapper.current.appendChild(renderer.domElement);
+    canvasWrapper.current?.appendChild(renderer.domElement);
 
     // create orbit controls
     const orbitController = new OrbitControls(camera, renderer.domElement);
