@@ -595,7 +595,7 @@ export default {
     tag: ["furnishings", "wood"],
     title: "chairdesk",
     description: "office chair",
-    image: "/images/chairdesk.png",
+    image: "/images/chairDesk.png",
   },
 
   properties: {

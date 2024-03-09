@@ -12,7 +12,7 @@ export { default as chairDesk } from "./chairdesk/planner-element.jsx";
 export { default as childChairDesk } from "./child-chair-desk/planner-element.jsx";
 export { default as cleaningCart } from "./cleaningcart/planner-element.jsx";
 export { default as coatHookPlanner } from "./coat-hook/planner-element.jsx";
-// export { default as column } from "./column/planner-element.jsx";
+export { default as column } from "./column/planner-element.jsx";
 export { default as columnSquare } from "./column-square/planner-element.jsx";
 export { default as cube } from "./cube/planner-element.jsx";
 export { default as desk } from "./desk/planner-element.jsx";
