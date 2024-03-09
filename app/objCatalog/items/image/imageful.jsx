@@ -124,8 +124,8 @@ const ImageFul = (props) => {
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown-planner-event", onMouseDown);
-    document.addEventListener("mousemove-planner-event", onMouseMove);
+    window.addEventListener("mousedown-planner-event", onMouseDown);
+    window.addEventListener("mousemove-planner-event", onMouseMove);
 
     if (imageUri) {
       let img = new Image();
@@ -142,8 +142,8 @@ const ImageFul = (props) => {
     }
 
     return () => {
-      document.removeEventListener("mousedown-planner-event", onMouseDown);
-      document.removeEventListener("mousemove-planner-event", onMouseMove);
+      window.removeEventListener("mousedown-planner-event", onMouseDown);
+      window.removeEventListener("mousemove-planner-event", onMouseMove);
     };
   }, [imageUri]);
 
