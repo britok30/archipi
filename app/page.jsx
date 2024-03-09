@@ -5,13 +5,18 @@ import MyCatalog from "./objCatalog/mycatalog";
 import "./styles/react-planner.css";
 import ReactPlanner from "./components/ReactPlanner";
 import { Plugins as PlannerPlugins } from "./plugins";
-import useWindowDimensions from "./hooks/useWindowDimensions";
+import { useWindowSize } from "./hooks/useWindowSize";
 import { store } from "./components/Providers";
 
 let plugins = [PlannerPlugins.Keyboard(), PlannerPlugins.Autosave("archipi")];
 
 export default function Home() {
-  const { height, width } = useWindowDimensions();
+  const size = useWindowSize();
+
+  const height = size.height;
+  const width = size.width;
+
+  if (!height || !width) return <></>;
 
   return (
     <div className="w-full min-h-screen">

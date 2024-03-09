@@ -362,6 +362,11 @@
   dependencies:
     tippy.js "^6.3.1"
 
+"@types/convert-units@^2.3.9":
+  version "2.3.9"
+  resolved "https://registry.yarnpkg.com/@types/convert-units/-/convert-units-2.3.9.tgz#e9802c55ee03aa5b59facbe9418d888719251834"
+  integrity sha512-W+R5Q76r6wo0yvitayxgZ1aFPKuSWAkVovNNa0f43vxnWHAhKXIY2IkHhd5PVJuc5g8tQpXeg+HVC0aGUVNG7g==
+
 "@types/hoist-non-react-statics@^3.3.0":
   version "3.3.5"
   resolved "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.5.tgz"

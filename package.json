@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tippyjs/react": "^4.2.6",
+    "@types/convert-units": "^2.3.9",
     "@types/react-redux": "^7.1.33",
     "@types/react-svg-pan-zoom": "^3.3.9",
     "@types/redux": "^3.6.0",
