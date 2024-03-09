@@ -53,14 +53,14 @@ function disposeMesh(mesh) {
 
 export function disposeScene(scene3D) {
   scene3D?.traverse((child) => {
-    disposeMesh(child);
+    // disposeMesh(child);
     child = null;
   });
 }
 
 export function disposeObject(object) {
   object.traverse((child) => {
-    disposeMesh(child);
+    // disposeMesh(child);
     child = null;
   });
 }
