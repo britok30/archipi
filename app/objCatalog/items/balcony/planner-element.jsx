@@ -7,11 +7,15 @@ const PI_2 = Math.PI / 2;
 const paintedTexture = "/images/textures/painted.jpg";
 const brickTexture = "/images/textures/bricks.jpg";
 const scale = 100;
+let mat;
+let mat2;
 
-let textureLoader = new Three.TextureLoader();
-textureLoader.setPath("./");
-let mat = textureLoader.load(paintedTexture);
-let mat2 = textureLoader.load(brickTexture);
+if (typeof window !== "undefined") {
+  let textureLoader = new Three.TextureLoader();
+  textureLoader.setPath("./");
+  mat = textureLoader.load(paintedTexture);
+  mat2 = textureLoader.load(brickTexture);
+}
 
 function makeObject(newWidth, newHeight, newDepth) {
   let mat3 = textureLoader.load(brickTexture, (texture) => {

@@ -1,6 +1,6 @@
 export { default as airConditioner } from "./air-conditioner/planner-element.jsx";
 export { default as armChairs } from "./armchairs/planner-element.jsx";
-// export { default as balcony } from "./balcony/planner-element.jsx";
+export { default as balcony } from "./balcony/planner-element.jsx";
 export { default as bench } from "./bench/planner-element.jsx";
 // export { default as blackboard } from "./blackboard/planner-element.jsx";
 // export { default as bookCase } from "./bookcase/planner-element.jsx";
