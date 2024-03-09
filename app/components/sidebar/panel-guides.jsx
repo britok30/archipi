@@ -4,27 +4,9 @@ import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import Panel from "./panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import * as SharedStyle from "../../styles/shared-style";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { FaPencil, FaTrash, FaTimes } from "react-icons/fa";
-import { Button, FormNumberInput } from "../../components/style/export";
+import { FaTrash, FaTimes } from "react-icons/fa";
+import { FormNumberInput } from "../../components/style/export";
 import classNames from "classnames";
-
-const iconStyle = {
-  fontSize: "14px",
-  margin: "2px",
-  cursor: "pointer",
-};
-
-const addGuideStyle = {
-  cursor: "pointer",
-  height: "2em",
-};
-
-const tableTabStyle = {
-  width: "100%",
-  textAlign: "center",
-};
 
 const PanelGuides = ({ state }) => {
   const { projectActions, translator } = useContext(ReactPlannerContext);
@@ -34,7 +16,7 @@ const PanelGuides = ({ state }) => {
 
   const [addHGVisible, setAddHGVisible] = useState(true);
   const [addVGVisible, setAddVGVisible] = useState(true);
-  const [addCGVisible, setAddCGVisible] = useState(true);
+  // const [addCGVisible, setAddCGVisible] = useState(true);
 
   return (
     <Panel name={translator.t("Guides")}>

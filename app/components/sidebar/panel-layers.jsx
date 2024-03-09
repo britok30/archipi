@@ -146,84 +146,77 @@ const PanelLayers = ({ state }) => {
 
   return (
     <Panel name={translator.t("Layers")}>
-      <table style={tableLayerStyle}>
-        <thead>
-          <tr>
-            <th colSpan="3"></th>
-            <th>{translator.t("Altitude")}</th>
-            <th>{translator.t("Name")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {scene.layers.entrySeq().map(([layerID, layer]) => {
-            let selectClick = (e) => sceneActions.selectLayer(layerID);
-            let configureClick = (e) => {
-              setEditingLayer(layer);
-              setLayerAddUIVisible(true);
-            };
+      <div className="grid grid-cols-4 gap-2 text-white mb-3">
+        <div className="text-sm">{translator.t("Altitude")}</div>
+        <div className="text-sm">{translator.t("Name")}</div>
+      </div>
 
-            let swapVisibility = (e) => {
-              e.stopPropagation();
-              sceneActions.setLayerProperties(layerID, {
-                visible: !layer.visible,
-              });
-            };
+      {scene.layers.entrySeq().map(([layerID, layer]) => {
+        let selectClick = (e) => sceneActions.selectLayer(layerID);
+        let configureClick = (e) => {
+          setEditingLayer(layer);
+          setLayerAddUIVisible(true);
+        };
 
-            let isCurrentLayer = layerID === scene.selectedLayer;
+        let swapVisibility = (e) => {
+          e.stopPropagation();
+          sceneActions.setLayerProperties(layerID, {
+            visible: !layer.visible,
+          });
+        };
 
-            return (
-              <tr
-                key={layerID}
-                onClick={selectClick}
-                onDoubleClick={configureClick}
-                style={!isCurrentLayer ? null : styleHoverColor}
-              >
-                <td style={iconColStyle}>
-                  {!isCurrentLayer ? (
-                    <FaEye
-                      onClick={swapVisibility}
-                      style={!layer.visible ? styleEyeHidden : styleEyeVisible}
-                    />
-                  ) : null}
-                </td>
-                <td style={iconColStyle}>
-                  <FaPencilAlt
-                    onClick={configureClick}
-                    style={
-                      !isCurrentLayer ? styleEditButton : styleEditButtonHover
-                    }
-                    title={translator.t("Configure layer")}
+        let isCurrentLayer = layerID === scene.selectedLayer;
+
+        return (
+          <div
+            key={layerID}
+            className="grid grid-cols-4 gap-3 text-white cursor-pointer hover:bg-[#292929] transition duration-200 ease-in-out py-3 px-3"
+            onClick={selectClick}
+          >
+            <div className="text-sm">[ h : {layer.altitude} ]</div>
+            <div className="text-sm col-span-2">{layer.name}</div>
+
+            <div className="flex items-center space-x-3">
+              {!isCurrentLayer && (
+                <button onClick={swapVisibility}>
+                  <FaEye
+                    className={`${
+                      !layer.visible ? "opacity-50" : "opacity-100"
+                    }`}
                   />
-                </td>
-                <td style={iconColStyle}>
-                  {!isLastLayer ? (
-                    <FaTrash
-                      onClick={(e) => delLayer(e, layerID)}
-                      style={
-                        !isCurrentLayer ? styleEditButton : styleEditButtonHover
-                      }
-                      title={translator.t("Delete layer")}
-                    />
-                  ) : null}
-                </td>
-                <td style={{ width: "6em", textAlign: "center" }}>
-                  [ h : {layer.altitude} ]
-                </td>
-                <td>{layer.name}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p
-        style={!headHovered ? newLayerLableStyle : newLayerLableHoverStyle}
-        onMouseOver={() => setHeadHovered(true)}
-        onMouseOut={() => setHeadHovered(false)}
+                </button>
+              )}
+
+              <button onClick={configureClick}>
+                <FaPencilAlt
+                  className={`${
+                    !isCurrentLayer ? "text-white" : "text-blue-500"
+                  }`}
+                  title={translator.t("Configure layer")}
+                />
+              </button>
+
+              {!isLastLayer && (
+                <button onClick={(e) => delLayer(e, layerID)}>
+                  <FaTrash
+                    className={`${
+                      !isCurrentLayer ? "text-white" : "text-blue-500"
+                    }`}
+                    title={translator.t("Delete layer")}
+                  />
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+
+      <button
         onClick={(e) => addLayer(e)}
+        className="bg-white text-black px-3 py-2 rounded-md my-3"
       >
-        {!layerAddUIVisible ? <TiPlus /> : <TiDelete />}
-        <b style={styleAddLabel}>{translator.t("New layer")}</b>
-      </p>
+        New layer
+      </button>
 
       {layerAddUIVisible && editingLayer ? (
         <table style={layerInputTableStyle}>
