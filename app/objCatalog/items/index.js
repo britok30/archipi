@@ -17,7 +17,7 @@ export { default as columnSquare } from "./column-square/planner-element.jsx";
 export { default as cube } from "./cube/planner-element.jsx";
 export { default as desk } from "./desk/planner-element.jsx";
 export { default as deskDouble } from "./deskdouble/planner-element.jsx";
-// export { default as deskOffice } from "./deskoffice/planner-element.jsx";
+export { default as deskOffice } from "./deskoffice/planner-element.jsx";
 export { default as electricalPanel } from "./electrical-panel/planner-element.jsx";
 // export { default as fireExtinguisher } from "./fire-extinguisher/planner-element.jsx";
 export { default as fridge } from "./fridge/planner-element.jsx";

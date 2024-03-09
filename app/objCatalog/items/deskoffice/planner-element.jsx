@@ -3,15 +3,22 @@
 import * as Three from "three";
 import React from "react";
 
-const textureLoader = new Three.TextureLoader();
-const white = textureLoader.load("/images/textures/white.jpg");
-const whiteMaterial = new Three.MeshLambertMaterial({ color: 0x000000 });
-const wood = textureLoader.load("/images/textures/wood.jpg");
-const glassMaterial = new Three.MeshLambertMaterial({
-  color: 0xc6c6c6,
-  transparent: true,
-  opacity: 0.5,
-});
+let white;
+let whiteMaterial;
+let wood;
+let glassMaterial;
+
+if (typeof window !== "undefined") {
+  const textureLoader = new Three.TextureLoader();
+  white = textureLoader.load("/images/textures/white.jpg");
+  whiteMaterial = new Three.MeshLambertMaterial({ color: 0x000000 });
+  wood = textureLoader.load("/images/textures/wood.jpg");
+  glassMaterial = new Three.MeshLambertMaterial({
+    color: 0xc6c6c6,
+    transparent: true,
+    opacity: 0.5,
+  });
+}
 
 function makeMonitor(newDepth) {
   let monitor = new Three.Object3D();
