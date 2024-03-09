@@ -20,7 +20,7 @@ export { default as deskDouble } from "./deskdouble/planner-element.jsx";
 // export { default as deskOffice } from "./deskoffice/planner-element.jsx";
 export { default as electricalPanel } from "./electrical-panel/planner-element.jsx";
 // export { default as fireExtinguisher } from "./fire-extinguisher/planner-element.jsx";
-// export { default as fridge } from "./fridge/planner-element.jsx";
+export { default as fridge } from "./fridge/planner-element.jsx";
 export { default as hanger } from "./hanger/planner-element.jsx";
 // export { default as hiroos } from "./hiroos/planner-element.jsx";
 // export { default as hub } from "./hub/planner-element.jsx";
