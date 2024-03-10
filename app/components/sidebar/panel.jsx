@@ -16,7 +16,7 @@ const Panel = ({
   const toggleOpen = () => setOpened(!opened);
 
   return (
-    <div className=" border-white border-b select-none bg-black">
+    <div className=" border-white borxder-b select-none bg-black">
       <h3
         className={classNames(
           "text-sm text-white p-3 appearance-none hover:text-gray-500 transition duration-200 ease-in-out",

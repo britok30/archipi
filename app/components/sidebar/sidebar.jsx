@@ -2,12 +2,12 @@
 
 import React from "react";
 import PropTypes from "prop-types";
-import PanelElementEditor from "./panel-element-editor/panel-element-editor";
-import PanelGroupEditor from "./panel-group-editor";
-import PanelLayers from "./panel-layers";
-import PanelGuides from "./panel-guides";
-import PanelGroups from "./panel-groups";
-import PanelLayerElements from "./panel-layer-elements";
+import PanelElementEditor from "./PanelElementEditor";
+import PanelGroupEditor from "./PanelGroupEditor";
+import PanelLayers from "./PanelLayers";
+import PanelGuides from "./PanelGuides";
+import PanelGroups from "./PanelGroups";
+import PanelLayerElements from "./PanelLayerElements";
 import If from "../../utils/react-if";
 
 import * as constants from "../../utils/constants";

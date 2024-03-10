@@ -2,8 +2,8 @@
 
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import Panel from "../panel";
-import ReactPlannerContext from "../../../context/ReactPlannerContext";
+import Panel from "./Panel";
+import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { Seq } from "immutable";
 import {
   MODE_IDLE,
@@ -23,8 +23,8 @@ import {
   MODE_FITTING_IMAGE,
   MODE_UPLOADING_IMAGE,
   MODE_ROTATING_ITEM,
-} from "../../../utils/constants";
-import ElementEditor from "./element-editor";
+} from "../../utils/constants";
+import ElementEditor from "./ElementEditor";
 
 const PanelElementEditor = ({ state }) => {
   let { translator } = useContext(ReactPlannerContext);

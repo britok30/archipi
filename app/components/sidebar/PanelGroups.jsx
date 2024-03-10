@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import Panel from "./panel";
+import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import * as SharedStyle from "../../styles/shared-style";
 import { TiPlus } from "react-icons/ti";
@@ -83,7 +83,7 @@ const PanelGroups = ({ mode, groups, layers }) => {
     e.stopPropagation();
     groupsActions.setGroupProperties(
       groupID,
-      new Map({ visible: !group.get("visible") })
+      Map({ visible: !group.get("visible") })
     );
   };
 
@@ -114,7 +114,7 @@ const PanelGroups = ({ mode, groups, layers }) => {
   };
 
   return (
-    <Panel name={translator.t("Groups")} opened={groups.size > 0}>
+    <Panel name={translator?.t("Groups")} opened={groups.size > 0}>
       <div className="grid grid-cols-2 gap-2 mb-2">
         <h3>Elements</h3>
         <h3>Names</h3>

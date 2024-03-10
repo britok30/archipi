@@ -2,7 +2,6 @@
 
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
-import Panel from "../panel";
 import {
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
@@ -21,9 +20,10 @@ import {
   MODE_FITTING_IMAGE,
   MODE_UPLOADING_IMAGE,
   MODE_ROTATING_ITEM,
-} from "../../../utils/constants";
-import { FormSelect } from "../../../components/style/export";
-import ReactPlannerContext from "../../../context/ReactPlannerContext";
+} from "../../utils/constants";
+import { FormSelect } from "../../components/style/export";
+import ReactPlannerContext from "../../context/ReactPlannerContext";
+import Panel from "./Panel";
 
 const tableStyle = { width: "100%" };
 const firstTdStyle = { width: "6em" };

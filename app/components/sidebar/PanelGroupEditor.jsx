@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import PropTypes from "prop-types";
-import Panel from "./panel";
+import Panel from "./Panel";
 import * as SharedStyle from "../../styles/shared-style";
 import { FormNumberInput, FormTextInput } from "../style/export";
 import { Map } from "immutable";
@@ -113,7 +113,7 @@ const PanelGroupEditor = (props) => {
                   onChange={(e) =>
                     groupsActions.setGroupAttributes(
                       groupID,
-                      new Map({ name: e.target.value })
+                      Map({ name: e.target.value })
                     )
                   }
                   style={inputStyle}

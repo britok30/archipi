@@ -3,15 +3,13 @@
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { Map } from "immutable";
-import Panel from "./panel";
+import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { TiPlus, TiDelete } from "react-icons/ti";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
 import {
   FormTextInput,
   FormNumberInput,
   FormSubmitButton,
-  FormSlider,
   CancelButton,
 } from "../style/export";
 

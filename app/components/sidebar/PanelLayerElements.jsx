@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import PropTypes from "prop-types";
-import Panel from "./panel";
+import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import {
   MODE_IDLE,
@@ -125,7 +125,7 @@ const PanelLayerElement = ({ mode, layers, selectedLayer }) => {
   let layer = layers.get(selectedLayer);
 
   return (
-    <Panel name={translator.t(`Elements on layer ${layer.name}`)}>
+    <Panel name={translator?.t(`Elements on layer ${layer.name}`)}>
       <div className="h-auto overflow-y-auto max-h-40 cursor-pointer mb-2 select-none w-full px-3">
         <div className="flex items-center space-x-3 mb-3">
           <MdSearch style={searchIconStyle} />

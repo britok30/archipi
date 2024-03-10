@@ -22,7 +22,7 @@ const BASE_STYLE = {
   backgroundRepeat: "no-repeat",
 };
 
-export default function FormSelect({ children, style, ...rest }) {
+export default function FormSelect({ children, ...rest }) {
   return (
     <select
       className="bg-[#292929] text-white border-none rounded-md ml-2 outline-none px-1 py-2.5 w-full block"

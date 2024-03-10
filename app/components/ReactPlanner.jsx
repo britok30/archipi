@@ -13,9 +13,9 @@ import { objectsMap } from "../utils/objects-utils";
 import { ToolbarComponents, Content, SidebarComponents } from "./export";
 import ReactPlannerContext from "../context/ReactPlannerContext";
 import Overlays from "./overlays";
+import Sidebar from "./Sidebar/Sidebar";
 
 const { Toolbar } = ToolbarComponents;
-const { Sidebar } = SidebarComponents;
 
 const footerBarH = 20;
 

@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import PropTypes from "prop-types";
 import { Map, fromJS } from "immutable";
-import AttributesEditor from "./attributes-editor/attributes-editor";
-import { GeometryUtils, MathUtils } from "../../../utils/export";
+import AttributesEditor from "./AttributesEditor";
+import { GeometryUtils, MathUtils } from "../../utils/export";
 import convert from "convert-units";
 import { MdContentCopy, MdContentPaste } from "react-icons/md";
-import ReactPlannerContext from "../../../context/ReactPlannerContext";
+import ReactPlannerContext from "../../context/ReactPlannerContext";
 
 const PRECISION = 2;
 
@@ -33,25 +33,25 @@ const ElementEditor = ({ state: appState, element, layer }) => {
   const initAttrData = (element, layer, state) => {
     element =
       typeof element.misc === "object"
-        ? element.set("misc", new Map(element.misc))
+        ? element.set("misc", Map(element.misc))
         : element;
 
     switch (element.prototype) {
       case "items": {
-        return new Map(element);
+        return Map(element);
       }
       case "lines": {
         let v_a = layer.vertices.get(element.vertices.get(0));
         let v_b = layer.vertices.get(element.vertices.get(1));
 
         let distance = GeometryUtils.pointsDistance(v_a.x, v_a.y, v_b.x, v_b.y);
-        let _unit = element.misc.get("_unitLength") || catalog.unit;
-        let _length = convert(distance).from(catalog.unit).to(_unit);
+        let _unit = element.misc.get("_unitLength") || catalog?.unit;
+        let _length = convert(distance).from(catalog?.unit).to(_unit);
 
-        return new Map({
+        return Map({
           vertexOne: v_a,
           vertexTwo: v_b,
-          lineLength: new Map({ length: distance, _length, _unit }),
+          lineLength: Map({ length: distance, _length, _unit }),
         });
       }
       case "holes": {
@@ -63,24 +63,24 @@ const ElementEditor = ({ state: appState, element, layer }) => {
           lineLength * element.offset -
           element.properties.get("width").get("length") / 2;
 
-        let _unitA = element.misc.get("_unitA") || catalog.unit;
-        let _lengthA = convert(startAt).from(catalog.unit).to(_unitA);
+        let _unitA = element.misc.get("_unitA") || catalog?.unit;
+        let _lengthA = convert(startAt).from(catalog?.unit).to(_unitA);
 
         let endAt =
           lineLength -
           lineLength * element.offset -
           element.properties.get("width").get("length") / 2;
-        let _unitB = element.misc.get("_unitB") || catalog.unit;
-        let _lengthB = convert(endAt).from(catalog.unit).to(_unitB);
+        let _unitB = element.misc.get("_unitB") || catalog?.unit;
+        let _lengthB = convert(endAt).from(catalog?.unit).to(_unitB);
 
-        return new Map({
+        return Map({
           offset: element.offset,
-          offsetA: new Map({
+          offsetA: Map({
             length: MathUtils.toFixedFloat(startAt, PRECISION),
             _length: MathUtils.toFixedFloat(_lengthA, PRECISION),
             _unit: _unitA,
           }),
-          offsetB: new Map({
+          offsetB: Map({
             length: MathUtils.toFixedFloat(endAt, PRECISION),
             _length: MathUtils.toFixedFloat(_lengthB, PRECISION),
             _unit: _unitB,
@@ -88,7 +88,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         });
       }
       case "areas": {
-        return new Map({});
+        return Map({});
       }
       default:
         return null;
@@ -96,11 +96,11 @@ const ElementEditor = ({ state: appState, element, layer }) => {
   };
 
   const initPropData = (element, layer, state) => {
-    let catalogElement = catalog.getElement(element.type);
+    let catalogElement = catalog?.getElement(element.type);
 
     let mapped = {};
     for (let name in catalogElement.properties) {
-      mapped[name] = new Map({
+      mapped[name] = Map({
         currentValue: element.properties.has(name)
           ? element.properties.get(name)
           : fromJS(catalogElement.properties[name].defaultValue),
@@ -108,7 +108,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
       });
     }
 
-    return new Map(mapped);
+    return Map(mapped);
   };
 
   const [attributesFormData, setAttributesFormData] = useState(
@@ -128,14 +128,14 @@ const ElementEditor = ({ state: appState, element, layer }) => {
 
     switch (element.prototype) {
       case "items": {
-        _attributesFormData = _attributesFormData.set(attributeName, value);
+        _attributesFormData = _attributesFormData?.set(attributeName, value);
         break;
       }
       case "lines": {
         switch (attributeName) {
           case "lineLength": {
-            let v_0 = _attributesFormData.get("vertexOne");
-            let v_1 = _attributesFormData.get("vertexTwo");
+            let v_0 = _attributesFormData?.get("vertexOne");
+            let v_1 = _attributesFormData?.get("vertexTwo");
 
             let [v_a, v_b] = GeometryUtils.orderVertices([v_0, v_1]);
 
@@ -148,7 +148,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
               PRECISION
             );
 
-            _attributesFormData = _attributesFormData.withMutations((attr) => {
+            _attributesFormData = _attributesFormData?.withMutations((attr) => {
               attr.set(
                 v_0 === v_a ? "vertexTwo" : "vertexOne",
                 v_b.merge(v_b_new)
@@ -159,7 +159,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
           }
           case "vertexOne":
           case "vertexTwo": {
-            _attributesFormData = _attributesFormData.withMutations((attr) => {
+            _attributesFormData = _attributesFormData?.withMutations((attr) => {
               attr.set(attributeName, attr.get(attributeName).merge(value));
 
               let newDistance = GeometryUtils.verticesDistance(
@@ -172,7 +172,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
                 attr.get("lineLength").merge({
                   length: newDistance,
                   _length: convert(newDistance)
-                    .from(catalog.unit)
+                    .from(catalog?.unit)
                     .to(attr.get("lineLength").get("_unit")),
                 })
               );
@@ -180,7 +180,10 @@ const ElementEditor = ({ state: appState, element, layer }) => {
             break;
           }
           default: {
-            _attributesFormData = _attributesFormData.set(attributeName, value);
+            _attributesFormData = _attributesFormData?.set(
+              attributeName,
+              value
+            );
             break;
           }
         }
@@ -223,28 +226,28 @@ const ElementEditor = ({ state: appState, element, layer }) => {
               lineLength - lineLength * offset - halfWidthLength,
               PRECISION
             );
-            let offsetUnit = _attributesFormData.getIn(["offsetB", "_unit"]);
+            let offsetUnit = _attributesFormData?.getIn(["offsetB", "_unit"]);
 
-            let offsetB = new Map({
+            let offsetB = Map({
               length: endAt,
               _length: convert(endAt).from(catalog.unit).to(offsetUnit),
               _unit: offsetUnit,
             });
 
             _attributesFormData = _attributesFormData
-              .set("offsetB", offsetB)
+              ?.set("offsetB", offsetB)
               .set("offset", offset);
 
-            let offsetAttribute = new Map({
+            let offsetAttribute = Map({
               length: MathUtils.toFixedFloat(lengthValue, PRECISION),
               _unit: value.get("_unit"),
               _length: MathUtils.toFixedFloat(
-                convert(lengthValue).from(catalog.unit).to(value.get("_unit")),
+                convert(lengthValue).from(catalog?.unit).to(value.get("_unit")),
                 PRECISION
               ),
             });
 
-            _attributesFormData = _attributesFormData.set(
+            _attributesFormData = _attributesFormData?.set(
               attributeName,
               offsetAttribute
             );
@@ -286,28 +289,28 @@ const ElementEditor = ({ state: appState, element, layer }) => {
               lineLength * offset - halfWidthLength,
               PRECISION
             );
-            let offsetUnit = _attributesFormData.getIn(["offsetA", "_unit"]);
+            let offsetUnit = _attributesFormData?.getIn(["offsetA", "_unit"]);
 
-            let offsetA = new Map({
+            let offsetA = Map({
               length: startAt,
-              _length: convert(startAt).from(catalog.unit).to(offsetUnit),
+              _length: convert(startAt).from(catalog?.unit).to(offsetUnit),
               _unit: offsetUnit,
             });
 
             _attributesFormData = _attributesFormData
-              .set("offsetA", offsetA)
+              ?.set("offsetA", offsetA)
               .set("offset", offset);
 
-            let offsetAttribute = new Map({
+            let offsetAttribute = Map({
               length: MathUtils.toFixedFloat(lengthValue, PRECISION),
               _unit: value.get("_unit"),
               _length: MathUtils.toFixedFloat(
-                convert(lengthValue).from(catalog.unit).to(value.get("_unit")),
+                convert(lengthValue).from(catalog?.unit).to(value.get("_unit")),
                 PRECISION
               ),
             });
 
-            _attributesFormData = _attributesFormData.set(
+            _attributesFormData = _attributesFormData?.set(
               attributeName,
               offsetAttribute
             );
@@ -315,7 +318,10 @@ const ElementEditor = ({ state: appState, element, layer }) => {
             break;
           }
           default: {
-            _attributesFormData = _attributesFormData.set(attributeName, value);
+            _attributesFormData = _attributesFormData?.set(
+              attributeName,
+              value
+            );
             break;
           }
         }
@@ -409,7 +415,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         </div>
       </div>
 
-      {propertiesFormData.entrySeq().map(([propertyName, data]) => {
+      {propertiesFormData?.entrySeq().map(([propertyName, data]) => {
         let currentValue = data.get("currentValue"),
           configs = data.get("configs");
 

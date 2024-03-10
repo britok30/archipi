@@ -2,10 +2,10 @@
 
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
-import Panel from "./panel";
+import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { FaTrash, FaTimes } from "react-icons/fa";
-import { FormNumberInput } from "../../components/style/export";
+import { FormNumberInput } from "../style/export";
 import classNames from "classnames";
 
 const PanelGuides = ({ state }) => {
@@ -143,7 +143,7 @@ const PanelGuides = ({ state }) => {
               <span className="text-xs mb-4 inline-block">{`Value must be between 0 and ${state.getIn(
                 ["scene", "height"]
               )}`}</span>
-              <div classNames="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <FormNumberInput
                   value={0}
                   onChange={(e) => {

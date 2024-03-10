@@ -2,9 +2,9 @@
 
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import { FormNumberInput, FormTextInput } from "../../../style/export";
-import { PropertyLengthMeasure } from "../../../../catalog/properties/export";
-import ReactPlannerContext from "../../../../context/ReactPlannerContext";
+import { FormNumberInput, FormTextInput } from "../style/export";
+import { PropertyLengthMeasure } from "../../catalog/properties/export";
+import ReactPlannerContext from "../../context/ReactPlannerContext";
 
 const tableStyle = { width: "100%" };
 const firstTdStyle = { width: "6em" };
