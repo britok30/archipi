@@ -41,7 +41,7 @@ const ProjectConfigurator = ({ state }) => {
             type="text"
             id="width"
             name="width"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none"
             placeholder="width"
             value={dataWidth}
             onChange={(e) => setDataWidth(e.target.value)}
@@ -58,7 +58,7 @@ const ProjectConfigurator = ({ state }) => {
             type="text"
             id="height"
             name="height"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none"
             placeholder="height"
             value={dataHeight}
             onChange={(e) => setDataHeight(e.target.value)}
@@ -67,13 +67,13 @@ const ProjectConfigurator = ({ state }) => {
 
         <div className="flex space-x-3 items-center">
           <button
-            class="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
+            class="text-white bg-[#292929] hover:bg-black focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
             onClick={(e) => projectActions.rollback()}
           >
             {translator.t("Cancel")}
           </button>
           <button
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
+            className="text-black bg-white hover:bg-zinc-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
             type="submit"
           >
             Save
