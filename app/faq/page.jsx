@@ -2,7 +2,7 @@ import React from "react";
 import PageHeader from "../components/PageHeader";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "ArchiPi | FAQ",
   alternates: {
     canonical: "https://www.archipi.io/faq",
