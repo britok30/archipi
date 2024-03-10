@@ -2,8 +2,6 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"]
-    },
-    "target": "es6",
-    "jsx": "react"
+    }
   }
 }
