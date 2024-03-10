@@ -12,7 +12,6 @@ let plugins = [PlannerPlugins.Keyboard(), PlannerPlugins.Autosave("archipi")];
 
 export default function Home() {
   const size = useWindowSize();
-
   const height = size.height;
   const width = size.width;
 
