@@ -140,7 +140,13 @@ export default {
     /*************** lod max ******************/
 
     let hubMaxLOD = new Three.Object3D();
-    hubMaxLOD.add(makeObjectMaxLOD(newWidth, newHeight, newDepth).clone());
+
+    if (
+      makeObjectMaxLOD(newWidth, newHeight, newDepth).clone() ||
+      makeObjectMaxLOD(newWidth, newHeight, newDepth).clone() instanceof
+        THREE.Object3D
+    )
+      hubMaxLOD.add(makeObjectMaxLOD(newWidth, newHeight, newDepth).clone());
 
     let valuePosition = new Three.Box3().setFromObject(hubMaxLOD);
 
