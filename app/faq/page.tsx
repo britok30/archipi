@@ -3,17 +3,17 @@ import PageHeader from "../components/PageHeader";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ArchiPi | About",
+  title: "ArchiPi | FAQ",
   alternates: {
-    canonical: "https://www.archipi.io/about",
+    canonical: "https://www.archipi.io/faq",
   },
   openGraph: {
-    title: "ArchiPi | About",
-    url: "https://www.archipi.io/about",
+    title: "ArchiPi | FAQ",
+    url: "https://www.archipi.io/faq",
   },
 };
 
-export default function About() {
+export default function Faq() {
   return (
     <>
       <div className="flex justify-center text-white bg-black flex-col items-center min-h-screen antialiased px-4 py-5 space-y-5">
