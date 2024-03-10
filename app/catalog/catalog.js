@@ -84,7 +84,7 @@ export default class Catalog {
    *  @return {void}
    */
   registerMultipleElements(elementArray) {
-    elementArray.forEach((el) => this.registerElement(el));
+    elementArray.forEach((el) => this.registerElement(...el));
   }
 
   /** @description Register a new property
