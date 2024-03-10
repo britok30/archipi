@@ -3,13 +3,10 @@
 import React, { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import CatalogItem from "./catalog-item";
-import CatalogBreadcrumb from "./catalog-breadcrumb";
-import CatalogPageItem from "./catalog-page-item";
-import CatalogTurnBackPageItem from "./catalog-turn-back-page-item";
-import ContentContainer from "../style/content-container";
-import ContentTitle from "../style/content-title";
-import * as SharedStyle from "../../styles/shared-style";
+import CatalogItem from "./CatalogItem";
+import CatalogBreadcrumb from "./CatalogBreadcrumb";
+import CatalogPageItem from "./CatalogPageItem";
+import CatalogTurnBackPageItem from "./CatalogTurnBackPageItem";
 
 const searchContainer = {
   width: "100%",

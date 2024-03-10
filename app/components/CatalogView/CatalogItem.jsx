@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import { FaPlusCircle as IconAdd } from "react-icons/fa";
-import * as SharedStyle from "../../styles/shared-style";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import Image from "next/image";
 

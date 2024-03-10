@@ -3,9 +3,7 @@
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import If from "../../utils/react-if";
-import FooterToggleButton from "./footer-toggle-button";
-import FooterContentButton from "./footer-content-button";
+import FooterToggleButton from "./FooterToggleButton";
 import {
   SNAP_POINT,
   SNAP_LINE,
@@ -14,12 +12,9 @@ import {
   SNAP_GUIDE,
 } from "../../utils/snap";
 import { MODE_SNAPPING } from "../../utils/constants";
-import * as SharedStyle from "../../styles/shared-style";
-import { MdAddCircle, MdWarning } from "react-icons/md";
+import Link from "next/link";
 
-const appMessageStyle = { borderBottom: "1px solid #555", lineHeight: "1.5em" };
-
-const FooterBar = ({
+const Footer = ({
   state: globalState,
   width,
   height,
@@ -66,7 +61,7 @@ const FooterBar = ({
 
           <div className="relative border-r border-white float-left py-0 px-[1rem] inline-block">
             <FooterToggleButton
-              state={state}
+              //   state={state}
               toggleOn={() => {
                 updateSnapMask({ SNAP_POINT: true });
               }}
@@ -78,7 +73,7 @@ const FooterBar = ({
               title={translator.t("Snap to Point")}
             />
             <FooterToggleButton
-              state={state}
+              //   state={state}
               toggleOn={() => {
                 updateSnapMask({ SNAP_LINE: true });
               }}
@@ -90,7 +85,7 @@ const FooterBar = ({
               title={translator.t("Snap to Line")}
             />
             <FooterToggleButton
-              state={state}
+              //   state={state}
               toggleOn={() => {
                 updateSnapMask({ SNAP_SEGMENT: true });
               }}
@@ -102,7 +97,7 @@ const FooterBar = ({
               title={translator.t("Snap to Segment")}
             />
             <FooterToggleButton
-              state={state}
+              //   state={state}
               toggleOn={() => {
                 updateSnapMask({ SNAP_GRID: true });
               }}
@@ -114,7 +109,7 @@ const FooterBar = ({
               title={translator.t("Snap to Grid")}
             />
             <FooterToggleButton
-              state={state}
+              //   state={state}
               toggleOn={() => {
                 updateSnapMask({ SNAP_GUIDE: true });
               }}
@@ -129,23 +124,26 @@ const FooterBar = ({
         </>
       )}
 
-      {footerbarComponents.map((Component, index) => (
-        <Component state={state} key={index} />
-      ))}
+      <div className="relative border-l flex space-x-3 border-white float-right py-0 px-[1rem]">
+        <Link
+          className="hover:underline transition duration-300 ease-in-out"
+          href="/about"
+        >
+          About
+        </Link>
 
-      {softwareSignature && (
-        <div className="relative border-l border-white  float-right py-0 px-[1rem] inline-block">
-          {softwareSignature}
-        </div>
-      )}
+        {softwareSignature && (
+          <div className="border-l px-2">{softwareSignature}</div>
+        )}
+      </div>
     </div>
   );
 };
 
-FooterBar.propTypes = {
+Footer.propTypes = {
   state: PropTypes.object.isRequired,
   footerbarComponents: PropTypes.array.isRequired,
   softwareSignature: PropTypes.string,
 };
 
-export default FooterBar;
+export default Footer;

@@ -67,7 +67,7 @@ const ProjectConfigurator = ({ state }) => {
 
         <div className="flex space-x-3 items-center">
           <button
-            class="text-white bg-[#292929] hover:bg-black focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
+            className="text-white bg-[#292929] hover:bg-black focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
             onClick={(e) => projectActions.rollback()}
           >
             {translator.t("Cancel")}

@@ -1,6 +1,6 @@
 import React from "react";
 import Providers from "./components/Providers";
-import GoogleAdsense from "./components/adsense/GoogleAdsense";
+import GoogleAdsense from "./components/GoogleAdsense";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";

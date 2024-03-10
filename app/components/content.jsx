@@ -4,9 +4,9 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Viewer2D } from "./viewer2d/viewer2d";
 import Viewer3D from "./viewer3d/viewer3d";
+import CatalogList from "./CatalogView/CatalogList";
 // import Viewer3DFirstPerson from './viewer3d/viewer3d-first-person';
-import CatalogList from "./catalog-view/catalog-list";
-import ProjectConfigurator from "./configurator/project-configurator";
+import ProjectConfigurator from "./ProjectConfigurator/ProjectConfigurator";
 import * as constants from "../utils/constants";
 
 export default function Content({ width, height, state, customContents }) {
