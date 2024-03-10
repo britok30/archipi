@@ -1,6 +1,5 @@
 import React from "react";
 import PageHeader from "../components/PageHeader";
-import { Metadata } from "next";
 
 export const metadata = {
   title: "ArchiPi | FAQ",

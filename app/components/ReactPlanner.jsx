@@ -58,7 +58,7 @@ const ReactPlannerContent = (props) => {
         state={extractedState}
         {...otherProps}
       />
-      <Sidebar state={extractedState} {...otherProps} />
+      <Sidebar state={extractedState} />
       <Footer
         width={width}
         height={footerBarH}
@@ -137,7 +137,6 @@ ReactPlanner.defaultProps = {
   plugins: [],
   allowProjectFileSupport: true,
   toolbarButtons: [],
-  sidebarComponents: [],
   footerbarComponents: [],
   customContents: {},
   customOverlays: [],
