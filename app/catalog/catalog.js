@@ -84,7 +84,7 @@ export default class Catalog {
    *  @return {void}
    */
   registerMultipleElements(elementArray) {
-    elementArray.forEach((el) => this.registerElement(...el));
+    elementArray.forEach((el) => this.registerElement(el));
   }
 
   /** @description Register a new property
@@ -102,7 +102,7 @@ export default class Catalog {
    *  @return {void}
    */
   registerMultiplePropertyType(propertyTypeArray) {
-    propertyTypeArray.forEach((el) => this.registerPropertyType(el));
+    propertyTypeArray.forEach((el) => this.registerPropertyType(...el));
   }
 
   /** @description Validate an element
