@@ -30,7 +30,7 @@ const mapButtonsCb = (el, ind) => (
   </If>
 );
 
-const Sidebar = ({ state, sidebarComponents }) => {
+const SideBar = ({ state, sidebarComponents }) => {
   let mode = state.get("mode");
   let isVisible = true;
 
@@ -124,7 +124,7 @@ const Sidebar = ({ state, sidebarComponents }) => {
   ];
 
   sorter = sorter.concat(
-    sidebarComponents.map((Component, key) => {
+    sidebarComponents?.map((Component, key) => {
       return Component.prototype //if is a react component
         ? {
             condition: true,
@@ -143,7 +143,7 @@ const Sidebar = ({ state, sidebarComponents }) => {
     <>
       {isVisible && (
         <aside
-          className="sidebar overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
+          className="overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
           onKeyDown={(event) => event.stopPropagation()}
           onKeyUp={(event) => event.stopPropagation()}
         >
@@ -154,8 +154,8 @@ const Sidebar = ({ state, sidebarComponents }) => {
   );
 };
 
-Sidebar.propTypes = {
+SideBar.propTypes = {
   state: PropTypes.object.isRequired,
 };
 
-export default Sidebar;
+export default SideBar;

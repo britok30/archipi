@@ -8,7 +8,7 @@ import { connect } from "react-redux";
 import Translator from "../translator/translator";
 import Catalog from "../catalog/catalog";
 import actions from "../actions/export";
-import Sidebar from "./Sidebar/Sidebar";
+import SideBar from "../components/Sidebar/SideBar";
 import Footer from "./Footer/Footer";
 import { objectsMap } from "../utils/objects-utils";
 import { ToolbarComponents, Content } from "./export";
@@ -58,7 +58,7 @@ const ReactPlannerContent = (props) => {
         state={extractedState}
         {...otherProps}
       />
-      <Sidebar state={extractedState} {...otherProps} />
+      <SideBar state={extractedState} {...otherProps} />
       <Footer
         width={width}
         height={footerBarH}
@@ -80,8 +80,6 @@ ReactPlannerContent.propTypes = {
   height: PropTypes.number.isRequired,
   stateExtractor: PropTypes.func.isRequired,
   toolbarButtons: PropTypes.array,
-  sidebarComponents: PropTypes.array,
-  footerbarComponents: PropTypes.array,
   customContents: PropTypes.object,
   customOverlays: PropTypes.arrayOf(PropTypes.object),
   customActions: PropTypes.object,
