@@ -7,13 +7,13 @@ import { connect } from "react-redux";
 
 import Translator from "../translator/translator";
 import Catalog from "../catalog/catalog";
-import actions from "../actions/export";
-import SideBar from "../components/Sidebar/SideBar";
+import actions from "../actions/export"; 
 import Footer from "./Footer/Footer";
 import { objectsMap } from "../utils/objects-utils";
 import { ToolbarComponents, Content } from "./export";
 import ReactPlannerContext from "../context/ReactPlannerContext";
 import Overlays from "./overlays";
+import Sidebar from "./Sidebar/Sidebar"
 
 const { Toolbar } = ToolbarComponents;
 
@@ -58,7 +58,7 @@ const ReactPlannerContent = (props) => {
         state={extractedState}
         {...otherProps}
       />
-      <SideBar state={extractedState} {...otherProps} />
+      <Sidebar state={extractedState} {...otherProps} />
       <Footer
         width={width}
         height={footerBarH}
