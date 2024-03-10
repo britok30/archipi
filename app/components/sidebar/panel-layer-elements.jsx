@@ -125,33 +125,18 @@ const PanelLayerElement = ({ mode, layers, selectedLayer }) => {
   let layer = layers.get(selectedLayer);
 
   return (
-    <Panel name={translator.t("Elements on layer {0}", layer.name)}>
-      <div style={contentArea} onWheel={(e) => e.stopPropagation()}>
-        <table style={tableSearchStyle}>
-          <tbody>
-            <tr>
-              <td>
-                <MdSearch style={searchIconStyle} />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  style={searchInputStyle}
-                  onChange={(e) => {
-                    matchArray(e.target.value);
-                  }}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        {/* const elementSelectedStyle = {
-  ...elementStyle,
-  color: SharedStyle.SECONDARY_COLOR.main,
-  borderColor: SharedStyle.SECONDARY_COLOR.main,
-};
- */}
+    <Panel name={translator.t(`Elements on layer ${layer.name}`)}>
+      <div className="h-auto overflow-y-auto max-h-40 cursor-pointer mb-2 select-none w-full px-3">
+        <div className="flex items-center space-x-3 mb-3">
+          <MdSearch style={searchIconStyle} />
+          <input
+            type="text"
+            className={`bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none`}
+            onChange={(e) => {
+              matchArray(e.target.value);
+            }}
+          />
+        </div>
 
         {matchedElements.lines.size ? (
           <div>
