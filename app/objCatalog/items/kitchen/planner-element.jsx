@@ -6,14 +6,20 @@ import React from "react";
 const WIDTH = 80;
 const DEPTH = 100;
 const HEIGHT = 80;
+let steelTexture;
+let darkSteelTexture;
+let logoTexture;
 
-let textureLoader = new Three.TextureLoader();
-let steel = textureLoader.load("/images/textures/steel.jpg");
-let darkSteel = textureLoader.load("/images/textures/darksteel.jpg");
-let logo = textureLoader.load("/images/textures/logo.jpg");
-let steelTexture = new Three.MeshLambertMaterial({ map: steel });
-let darkSteelTexture = new Three.MeshLambertMaterial({ map: darkSteel });
-let logoTexture = new Three.MeshLambertMaterial({ map: logo });
+if (typeof window !== "undefined") {
+  let textureLoader = new Three.TextureLoader();
+  let steel = textureLoader.load("/images/textures/steel.jpg");
+  let darkSteel = textureLoader.load("/images/textures/darksteel.jpg");
+  let logo = textureLoader.load("/images/textures/logo.jpg");
+
+  steelTexture = new Three.MeshLambertMaterial({ map: steel });
+  darkSteelTexture = new Three.MeshLambertMaterial({ map: darkSteel });
+  logoTexture = new Three.MeshLambertMaterial({ map: logo });
+}
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();

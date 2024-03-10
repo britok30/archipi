@@ -25,7 +25,7 @@ export { default as hanger } from "./hanger/planner-element.jsx";
 // export { default as hiroos } from "./hiroos/planner-element.jsx";
 // export { default as hub } from "./hub/planner-element.jsx";
 export { default as image } from "./image/planner-element.jsx";
-// export { default as kitchen } from "./kitchen/planner-element.jsx";
+export { default as kitchen } from "./kitchen/planner-element.jsx";
 export { default as lim } from "./lim/planner-element.jsx";
 // export { default as metalDetector } from "./metal-detector/planner-element.jsx";
 // export { default as monitorPC } from "./monitor-pc/planner-element.jsx";
