@@ -7,19 +7,27 @@ const newWidth = 90;
 const newDepth = 90;
 const newHeight = 220;
 
-const grey = new Three.MeshLambertMaterial({ color: 0xa6a9ad });
-const darkGrey = new Three.MeshLambertMaterial({ color: 0x3f454f });
-const red = new Three.MeshLambertMaterial({ color: 0xff0000 });
+let display1;
+let display2;
+let grey;
+let darkGrey;
+let red;
+
+if (typeof window !== "undefined") {
+  let textureLoader = new Three.TextureLoader();
+  display1 = textureLoader.load("/images/textures/display1.png");
+  display2 = textureLoader.load("/images/textures/display2.png");
+
+  grey = new Three.MeshLambertMaterial({ color: 0xa6a9ad });
+  darkGrey = new Three.MeshLambertMaterial({ color: 0x3f454f });
+  red = new Three.MeshLambertMaterial({ color: 0xff0000 });
+}
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();
 
 function makeObjectMaxLOD() {
   let metalDetector = new Three.Mesh();
-
-  let textureLoader = new Three.TextureLoader();
-  let display1 = textureLoader.load("/images/textures/display1.png");
-  let display2 = textureLoader.load("/images/textures/display2.png");
 
   let cubeGeometryBase = new Three.BoxGeometry(0.72, 0.2, 0.4);
   let up = new Three.Mesh(cubeGeometryBase, grey);
