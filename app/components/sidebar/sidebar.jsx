@@ -30,7 +30,7 @@ const mapButtonsCb = (el, ind) => (
   </If>
 );
 
-export default function Sidebar({ state, sidebarComponents }) {
+const Sidebar = ({ state, sidebarComponents }) => {
   let mode = state.get("mode");
   let isVisible = true;
 
@@ -152,8 +152,10 @@ export default function Sidebar({ state, sidebarComponents }) {
       )}
     </>
   );
-}
+};
 
 Sidebar.propTypes = {
   state: PropTypes.object.isRequired,
 };
+
+export default Sidebar;
