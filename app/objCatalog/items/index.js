@@ -23,7 +23,7 @@ export { default as fireExtinguisher } from "./fire-extinguisher/planner-element
 export { default as fridge } from "./fridge/planner-element.jsx";
 export { default as hanger } from "./hanger/planner-element.jsx";
 // export { default as hiroos } from "./hiroos/planner-element.jsx";
-// export { default as hub } from "./hub/planner-element.jsx";
+export { default as hub } from "./hub/planner-element.jsx";
 export { default as image } from "./image/planner-element.jsx";
 export { default as kitchen } from "./kitchen/planner-element.jsx";
 export { default as lim } from "./lim/planner-element.jsx";
