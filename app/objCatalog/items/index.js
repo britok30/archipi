@@ -44,7 +44,7 @@ export { default as sofa } from "./sofa/planner-element.jsx";
 export { default as table } from "./table/planner-element.jsx";
 export { default as teachingPost } from "./teaching-post/planner-element.jsx";
 export { default as text3D } from "./text-3d/planner-element.jsx";
-// export { default as threePhasePanel } from "./three-phase-panel/planner-element.jsx";
+export { default as threePhasePanel } from "./three-phase-panel/planner-element.jsx";
 export { default as trash } from "./trash/planner-element.jsx";
 export { default as tv } from "./tv/planner-element.jsx";
 export { default as umbrellaStand } from "./umbrella-stand/planner-element.jsx";

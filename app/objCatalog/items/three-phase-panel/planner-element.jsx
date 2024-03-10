@@ -6,16 +6,24 @@ import React from "react";
 const WIDTH = 40;
 const DEPTH = 20;
 const HEIGHT = 50;
+let grey;
+let red;
+let blue;
+let black;
+let quadro;
 
-const grey = new Three.MeshLambertMaterial({ color: 0xaaaaaa });
-grey.side = Three.DoubleSide;
-const red = new Three.MeshPhongMaterial({ color: 0xaa0000 });
-const blue = new Three.MeshPhongMaterial({ color: 0x0000aa });
-const black = new Three.MeshLambertMaterial({ color: 0x000000 });
-black.side = Three.DoubleSide;
+if (typeof window !== "undefined") {
+  grey = new Three.MeshLambertMaterial({ color: 0xaaaaaa });
+  grey.side = Three.DoubleSide;
 
-const textureLoader = new Three.TextureLoader();
-const quadro = textureLoader.load("/images/textures/panel-texture.png");
+  red = new Three.MeshPhongMaterial({ color: 0xaa0000 });
+  blue = new Three.MeshPhongMaterial({ color: 0x0000aa });
+  black = new Three.MeshLambertMaterial({ color: 0x000000 });
+  black.side = Three.DoubleSide;
+
+  const textureLoader = new Three.TextureLoader();
+  quadro = textureLoader.load("/images/textures/panel-texture.png");
+}
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMiddleLOD = makeObjectMiddleLOD();
@@ -62,11 +70,17 @@ function makeObjectMaxLOD() {
   threePhasePanel.add(BackSide);
 
   let PanelGeometry = new Three.PlaneGeometry(0.5, 0.5);
-  let meshPanel = new Three.Mesh(
-    PanelGeometry,
-    new Three.MeshPhongMaterial({ map: quadro, transparent: true })
-  );
-  meshPanel.position.set(0.5, 1.85, 0.31);
+
+  let meshPanel;
+
+  if (quadro) {
+    meshPanel = new Three.Mesh(
+      PanelGeometry,
+      new Three.MeshPhongMaterial({ map: quadro, transparent: true })
+    );
+    meshPanel.position.set(0.5, 1.85, 0.31);
+  }
+
   threePhasePanel.add(meshPanel);
 
   let geometry0 = new Three.ExtrudeGeometry(roundedRectShape, extrudeSettings);
