@@ -13,7 +13,7 @@ import { objectsMap } from "../utils/objects-utils";
 import { ToolbarComponents, Content } from "./export";
 import ReactPlannerContext from "../context/ReactPlannerContext";
 import Overlays from "./overlays";
-import Sidebar from "./Sidebar/sidebar";
+import Sidebar from "./Sidebar";
 
 const { Toolbar } = ToolbarComponents;
 
