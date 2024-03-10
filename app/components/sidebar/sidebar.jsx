@@ -32,7 +32,6 @@ const mapButtonsCb = (el, ind) => (
 
 const Sidebar = ({ state, sidebarComponents }) => {
   let mode = state.get("mode");
-  let isVisible = true;
 
   switch (mode) {
     case constants.MODE_VIEWING_CATALOG:
@@ -140,17 +139,13 @@ const Sidebar = ({ state, sidebarComponents }) => {
   );
 
   return (
-    <>
-      {isVisible && (
-        <aside
-          className="overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
-          onKeyDown={(event) => event.stopPropagation()}
-          onKeyUp={(event) => event.stopPropagation()}
-        >
-          {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
-        </aside>
-      )}
-    </>
+    <aside
+      className="overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
+      onKeyDown={(event) => event.stopPropagation()}
+      onKeyUp={(event) => event.stopPropagation()}
+    >
+      {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
+    </aside>
   );
 };
 
