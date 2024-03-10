@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import * as SharedStyle from '../../styles/shared-style';
+import React from "react";
+import * as SharedStyle from "../../styles/shared-style";
 
 const BASE_STYLE = {
   display: "block",
@@ -22,6 +22,13 @@ const BASE_STYLE = {
   backgroundRepeat: "no-repeat",
 };
 
-export default function FormSelect({children, style, ...rest}) {
-  return <select type="text" style={{...BASE_STYLE, ...style}} {...rest}>{children}</select>;
+export default function FormSelect({ children, style, ...rest }) {
+  return (
+    <select
+      className="bg-[#292929] text-white border-none rounded-md ml-2 outline-none px-1 py-2.5 w-full block"
+      {...rest}
+    >
+      {children}
+    </select>
+  );
 }
