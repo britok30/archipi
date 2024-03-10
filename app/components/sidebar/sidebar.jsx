@@ -32,6 +32,7 @@ const mapButtonsCb = (el, ind) => (
 
 const Sidebar = ({ state, sidebarComponents }) => {
   let mode = state.get("mode");
+  let isVisible = true;
 
   switch (mode) {
     case constants.MODE_VIEWING_CATALOG:
@@ -137,6 +138,8 @@ const Sidebar = ({ state, sidebarComponents }) => {
           };
     })
   );
+
+  if (!isVisible) return <></>;
 
   return (
     <aside
