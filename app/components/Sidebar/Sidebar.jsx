@@ -30,7 +30,7 @@ const mapButtonsCb = (el, ind) => (
   </If>
 );
 
-export default function Sidebar({ state, sidebarComponents }) {
+export default function Sidebar({ state }) {
   let mode = state.get("mode");
   let isVisible = true;
 
@@ -123,22 +123,6 @@ export default function Sidebar({ state, sidebarComponents }) {
     },
   ];
 
-  sorter = sorter.concat(
-    sidebarComponents?.map((Component, key) => {
-      return Component.prototype //if is a react component
-        ? {
-            condition: true,
-            dom: React.createElement(Component, { state, key }),
-          }
-        : {
-            //else is a sortable toolbar button
-            index: Component.index,
-            condition: Component.condition,
-            dom: React.createElement(Component.dom, { state, key }),
-          };
-    })
-  );
-
   if (!isVisible) return <></>;
 
   return (
@@ -150,7 +134,7 @@ export default function Sidebar({ state, sidebarComponents }) {
       {sorter.sort(sortButtonsCb).map(mapButtonsCb)}
     </aside>
   );
-};
+}
 
 Sidebar.propTypes = {
   state: PropTypes.object.isRequired,
