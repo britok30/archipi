@@ -6,7 +6,21 @@ import React from "react";
 const RADIUS = 15;
 const HEIGHT = 60;
 
-//colors
+let gageImage;
+let labelImage;
+
+if (typeof window !== "undefined") {
+  const textureLoader = new Three.TextureLoader();
+  gageImage = textureLoader.load("/images/textures/gage-image.png");
+  labelImage = textureLoader.load("/images/textures/label-image.png");
+
+  labelImage.wrapS = Three.RepeatWrapping;
+  labelImage.wrapT = Three.RepeatWrapping;
+  labelImage.repeat.set(1, 1);
+  labelImage.offset.x = 0; // 0.0 - 1.0
+  labelImage.offset.y = 0; // 0.0 - 1.0
+}
+
 const black = new Three.MeshLambertMaterial({ color: 0x000000 });
 const red = new Three.MeshLambertMaterial({ color: 0xff0000 });
 const grey = new Three.MeshLambertMaterial({ color: 0xcccccc });
@@ -65,14 +79,13 @@ function makeObjectMaxLOD() {
   cylinder5.rotation.z += Math.PI / 2;
   body.add(cylinder5);
 
-  const textureLoader = new Three.TextureLoader();
-  const gageImage = textureLoader.load("/images/textures/gage-image.png");
-
   const geometry2 = new Three.PlaneGeometry(0.04, 0.04);
-  const material2 = new Three.MeshLambertMaterial({
-    map: gageImage,
-    transparent: true,
-  });
+  const material2 =
+    gageImage &&
+    new Three.MeshLambertMaterial({
+      map: gageImage,
+      transparent: true,
+    });
   const gage = new Three.Mesh(geometry2, material2);
   gage.position.set(-0.0255, 0.38, 0);
   gage.rotation.y = -Math.PI / 2;
@@ -92,17 +105,12 @@ function makeObjectMaxLOD() {
   cylinder7.rotation.y += Math.PI / 2;
   body.add(cylinder7);
 
-  const labelImage = textureLoader.load("/images/textures/label-image.png");
-  labelImage.wrapS = Three.RepeatWrapping;
-  labelImage.wrapT = Three.RepeatWrapping;
-  labelImage.repeat.set(1, 1);
-  labelImage.offset.x = 0; // 0.0 - 1.0
-  labelImage.offset.y = 0; // 0.0 - 1.0
-
   const points = [new Three.Vector2(0.1, 0.666), new Three.Vector2(0.1, 1)];
 
   const geometry = new Three.LatheGeometry(points, 200, 0, Math.PI);
-  const material = new Three.MeshLambertMaterial({ map: labelImage });
+
+  const material =
+    labelImage && new Three.MeshLambertMaterial({ map: labelImage });
   const label = new Three.Mesh(geometry, material);
 
   label.rotation.y = 60;

@@ -107,7 +107,6 @@ export default {
     var grey2 = new Three.MeshLambertMaterial({ color: 0x414449 });
 
     var lavagna = new Three.Object3D();
-
     var roundedRectShape = new Three.Shape();
 
     let x = 0;
@@ -143,7 +142,7 @@ export default {
     var geometry = new Three.ExtrudeGeometry(roundedRectShape, extrudeSettings);
     var mesh = new Three.Mesh(geometry, grey);
     mesh.position.set(0, 1.2, 0);
-    lavagna.add(mesh);
+    if (mesh || mesh instanceof THREE.Object3D) lavagna.add(mesh);
 
     var geometry2 = new Three.BoxGeometry(
       width - width / 11,
@@ -152,23 +151,23 @@ export default {
     );
     var mesh2 = new Three.Mesh(geometry2, grey2);
     mesh2.position.set(4, 3.2, 0.07);
-    lavagna.add(mesh2);
+    if (mesh2 || mesh2 instanceof THREE.Object3D) lavagna.add(mesh2);
 
     var geometry3 = new Three.BoxGeometry(width, height / 50, 0.33);
     var mesh3 = new Three.Mesh(geometry3, grey);
     mesh3.position.set(4, 1.0, -0.095);
-    lavagna.add(mesh3);
+    if (mesh3 || mesh3 instanceof THREE.Object3D) lavagna.add(mesh3);
 
     var geometry4 = new Three.BoxGeometry(width, height / 50, 0.25);
     var mesh4 = new Three.Mesh(geometry4, grey);
     mesh4.rotation.x += Math.PI / 2;
     mesh4.position.set(4, 1.1, 0.03);
-    lavagna.add(mesh4);
+    if (mesh4 || mesh4 instanceof THREE.Object3D) lavagna.add(mesh4);
 
     var mesh5 = new Three.Mesh(geometry4, grey);
     mesh5.rotation.x += Math.PI / 2;
     mesh5.position.set(4, 1.1, -0.22);
-    lavagna.add(mesh5);
+    if (mesh5 || mesh5 instanceof THREE.Object3D) lavagna.add(mesh5);
 
     let value = new Three.Box3().setFromObject(lavagna);
 
