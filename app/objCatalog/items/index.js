@@ -35,7 +35,7 @@ export { default as radiatorModernStyle } from "./radiator-modern-style/planner-
 export { default as radiatorOldStyle } from "./radiator-old-style/planner-element.jsx";
 export { default as recyclingBins } from "./recycling-bins/planner-element.jsx";
 export { default as routerWifi } from "./router-wifi/planner-element.jsx";
-// export { default as schneider } from "./schneider/planner-element.jsx";
+export { default as schneider } from "./schneider/planner-element.jsx";
 export { default as schoolDesk } from "./school-desk/planner-element.jsx";
 export { default as schoolDeskDouble } from "./school-desk-double/planner-element.jsx";
 export { default as simpleStair } from "./simple-stair/planner-element.jsx";

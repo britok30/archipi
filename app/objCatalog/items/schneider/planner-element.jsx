@@ -11,9 +11,12 @@ let black = new Three.MeshLambertMaterial({ color: 0x000000 });
 let boxMaterials = [grey, darkGrey, grey, grey, grey, grey];
 let boxMaterials2 = [grey, grey, grey, grey, grey, darkGrey];
 let boxMaterials3 = [grey, grey, grey, grey, darkGrey, grey];
+let lcdTexture;
 
-let textureLoader = new Three.TextureLoader();
-let lcdTexture = textureLoader.load("/images/textures/monitor.png");
+if (typeof window !== "undefined") {
+  let textureLoader = new Three.TextureLoader();
+  lcdTexture = textureLoader.load("/images/textures/monitor.png");
+}
 
 //dimensions
 let width = 258;
@@ -44,14 +47,16 @@ function makeObjectMaxLOD() {
     let gridVerticalElem = new Three.Mesh(gridVerticalElemGeometry, white);
     gridVerticalElem.position.x = i;
     gridVerticalElem.position.y = 26;
-    filter.add(gridVerticalElem);
+    if (gridVerticalElem || gridVerticalElem instanceof THREE.Object3D)
+      filter.add(gridVerticalElem);
   }
 
   for (let i = 0; i < 52; i += 7.4) {
     let gridHorizontalElem = new Three.Mesh(gridHorizontalElemGeometry, white);
     gridHorizontalElem.position.x = 23.5;
     gridHorizontalElem.position.y = i;
-    filter.add(gridHorizontalElem);
+    if (gridHorizontalElem || gridHorizontalElem instanceof THREE.Object3D)
+      filter.add(gridHorizontalElem);
   }
 
   for (let k = 0; k <= 54; k += 46) {
