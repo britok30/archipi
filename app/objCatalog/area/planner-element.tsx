@@ -2,14 +2,28 @@
 
 import AreaFactory from "../../catalog/factories/area-factory";
 
-let info = {
+export interface Info {
+  title: string;
+  tag: string[];
+  description: string;
+  image: string;
+}
+
+export interface Textures {
+  name: string;
+  uri: string;
+  lengthRepeatScale: number;
+  heightRepeatScale: number;
+}
+
+let info: Info = {
   title: "area",
   tag: ["area"],
   description: "Generic Room",
   image: "",
 };
 
-let textures = {
+let textures: Record<string, Textures> = {
   parquet: {
     name: "Parquet",
     uri: "/images/textures/parquet.jpg",

@@ -4,10 +4,15 @@ import React from "react";
 import { createArea, updatedArea } from "./area-factory-3d";
 import * as SharedStyle from "../../styles/shared-style";
 import Translator from "../../translator/translator";
+import { Info, Textures } from "../../objCatalog/area/planner-element";
 
 let translator = new Translator();
 
-export default function AreaFactory(name, info, textures) {
+export default function AreaFactory(
+  name: string,
+  info: Info,
+  textures: Record<string, Textures>
+) {
   let areaElement = {
     name,
     prototype: "areas",
@@ -31,6 +36,7 @@ export default function AreaFactory(name, info, textures) {
           length: 0,
         },
       },
+      texture: {},
     },
     render2D: function (element, layer, scene) {
       let path = "";
