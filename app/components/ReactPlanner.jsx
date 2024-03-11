@@ -10,10 +10,11 @@ import Catalog from "../catalog/catalog";
 import actions from "../actions/export";
 import Footer from "./Footer/Footer";
 import { objectsMap } from "../utils/objects-utils";
-import { ToolbarComponents, Content } from "./export";
+import { ToolbarComponents } from "./export";
 import ReactPlannerContext from "../context/ReactPlannerContext";
 import Overlays from "./overlays";
 import Sidebar from "./Sidebar/Sidebar";
+import Content from "./Content";
 
 const { Toolbar } = ToolbarComponents;
 

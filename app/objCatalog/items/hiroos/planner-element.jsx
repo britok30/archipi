@@ -3,9 +3,15 @@
 import * as Three from "three";
 import React from "react";
 
+let frontTexture1;
+
+if (typeof window !== "undefined") {
+  let textureLoader = new Three.TextureLoader();
+  frontTexture1 = textureLoader.load("/images/textures/hiroosTexture.jpg");
+}
+
 const cubeMaterial = new Three.MeshStandardMaterial({ color: 0x65696c });
-let textureLoader = new Three.TextureLoader();
-let frontTexture1 = textureLoader.load("/images/textures/hiroosTexture.jpg");
+
 let newWidth = 175;
 let newDepth = 85;
 let newHeight = 195;
