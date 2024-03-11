@@ -1,11 +1,9 @@
-import ToolbarComponents from "./toolbar/export";
-import Content from "./content";
+import ToolbarComponents from "./Toolbar/export";
 import StyleComponents from "./style/export";
 
-export { ToolbarComponents, Content, StyleComponents };
+export { ToolbarComponents, StyleComponents };
 
 export default {
   ToolbarComponents,
-  Content,
   StyleComponents,
 };
