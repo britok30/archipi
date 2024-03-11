@@ -199,10 +199,15 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
               <div className="mb-3">
                 <h3 className="mb-1">2D View Controls</h3>
                 <ul className="flex flex-col space-y-1">
-                  <li>Move View: Click and drag the mouse in any direction.</li>
-                  <li>Zoom: Scroll the mouse wheel up or down.</li>
-                  <li>Cancel Action: Press the &apos;Esc&apos; key.</li>
-                  <li>Delete item: Select and press Backspace/Delete</li>
+                  <li>
+                    - Move View: Click and drag the mouse in any direction.
+                  </li>
+                  <li>
+                    - Zoom: Scroll the mouse wheel up or down or pinch to zoom
+                    on trackpad
+                  </li>
+                  <li>- Cancel Action: Press the &apos;Esc&apos; key.</li>
+                  <li>- Delete item: Select and press Backspace/Delete</li>
                 </ul>
               </div>
               <div>
@@ -211,7 +216,10 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
                   <li>
                     - Rotate: Click and drag with the mouse in any direction.
                   </li>
-                  <li>- Zoom: Scroll the mouse wheel up or down.</li>
+                  <li>
+                    - Zoom: Scroll the mouse wheel up or down or pinch to zoom
+                    on trackpad
+                  </li>
                   <li>
                     - Move Camera: Hold CMD/CTRL and click, then drag to
                     reposition the camera.
