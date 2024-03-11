@@ -1,7 +1,7 @@
 import * as Three from "three";
 import { HELVETIKER } from "./libs/helvetiker_regular.typeface.js";
-import gridHorizontalStreak from "./grids/grid-horizontal-streak";
-import gridVerticalStreak from "./grids/grid-vertical-streak";
+import gridHorizontalStreak from "./grids/grid-horizontal-streak.ts";
+import gridVerticalStreak from "./grids/grid-vertical-streak.ts";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 
 export default function createGrid(scene) {
