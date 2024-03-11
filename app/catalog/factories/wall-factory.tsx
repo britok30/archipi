@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { CSSProperties } from "react";
 import { buildWall, updatedWall } from "./wall-factory-3d";
 import * as SharedStyle from "../../styles/shared-style";
 import * as Geometry from "../../utils/geometry";
@@ -12,21 +12,23 @@ const THRESHOLD_ANGLE = 0.5;
 const EPSILON_ANGLE = 0.01;
 const CHAR_HEIGHT = 11;
 
-const STYLE_TEXT = { textAnchor: "middle" };
-const STYLE_LINE = { stroke: SharedStyle.LINE_MESH_COLOR.selected };
+const STYLE_TEXT = { textAnchor: "middle" } as CSSProperties;
+const STYLE_LINE = {
+  stroke: SharedStyle.LINE_MESH_COLOR.selected,
+} as CSSProperties;
 const STYLE_RECT = {
   strokeWidth: 1,
   stroke: SharedStyle.LINE_MESH_COLOR.unselected,
   fill: "url(#diagonalFill)",
-};
+} as CSSProperties;
 const STYLE_RECT_SELECTED = {
   ...STYLE_RECT,
   stroke: SharedStyle.LINE_MESH_COLOR.selected,
-};
+} as CSSProperties;
 
 let translator = new Translator();
 
-export default function WallFactory(name, info, textures) {
+export default function WallFactory(name: string, info, textures) {
   let wallElement = {
     name,
     prototype: "lines",
@@ -46,6 +48,8 @@ export default function WallFactory(name, info, textures) {
           length: 20,
         },
       },
+      textureA: {},
+      textureB: {},
     },
 
     calculatePolygonPoints: function (
@@ -1164,7 +1168,10 @@ export default function WallFactory(name, info, textures) {
   };
 
   if (textures && Object.keys(textures).length !== 0) {
-    let textureValues = { none: "None" };
+    let textureValues: {
+      none: string;
+      bricks?: string;
+    } = { none: "None" };
 
     for (let textureName in textures) {
       textureValues[textureName] = textures[textureName].name;
