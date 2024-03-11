@@ -6,12 +6,19 @@ import React from "react";
 const WIDTH = 50;
 const DEPTH = 50;
 const HEIGHT = 50;
+let power;
+let black;
+let white;
+let keyboard;
 
-const textureLoader = new Three.TextureLoader();
-const power = textureLoader.load("/images/textures/pc-power.jpg");
-const black = textureLoader.load("/images/textures/pc-black.jpg");
-const white = textureLoader.load("/images/textures/pc-white.jpg");
-const keyboard = textureLoader.load("/images/textures/keyboard.jpg");
+if (typeof window !== "undefined") {
+  const textureLoader = new Three.TextureLoader();
+  power = textureLoader.load("/images/textures/pc-power.jpg");
+  black = textureLoader.load("/images/textures/pc-black.jpg");
+  white = textureLoader.load("/images/textures/pc-white.jpg");
+  keyboard = textureLoader.load("/images/textures/keyboard.jpg");
+}
+
 const blackMaterial = new Three.MeshBasicMaterial({ map: black });
 
 const objectMaxLOD = makeObjectMaxLOD();
