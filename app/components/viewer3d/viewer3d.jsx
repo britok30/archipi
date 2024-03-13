@@ -54,7 +54,7 @@ const Scene3DViewer = (props) => {
     scene3D.add(planData.grid);
 
     let aspectRatio = width / height;
-    const camera = new Three.PerspectiveCamera(45, aspectRatio, 1, 300000);
+    const camera = new Three.PerspectiveCamera(45, aspectRatio, 300, 300000);
 
     scene3D.add(camera);
 
