@@ -7,6 +7,7 @@ export const useWindowSize = () => {
     width: undefined,
     height: undefined,
   });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     // only execute all the code below in client side
@@ -17,6 +18,8 @@ export const useWindowSize = () => {
         width: window.innerWidth,
         height: window.innerHeight,
       });
+
+      setIsMobile(window.innerWidth < 768);
     }
 
     // Add event listener
@@ -29,5 +32,5 @@ export const useWindowSize = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  return windowSize;
+  return { windowSize, isMobile };
 };
