@@ -24,12 +24,7 @@ export function orderVertices(vertices) {
   return vertices.sort(compareVertices);
 }
 
-export function pointsDistance(x0, y0, x1, y1) {
-  let diff_x = x0 - x1;
-  let diff_y = y0 - y1;
-
-  return Math.sqrt(diff_x * diff_x + diff_y * diff_y);
-}
+export const pointsDistance = (x0, y0, x1, y1) => Math.hypot(x1 - x0, y1 - y0);
 
 export function verticesDistance(v1, v2) {
   let { x: x0, y: y0 } = v1;

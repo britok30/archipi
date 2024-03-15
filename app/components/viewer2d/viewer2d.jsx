@@ -173,7 +173,7 @@ export const Viewer2D = ({ state, width, height }) => {
     viewerEvent.originalEvent.stopPropagation();
   };
 
-  let onMouseDown = (viewerEvent) => {
+  const onMouseDown = (viewerEvent) => {
     let event = viewerEvent.originalEvent;
 
     //workaround that allow imageful component to work
@@ -241,7 +241,7 @@ export const Viewer2D = ({ state, width, height }) => {
     event.stopPropagation();
   };
 
-  let onMouseUp = (viewerEvent) => {
+  const onMouseUp = (viewerEvent) => {
     let event = viewerEvent.originalEvent;
 
     let evt = new Event("mouseup-planner-event");
@@ -421,7 +421,12 @@ export const Viewer2D = ({ state, width, height }) => {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         toolbarProps={{ position: "none" }}
-        miniatureProps={{ position: "none" }}
+        miniatureProps={{
+          position: "none",
+          background: "#616264",
+          width: 100,
+          height: 80,
+        }}
       >
         <svg width={scene.width} height={scene.height}>
           <defs>
