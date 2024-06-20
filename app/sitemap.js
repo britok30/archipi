@@ -8,11 +8,5 @@ export default async function sitemap() {
       changeFrequency: "weekly",
       priority: 1,
     },
-    {
-      url: `${baseUrl}/faq`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
   ];
 }

@@ -125,16 +125,7 @@ const Footer = ({
       )}
 
       <div className="relative border-l flex space-x-3 border-white float-right py-0 px-[1rem]">
-        <Link
-          className="hover:underline transition duration-300 ease-in-out"
-          href="/faq"
-        >
-          FAQ
-        </Link>
-
-        {softwareSignature && (
-          <div className="border-l px-2">{softwareSignature}</div>
-        )}
+        {softwareSignature && <div>{softwareSignature}</div>}
       </div>
     </div>
   );

@@ -21,7 +21,6 @@ export default {
   "Delete group and all Elements": "Удалить группу и все элементы",
   "Delete layer": "Удалить слой",
   Delete: "Удалить",
-  "Elements on layer {0}": "Элементов на слое {0}",
   Elements: "элементы",
   "Get Screenshot": "Сделать снимок экрана",
   "Group [{0}]": "группа [{0}]",

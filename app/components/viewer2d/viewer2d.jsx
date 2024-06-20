@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useCallback, memo } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -452,6 +452,11 @@ export const Viewer2D = ({ state, width, height }) => {
     </div>
   );
 };
+
+export const MemoizedViewer2D = memo(
+  Viewer2D,
+  (prevProps, nextProps) => prevProps === nextProps
+);
 
 Viewer2D.propTypes = {
   state: PropTypes.object.isRequired,

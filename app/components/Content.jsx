@@ -2,7 +2,7 @@
 
 import React from "react";
 import PropTypes from "prop-types";
-import { Viewer2D } from "./viewer2d/viewer2d";
+import { MemoizedViewer2D, Viewer2D } from "./viewer2d/viewer2d";
 import Viewer3D from "./viewer3d/viewer3d";
 import CatalogList from "./CatalogView/CatalogList";
 // import Viewer3DFirstPerson from './viewer3d/viewer3d-first-person';
@@ -36,7 +36,7 @@ export default function Content({ width, height, state, customContents }) {
     case constants.MODE_DRAWING_ITEM:
     case constants.MODE_DRAGGING_HOLE:
     case constants.MODE_ROTATING_ITEM:
-      return <Viewer2D state={state} width={width} height={height} />;
+      return <MemoizedViewer2D state={state} width={width} height={height} />;
 
     case constants.MODE_CONFIGURING_PROJECT:
       return <ProjectConfigurator state={state} />;

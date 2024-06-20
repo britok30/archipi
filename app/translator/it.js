@@ -21,7 +21,6 @@ export default {
   "Delete group and all Elements": "Elimina Gruppo e tutti i suoi Elementi",
   "Delete layer": "Elimina livello",
   Delete: "Elimina",
-  "Elements on layer {0}": "Elementi nel livello {0}",
   Elements: "Elementi",
   "Get Screenshot": "Cattura uno screenshot",
   "Group [{0}]": "Gruppo [{0}]",

@@ -21,7 +21,6 @@ export default {
   "Delete group and all Elements": "Delete group and all Elements",
   "Delete layer": "Delete layer",
   Delete: "Delete",
-  "Elements on layer": "Elements on layer",
   Elements: "Elements",
   "Get Screenshot": "Get Screenshot",
   "Group [{0}]": "Group [{0}]",
