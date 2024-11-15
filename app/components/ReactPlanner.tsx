@@ -15,8 +15,7 @@ import ReactPlannerContext from "../context/ReactPlannerContext";
 import Overlays from "./overlays";
 import Sidebar from "./Sidebar/Sidebar";
 import Content from "./Content";
-
-const { Toolbar } = ToolbarComponents;
+import { Toolbar } from "./Toolbar/export";
 
 const footerBarH = 20;
 
