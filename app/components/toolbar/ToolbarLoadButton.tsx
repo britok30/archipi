@@ -3,15 +3,17 @@
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import ToolbarButton from "./toolbar-button";
 import { browserUpload } from "../../utils/browser";
-import { MdFileUpload } from "react-icons/md";
+import { Upload } from "lucide-react";
+import ToolbarButton from "./ToolbarButton";
 
 export default function ToolbarLoadButton({ state }) {
   const { projectActions, translator } = useContext(ReactPlannerContext);
 
-  let loadProjectFromFile = (event) => {
-    event.preventDefault();
+  let loadProjectFromFile = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
     browserUpload().then((data) => {
       projectActions.loadProject(JSON.parse(data));
     });
@@ -20,10 +22,10 @@ export default function ToolbarLoadButton({ state }) {
   return (
     <ToolbarButton
       active={false}
-      tooltip={translator.t("Load project")}
-      onClick={loadProjectFromFile}
+      tooltip="Load Project"
+      onClick={(e) => loadProjectFromFile(e)}
     >
-      <MdFileUpload className="mb-0.5" size={25} />
+      <Upload size={18} />
       Upload
     </ToolbarButton>
   );

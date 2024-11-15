@@ -3,16 +3,20 @@
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import ToolbarButton from "./toolbar-button";
 import { browserDownload } from "../../utils/browser";
 import { Project } from "../../class";
 import { OBJExporter } from "./OBJExporter";
-import Dropdown from "rc-dropdown";
-import Menu, { Item as MenuItem } from "rc-menu";
 import { parseData } from "../viewer3d/scene-creator";
 
 import * as Three from "three";
-import { FaSave } from "react-icons/fa";
+import { Save } from "lucide-react";
+import {
+  PopoverTrigger,
+  Popover,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export default function ToolbarSaveButton({ state }) {
   const context = useContext(ReactPlannerContext);
@@ -44,29 +48,27 @@ export default function ToolbarSaveButton({ state }) {
     });
   };
 
-  const menu = (
-    <Menu style={{ width: 140 }}>
-      <MenuItem key="1" onClick={saveProjectToJSONFile}>
-        JSON
-      </MenuItem>
-      <MenuItem key="2" onClick={saveProjectToObjFile}>
-        OBJ
-      </MenuItem>
-    </Menu>
-  );
-
   return (
-    <Dropdown
-      trigger={["click"]}
-      overlay={menu}
-      animation="slide-up"
-      placement="topLeft"
-    >
-      <ToolbarButton active={false} tooltip={translator.t("Save project")}>
-        <FaSave className="mb-0.5" size={20} />
-        Save
-      </ToolbarButton>
-    </Dropdown>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button>
+          <Save size={18} />
+          Save
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent side="top" className="w-80 bg-white">
+        <Label>Save as</Label>
+        <div>
+          <Button className="w-full mb-2" onClick={saveProjectToJSONFile}>
+            JSON
+          </Button>
+          <Button className="w-full" onClick={saveProjectToObjFile}>
+            OBJ
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 

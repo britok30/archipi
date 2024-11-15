@@ -4,9 +4,9 @@ import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { IoIosDocument } from "react-icons/io";
-import ToolbarButton from "./toolbar-button";
-import ToolbarSaveButton from "./toolbar-save-button";
-import ToolbarLoadButton from "./toolbar-load-button";
+import ToolbarButton from "./ToolbarButton";
+import ToolbarSaveButton from "./ToolbarSaveButton";
+import ToolbarLoadButton from "./ToolbarLoadButton";
 import If from "../../utils/react-if";
 import {
   MODE_IDLE,
@@ -188,52 +188,52 @@ const Toolbar = ({ state, toolbarButtons, allowProjectFileSupport }) => {
       condition: true,
       dom: <ScreenshotToolbarButton mode={mode} />,
     },
-    {
-      index: 10,
-      condition: true,
-      dom: (
-        <ToolbarButton
-          active={false}
-          tooltip={
-            <>
-              <div className="mb-3">
-                <h3 className="mb-1">2D View Controls</h3>
-                <ul className="flex flex-col space-y-1">
-                  <li>
-                    - Move View: Click and drag the mouse in any direction.
-                  </li>
-                  <li>
-                    - Zoom: Scroll the mouse wheel up or down or pinch to zoom
-                    on trackpad
-                  </li>
-                  <li>- Cancel Action: Press the &apos;Esc&apos; key.</li>
-                  <li>- Delete item: Select and press Backspace/Delete</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="mb-1">3D View Controls</h3>
-                <ul className="flex flex-col space-y-1">
-                  <li>
-                    - Rotate: Click and drag with the mouse in any direction.
-                  </li>
-                  <li>
-                    - Zoom: Scroll the mouse wheel up or down or pinch to zoom
-                    on trackpad
-                  </li>
-                  <li>
-                    - Move Camera: Hold CMD/CTRL and click, then drag to
-                    reposition the camera.
-                  </li>
-                </ul>
-              </div>
-            </>
-          }
-        >
-          <CiCircleInfo className="mb-0.5" size={23} />
-          Tips
-        </ToolbarButton>
-      ),
-    },
+    // {
+    //   index: 10,
+    //   condition: true,
+    //   dom: (
+    //     <ToolbarButton
+    //       active={false}
+    //       tooltip={
+    //         <>
+    //           <div className="mb-3">
+    //             <h3 className="mb-1">2D View Controls</h3>
+    //             <ul className="flex flex-col space-y-1">
+    //               <li>
+    //                 - Move View: Click and drag the mouse in any direction.
+    //               </li>
+    //               <li>
+    //                 - Zoom: Scroll the mouse wheel up or down or pinch to zoom
+    //                 on trackpad
+    //               </li>
+    //               <li>- Cancel Action: Press the &apos;Esc&apos; key.</li>
+    //               <li>- Delete item: Select and press Backspace/Delete</li>
+    //             </ul>
+    //           </div>
+    //           <div>
+    //             <h3 className="mb-1">3D View Controls</h3>
+    //             <ul className="flex flex-col space-y-1">
+    //               <li>
+    //                 - Rotate: Click and drag with the mouse in any direction.
+    //               </li>
+    //               <li>
+    //                 - Zoom: Scroll the mouse wheel up or down or pinch to zoom
+    //                 on trackpad
+    //               </li>
+    //               <li>
+    //                 - Move Camera: Hold CMD/CTRL and click, then drag to
+    //                 reposition the camera.
+    //               </li>
+    //             </ul>
+    //           </div>
+    //         </>
+    //       }
+    //     >
+    //       <CiCircleInfo className="mb-0.5" size={23} />
+    //       Tips
+    //     </ToolbarButton>
+    //   ),
+    // },
   ];
 
   sorter = sorter.concat(

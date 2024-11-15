@@ -6,7 +6,7 @@ import ReactPlannerContext from "../context/ReactPlannerContext";
 import { ReactPlannerConstants } from "../utils";
 import { ReactPlannerUtils } from "../utils";
 import { IoCamera } from "react-icons/io5";
-import ToolbarButton from "../components/toolbar/toolbar-button";
+import ToolbarButton from "../components/Toolbar/ToolbarButton";
 
 const { imageBrowserDownload } = ReactPlannerUtils.BrowserUtils;
 const { saveSVGtoPngFile } = ReactPlannerUtils.ImageUtils;
