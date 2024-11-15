@@ -24,7 +24,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
 }) => {
   return (
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <Button variant="default" onClick={onClick}>
             {children}
