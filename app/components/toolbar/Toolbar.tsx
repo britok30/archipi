@@ -22,7 +22,6 @@ import { IoIosUndo } from "react-icons/io";
 import { IoIosRedo } from "react-icons/io";
 import { IoSettingsSharp } from "react-icons/io5";
 import ScreenshotToolbarButton from "./ScreenshotToolbarButton";
-import { CiCircleInfo } from "react-icons/ci";
 
 const sortButtonsCb = (a, b) => {
   if (a.index === undefined || a.index === null) {
