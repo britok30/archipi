@@ -50,7 +50,7 @@ export class Line {
           "lines",
           state.catalog.getIn(["elements", type, "info", "title"])
         ),
-        vertices: new List([v0.id, v1.id]),
+        vertices: List([v0.id, v1.id]),
         type,
       },
       properties
@@ -328,7 +328,7 @@ export class Line {
       lines.push(line);
     });
 
-    return { updatedState: state, lines: new List(lines) };
+    return { updatedState: state, lines: List(lines) };
   }
 
   static createAvoidingIntersections(
@@ -505,7 +505,7 @@ export class Line {
   static selectToolDrawingLine(state, sceneComponentType) {
     state = state.merge({
       mode: MODE_WAITING_DRAWING_LINE,
-      drawingSupport: new Map({
+      drawingSupport: Map({
         type: sceneComponentType,
       }),
     });
@@ -633,7 +633,7 @@ export class Line {
 
     state = state.merge({
       mode: MODE_WAITING_DRAWING_LINE,
-      snapElements: new List(),
+      snapElements: List(),
       activeSnapElement: null,
     });
 
@@ -646,7 +646,7 @@ export class Line {
 
     let snapElements = SnapSceneUtils.sceneSnapElements(
       state.scene,
-      new List(),
+      List(),
       state.snapMask
     );
 

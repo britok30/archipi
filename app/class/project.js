@@ -14,7 +14,7 @@ import {
   HorizontalGuide,
   VerticalGuide,
   Item,
-} from "./export";
+} from "./index.js";
 
 export class Project {
   static setAlterate(state) {
@@ -180,11 +180,11 @@ export class Project {
       mode: MODE_IDLE,
       scene: sceneHistory.last,
       sceneHistory: history.historyPush(sceneHistory, sceneHistory.last),
-      snapElements: new List(),
+      snapElements: List(),
       activeSnapElement: null,
-      drawingSupport: new Map(),
-      draggingSupport: new Map(),
-      rotatingSupport: new Map(),
+      drawingSupport: Map(),
+      draggingSupport: Map(),
+      rotatingSupport: Map(),
     });
 
     return { updatedState: state };
@@ -215,7 +215,7 @@ export class Project {
   }
 
   static updateMouseCoord(state, coords) {
-    state = state.set("mouse", new Map(coords));
+    state = state.set("mouse", Map(coords));
 
     return { updatedState: state };
   }

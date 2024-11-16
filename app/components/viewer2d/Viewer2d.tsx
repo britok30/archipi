@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useContext, useCallback, memo } from "react";
-import PropTypes from "prop-types";
-
 import {
   ReactSVGPanZoom,
   TOOL_NONE,
@@ -10,17 +8,24 @@ import {
   TOOL_ZOOM_IN,
   TOOL_ZOOM_OUT,
   TOOL_AUTO,
-  INITIAL_VALUE,
+  Value,
+  Tool,
 } from "react-svg-pan-zoom";
-
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import * as constants from "../../utils/constants";
 import { State } from "./state";
 import * as SharedStyle from "../../styles/shared-style";
 import { RulerX } from "./rulerX";
 import { RulerY } from "./rulerY";
+import { Map as ImmutableMap } from "immutable";
 
-const mode2Tool = (mode) => {
+interface Viewer2DProps {
+  state: any; // Replace 'any' with the actual type of your app state if available
+  width: number;
+  height: number;
+}
+
+const mode2Tool = (mode: string): Tool => {
   switch (mode) {
     case constants.MODE_2D_PAN:
       return TOOL_PAN;
@@ -35,7 +40,7 @@ const mode2Tool = (mode) => {
   }
 };
 
-const mode2PointerEvents = (mode) => {
+const mode2PointerEvents = (mode: string): React.CSSProperties => {
   switch (mode) {
     case constants.MODE_DRAWING_LINE:
     case constants.MODE_DRAWING_HOLE:
@@ -45,23 +50,20 @@ const mode2PointerEvents = (mode) => {
     case constants.MODE_DRAGGING_LINE:
     case constants.MODE_DRAGGING_VERTEX:
       return { pointerEvents: "none" };
-
     default:
       return {};
   }
 };
 
-const mode2Cursor = (mode) => {
+const mode2Cursor = (mode: string): React.CSSProperties => {
   switch (mode) {
     case constants.MODE_DRAGGING_HOLE:
     case constants.MODE_DRAGGING_LINE:
     case constants.MODE_DRAGGING_VERTEX:
     case constants.MODE_DRAGGING_ITEM:
       return { cursor: "move" };
-
     case constants.MODE_ROTATING_ITEM:
       return { cursor: "ew-resize" };
-
     case constants.MODE_WAITING_DRAWING_LINE:
     case constants.MODE_DRAWING_LINE:
       return { cursor: "crosshair" };
@@ -70,7 +72,7 @@ const mode2Cursor = (mode) => {
   }
 };
 
-const mode2DetectAutopan = (mode) => {
+const mode2DetectAutopan = (mode: string): boolean => {
   switch (mode) {
     case constants.MODE_DRAWING_LINE:
     case constants.MODE_DRAGGING_LINE:
@@ -80,34 +82,40 @@ const mode2DetectAutopan = (mode) => {
     case constants.MODE_DRAWING_HOLE:
     case constants.MODE_DRAWING_ITEM:
       return true;
-
     default:
       return false;
   }
 };
 
-const extractElementData = (node) => {
-  while (
-    !node.attributes.getNamedItem("data-element-root") &&
-    node.tagName !== "svg"
-  ) {
-    node = node.parentNode;
+interface ElementData {
+  part?: string;
+  layer: string;
+  prototype: string;
+  selected: boolean;
+  id: string;
+}
+
+const extractElementData = (node: HTMLElement): ElementData | null => {
+  while (!node.getAttribute("data-element-root") && node.tagName !== "svg") {
+    if (node.parentNode) {
+      node = node.parentNode as HTMLElement;
+    } else {
+      return null;
+    }
   }
   if (node.tagName === "svg") return null;
 
   return {
-    part: node.attributes.getNamedItem("data-part")
-      ? node.attributes.getNamedItem("data-part").value
-      : undefined,
-    layer: node.attributes.getNamedItem("data-layer").value,
-    prototype: node.attributes.getNamedItem("data-prototype").value,
-    selected: node.attributes.getNamedItem("data-selected").value === "true",
-    id: node.attributes.getNamedItem("data-id").value,
+    part: node.getAttribute("data-part") || undefined,
+    layer: node.getAttribute("data-layer")!,
+    prototype: node.getAttribute("data-prototype")!,
+    selected: node.getAttribute("data-selected") === "true",
+    id: node.getAttribute("data-id")!,
   };
 };
 
-export const Viewer2D = ({ state, width, height }) => {
-  let {
+export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
+  const {
     viewer2DActions,
     linesActions,
     holesActions,
@@ -118,21 +126,24 @@ export const Viewer2D = ({ state, width, height }) => {
     catalog,
   } = useContext(ReactPlannerContext);
 
-  let { viewer2D, mode, scene } = state;
+  const { viewer2D, mode, scene } = state;
 
-  let layerID = scene.selectedLayer;
+  const layerID = scene.selectedLayer;
 
-  let mapCursorPosition = ({ x, y }) => {
-    return { x, y: -y + scene.height };
-  };
+  const mapCursorPosition = useCallback(
+    ({ x, y }: { x: number; y: number }) => {
+      return { x, y: -y + scene.height };
+    },
+    [scene.height]
+  );
 
-  let onMouseMove = (viewerEvent) => {
-    //workaround that allow imageful component to work
-    let evt = new Event("mousemove-planner-event");
+  const onMouseMove = (viewerEvent: any) => {
+    // Workaround to allow imageful component to work
+    const evt = new Event("mousemove-planner-event") as any;
     evt.viewerEvent = viewerEvent;
     document.dispatchEvent(evt);
 
-    let { x, y } = mapCursorPosition(viewerEvent);
+    const { x, y } = mapCursorPosition(viewerEvent);
 
     projectActions.updateMouseCoord({ x, y });
 
@@ -173,18 +184,18 @@ export const Viewer2D = ({ state, width, height }) => {
     viewerEvent.originalEvent.stopPropagation();
   };
 
-  const onMouseDown = (viewerEvent) => {
-    let event = viewerEvent.originalEvent;
+  const onMouseDown = (viewerEvent: any) => {
+    const event = viewerEvent.originalEvent;
 
-    //workaround that allow imageful component to work
-    let evt = new Event("mousedown-planner-event");
+    // Workaround to allow imageful component to work
+    const evt = new Event("mousedown-planner-event") as any;
     evt.viewerEvent = viewerEvent;
     document.dispatchEvent(evt);
 
-    let { x, y } = mapCursorPosition(viewerEvent);
+    const { x, y } = mapCursorPosition(viewerEvent);
 
     if (mode === constants.MODE_IDLE) {
-      let elementData = extractElementData(event.target);
+      const elementData = extractElementData(event.target as HTMLElement);
       if (!elementData || !elementData.selected) return;
 
       switch (elementData.prototype) {
@@ -241,18 +252,18 @@ export const Viewer2D = ({ state, width, height }) => {
     event.stopPropagation();
   };
 
-  const onMouseUp = (viewerEvent) => {
-    let event = viewerEvent.originalEvent;
+  const onMouseUp = (viewerEvent: any) => {
+    const event = viewerEvent.originalEvent;
 
-    let evt = new Event("mouseup-planner-event");
+    const evt = new Event("mouseup-planner-event") as any;
     evt.viewerEvent = viewerEvent;
     document.dispatchEvent(evt);
 
-    let { x, y } = mapCursorPosition(viewerEvent);
+    const { x, y } = mapCursorPosition(viewerEvent);
 
     switch (mode) {
       case constants.MODE_IDLE:
-        let elementData = extractElementData(event.target);
+        const elementData = extractElementData(event.target as HTMLElement);
 
         if (elementData && elementData.selected) return;
 
@@ -320,12 +331,12 @@ export const Viewer2D = ({ state, width, height }) => {
     event.stopPropagation();
   };
 
-  let onChangeValue = (value) => {
+  const onChangeValue = (value: Value) => {
     projectActions.updateZoomScale(value.a);
-    return viewer2DActions.updateCameraView(value);
+    viewer2DActions.updateCameraView(value);
   };
 
-  let onChangeTool = (tool) => {
+  const onChangeTool = (tool: Tool) => {
     switch (tool) {
       case TOOL_NONE:
         projectActions.selectToolEdit();
@@ -345,18 +356,18 @@ export const Viewer2D = ({ state, width, height }) => {
     }
   };
 
-  let { e, f, SVGWidth, SVGHeight } = state.get("viewer2D").toJS();
+  const { e, f, SVGWidth, SVGHeight } = viewer2D.toJS();
 
-  let rulerSize = 15; //px
-  let rulerUnitPixelSize = 100;
-  let rulerBgColor = "#292929";
-  let rulerFnColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
-  let rulerMkColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
-  let sceneWidth = SVGWidth || state.getIn(["scene", "width"]);
-  let sceneHeight = SVGHeight || state.getIn(["scene", "height"]);
-  let sceneZoom = state.zoom || 1;
-  let rulerXElements = Math.ceil(sceneWidth / rulerUnitPixelSize) + 1;
-  let rulerYElements = Math.ceil(sceneHeight / rulerUnitPixelSize) + 1;
+  const rulerSize = 15; // px
+  const rulerUnitPixelSize = 100;
+  const rulerBgColor = "#292929";
+  const rulerFnColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
+  const rulerMkColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
+  const sceneWidth = SVGWidth || scene.width;
+  const sceneHeight = SVGHeight || scene.height;
+  const sceneZoom = viewer2D.get("zoom") || 1;
+  const rulerXElements = Math.ceil(sceneWidth / rulerUnitPixelSize) + 1;
+  const rulerYElements = Math.ceil(sceneHeight / rulerUnitPixelSize) + 1;
 
   return (
     <div
@@ -412,7 +423,7 @@ export const Viewer2D = ({ state, width, height }) => {
         style={{ gridColumn: 2, gridRow: 2 }}
         width={width - rulerSize}
         height={height - rulerSize}
-        value={viewer2D.isEmpty() ? INITIAL_VALUE : viewer2D.toJS()}
+        value={viewer2D.isEmpty() ? {} : viewer2D.toJS()}
         onChangeValue={onChangeValue}
         tool={mode2Tool(mode)}
         onChangeTool={onChangeTool}
@@ -444,7 +455,7 @@ export const Viewer2D = ({ state, width, height }) => {
               />
             </pattern>
           </defs>
-          <g style={Object.assign(mode2Cursor(mode), mode2PointerEvents(mode))}>
+          <g style={{ ...mode2Cursor(mode), ...mode2PointerEvents(mode) }}>
             <State state={state} catalog={catalog} />
           </g>
         </svg>
@@ -453,13 +464,4 @@ export const Viewer2D = ({ state, width, height }) => {
   );
 };
 
-export const MemoizedViewer2D = memo(
-  Viewer2D,
-  (prevProps, nextProps) => prevProps === nextProps
-);
-
-Viewer2D.propTypes = {
-  state: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-};
+export default memo(Viewer2D);

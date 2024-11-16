@@ -7,6 +7,7 @@ import { Grids } from "./grids/grids";
 
 export const Scene = ({ scene, catalog }) => {
   const { layers } = scene;
+  console.log(scene.selectedLayer);
   const selectedLayer = layers.get(scene.selectedLayer);
 
   return (
@@ -31,7 +32,7 @@ export const Scene = ({ scene, catalog }) => {
       </g>
 
       <Layer
-        key={selectedLayer.id}
+        key={selectedLayer?.id}
         layer={selectedLayer}
         scene={scene}
         catalog={catalog}

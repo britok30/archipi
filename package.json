@@ -12,6 +12,7 @@
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-popover": "^1.1.2",
+    "@radix-ui/react-slider": "^1.2.1",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
     "@tippyjs/react": "^4.2.6",
@@ -40,7 +41,7 @@
     "react-icons": "^5.0.1",
     "react-range": "^1.8.14",
     "react-redux": "7.2.9",
-    "react-svg-pan-zoom": "^3.12.1",
+    "react-svg-pan-zoom": "^3.13.1",
     "react-tabs": "^6.0.2",
     "redux": "4.0.1",
     "sharp": "^0.33.2",
@@ -48,7 +49,8 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.170.0",
-    "three-csg-ts": "^3.1.13"
+    "three-csg-ts": "^3.1.13",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@types/node": "20.11.20",

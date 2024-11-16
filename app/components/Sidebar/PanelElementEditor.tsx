@@ -3,7 +3,7 @@
 import React, { useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { Seq } from "immutable";
+import { Seq, Map } from "immutable";
 import ElementEditor from "./ElementEditor";
 
 const PanelElementEditor: React.FC<{ state: any }> = ({ state }) => {
@@ -26,10 +26,10 @@ const PanelElementEditor: React.FC<{ state: any }> = ({ state }) => {
   const layerRenderer = (layer: any) =>
     Seq()
       .concat(
-        layer.get("lines"),
-        layer.get("holes"),
-        layer.get("areas"),
-        layer.get("items")
+        layer.get("lines") || Map(),
+        layer.get("holes") || Map(),
+        layer.get("areas") || Map(),
+        layer.get("items") || Map()
       )
       .filter((element: any) => element.get("selected"))
       .map((element: any) => componentRenderer(element, layer))

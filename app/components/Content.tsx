@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MemoizedViewer2D } from "./viewer2d/viewer2d";
+import { Viewer2D } from "./viewer2d/Viewer2d";
 import CatalogList from "./CatalogView/CatalogList";
 import ProjectConfigurator from "./ProjectConfigurator/ProjectConfigurator";
 import * as constants from "../utils/constants";
@@ -64,7 +64,7 @@ const Content: React.FC<ContentProps> = ({
 
     default:
       if (viewer2DModes.has(mode)) {
-        return <MemoizedViewer2D state={state} width={width} height={height} />;
+        return <Viewer2D state={state} width={width} height={height} />;
       }
       if (customContents.hasOwnProperty(mode)) {
         const CustomContent = customContents[mode];

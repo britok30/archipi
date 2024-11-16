@@ -169,9 +169,9 @@ class Layer {
       linesArray
     );
 
-    let innerCyclesByVerticesID = new List(innerCyclesByVerticesArrayIndex).map(
+    let innerCyclesByVerticesID = List(innerCyclesByVerticesArrayIndex).map(
       (cycle) =>
-        new List(
+        List(
           cycle.map(
             (vertexIndex) => verticesArrayIndex_to_vertexID[vertexIndex]
           )

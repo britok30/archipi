@@ -29,6 +29,6 @@
     "**/*.ts",
     "**/*.tsx",
     "app/plugins/autosave.js"
-, "app/components/Toolbar/export.ts"  ],
+, "app/components/Toolbar/export.ts", "app/class/line.js", "app/class/index.js", "app/class/project.js"  ],
   "exclude": ["node_modules"]
 }
