@@ -19,7 +19,7 @@ export default function Home() {
 
   if (isMobile) {
     return (
-      <div className="w-full min-h-screen flex items-center flex-col justify-center text-center px-4">
+      <div className="lg:hidden w-full min-h-screen flex items-center flex-col justify-center text-center px-4">
         <h2>Please use a desktop browser</h2>
         <p className="font-lihjy text-sm">
           For the best possible experience, please use a desktop browser to
@@ -30,7 +30,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="hidden lg:block w-full min-h-screen">
       <Suspense fallback="Loading...">
         <ReactPlanner
           store={store}

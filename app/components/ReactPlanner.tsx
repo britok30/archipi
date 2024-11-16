@@ -11,7 +11,7 @@ import actions from "../actions/export";
 import Footer from "./Footer/Footer";
 import { objectsMap } from "../utils/objects-utils";
 import ReactPlannerContext from "../context/ReactPlannerContext";
-import Overlays from "./overlays";
+import Overlays from "./Overlays";
 import Sidebar from "./Sidebar/Sidebar";
 import Content from "./Content";
 import Toolbar from "./Toolbar/Toolbar";
@@ -85,7 +85,6 @@ ReactPlannerContent.propTypes = {
   softwareSignature: PropTypes.string,
 };
 
-// Step 3: Wrap the component tree with the Provider component
 function ReactPlanner(props) {
   const {
     state,
@@ -129,7 +128,6 @@ function ReactPlanner(props) {
   );
 }
 
-// Step 4: Define defaultProps directly on the component function
 ReactPlanner.defaultProps = {
   translator: new Translator(),
   catalog: new Catalog(),
