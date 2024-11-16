@@ -16,6 +16,17 @@ import {
   MODE_VIEWING_CATALOG,
   MODE_CONFIGURING_PROJECT,
 } from "../../utils/constants";
+import {
+  Book,
+  Box,
+  File,
+  MousePointer,
+  Redo,
+  Rotate3D,
+  Settings,
+  Square,
+  Undo,
+} from "lucide-react";
 
 interface ToolbarProps {
   state: any;
@@ -44,7 +55,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
               : null
           }
         >
-          <IoIosDocument className="mb-0.5" size={25} />
+          <File size={25} />
           New
         </ToolbarButton>
       )}
@@ -57,7 +68,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="Open Catalog"
         onClick={() => projectActions.openCatalog()}
       >
-        <FaBookOpen className="mb-0.5" size={23} />
+        <Book size={23} />
         Catalog
       </ToolbarButton>
 
@@ -67,9 +78,9 @@ const Toolbar: React.FC<ToolbarProps> = ({
         onClick={() => projectActions.setMode(MODE_IDLE)}
       >
         {[MODE_3D_FIRST_PERSON, MODE_3D_VIEW].includes(mode) ? (
-          <IoSquare className="mb-0.5" size={23} />
+          <Square size={23} />
         ) : (
-          <FaMousePointer className="mb-0.5" size={23} />
+          <MousePointer size={23} />
         )}
         2D
       </ToolbarButton>
@@ -79,7 +90,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="3D View"
         onClick={() => viewer3DActions.selectTool3DView()}
       >
-        <FaCube className="mb-0.5" size={23} />
+        <Rotate3D size={23} />
         3D
       </ToolbarButton>
 
@@ -97,7 +108,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="Undo (CTRL-Z)"
         onClick={() => projectActions.undo()}
       >
-        <IoIosUndo className="mb-0.5" size={23} />
+        <Undo size={23} />
         Undo
       </ToolbarButton>
 
@@ -106,7 +117,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="Redo (CTRL-Y)"
         onClick={() => projectActions.redo()}
       >
-        <IoIosRedo className="mb-0.5" size={23} />
+        <Redo size={23} />
         Redo
       </ToolbarButton>
 
@@ -115,7 +126,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="Configure project"
         onClick={() => projectActions.openProjectConfigurator()}
       >
-        <IoSettingsSharp className="mb-0.5" size={23} />
+        <Settings size={23} />
         Settings
       </ToolbarButton>
 
