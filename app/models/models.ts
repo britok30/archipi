@@ -1,6 +1,6 @@
-import { Record as ImmutableRecord, List, Map, fromJS } from 'immutable';
-import { MODE_IDLE } from '../utils/constants';
-import { SNAP_MASK } from '../utils/snap';
+import { Record as ImmutableRecord, List, Map, fromJS } from "immutable";
+import { MODE_IDLE } from "../utils/constants";
+import { SNAP_MASK } from "../utils/snap";
 
 // Helper function to safely load map lists with a default value
 function safeLoadMapList<T>(
@@ -9,7 +9,9 @@ function safeLoadMapList<T>(
   defaultMap?: Map<string, T>
 ): Map<string, T> {
   return mapList
-    ? Map(mapList).map((m: any) => new Model(m)).toMap() as Map<string, T>
+    ? (Map(mapList)
+        .map((m: any) => new Model(m))
+        .toMap() as Map<string, T>)
     : defaultMap || Map<string, T>();
 }
 
@@ -26,10 +28,10 @@ interface SharedAttributes {
 }
 
 const defaultSharedAttributes: SharedAttributes = {
-  id: '',
-  type: '',
-  prototype: '',
-  name: '',
+  id: "",
+  type: "",
+  prototype: "",
+  name: "",
   misc: Map<string, any>(),
   selected: false,
   properties: Map<string, any>(),
@@ -44,8 +46,8 @@ interface GridProps {
 }
 
 const defaultGridProps: GridProps = {
-  id: '',
-  type: '',
+  id: "",
+  type: "",
   properties: Map<string, any>(),
 };
 
@@ -60,19 +62,19 @@ export class Grid extends ImmutableRecord(defaultGridProps) {
 
 export const DefaultGrids: Map<string, Grid> = Map({
   h1: new Grid({
-    id: 'h1',
-    type: 'horizontal-streak',
+    id: "h1",
+    type: "horizontal-streak",
     properties: Map({
       step: 20,
-      colors: List(['#808080', '#ddd', '#ddd', '#ddd', '#ddd']),
+      colors: List(["#808080", "#ddd", "#ddd", "#ddd", "#ddd"]),
     }),
   }),
   v1: new Grid({
-    id: 'v1',
-    type: 'vertical-streak',
+    id: "v1",
+    type: "vertical-streak",
     properties: Map({
       step: 20,
-      colors: List(['#808080', '#ddd', '#ddd', '#ddd', '#ddd']),
+      colors: List(["#808080", "#ddd", "#ddd", "#ddd", "#ddd"]),
     }),
   }),
 });
@@ -84,6 +86,7 @@ interface ElementsSetProps {
   holes: List<string>;
   areas: List<string>;
   items: List<string>;
+  selected: List<any>;
 }
 
 const defaultElementsSetProps: ElementsSetProps = {
@@ -92,6 +95,7 @@ const defaultElementsSetProps: ElementsSetProps = {
   holes: List<string>(),
   areas: List<string>(),
   items: List<string>(),
+  selected: List<string>(),
 };
 
 export class ElementsSet extends ImmutableRecord(defaultElementsSetProps) {
@@ -102,6 +106,7 @@ export class ElementsSet extends ImmutableRecord(defaultElementsSetProps) {
       holes: List(json.holes || []),
       areas: List(json.areas || []),
       items: List(json.items || []),
+      selected: List(json.selected || []),
     });
   }
 }
@@ -118,7 +123,7 @@ const defaultVertexProps: VertexProps = {
   ...defaultSharedAttributes,
   x: -1,
   y: -1,
-  prototype: 'vertices',
+  prototype: "vertices",
   lines: List<string>(),
   areas: List<string>(),
 };
@@ -141,7 +146,7 @@ interface LineProps extends SharedAttributes {
 
 const defaultLineProps: LineProps = {
   ...defaultSharedAttributes,
-  prototype: 'lines',
+  prototype: "lines",
   vertices: List<string>(),
   holes: List<string>(),
 };
@@ -165,9 +170,9 @@ interface HoleProps extends SharedAttributes {
 
 const defaultHoleProps: HoleProps = {
   ...defaultSharedAttributes,
-  prototype: 'holes',
+  prototype: "holes",
   offset: -1,
-  line: '',
+  line: "",
 };
 
 export class Hole extends ImmutableRecord(defaultHoleProps) {
@@ -187,7 +192,7 @@ interface AreaProps extends SharedAttributes {
 
 const defaultAreaProps: AreaProps = {
   ...defaultSharedAttributes,
-  prototype: 'areas',
+  prototype: "areas",
   vertices: List<string>(),
   holes: List<string>(),
 };
@@ -212,7 +217,7 @@ interface ItemProps extends SharedAttributes {
 
 const defaultItemProps: ItemProps = {
   ...defaultSharedAttributes,
-  prototype: 'items',
+  prototype: "items",
   x: 0,
   y: 0,
   rotation: 0,
@@ -244,11 +249,11 @@ interface LayerProps {
 }
 
 const defaultLayerProps: LayerProps = {
-  id: '',
+  id: "",
   altitude: 0,
   order: 0,
   opacity: 1,
-  name: '',
+  name: "",
   visible: true,
   vertices: Map<string, Vertex>(),
   lines: Map<string, Line>(),
@@ -267,13 +272,14 @@ export class Layer extends ImmutableRecord(defaultLayerProps) {
       holes: safeLoadMapList(json.holes, Hole),
       areas: safeLoadMapList(json.areas, Area),
       items: safeLoadMapList(json.items, Item),
+      //@ts-ignore
       selected: new ElementsSet(json.selected),
     });
   }
 }
 
 export const DefaultLayers: Map<string, Layer> = Map({
-  'layer-1': new Layer({ id: 'layer-1', name: 'default' }),
+  "layer-1": new Layer({ id: "layer-1", name: "default" }),
 });
 
 // Group class
@@ -286,7 +292,7 @@ interface GroupProps extends SharedAttributes {
 
 const defaultGroupProps: GroupProps = {
   ...defaultSharedAttributes,
-  prototype: 'groups',
+  prototype: "groups",
   x: 0,
   y: 0,
   rotation: 0,
@@ -317,7 +323,7 @@ interface SceneProps {
 }
 
 const defaultSceneProps: SceneProps = {
-  unit: 'cm',
+  unit: "cm",
   layers: Map<string, Layer>(),
   grids: Map<string, Grid>(),
   selectedLayer: null,
@@ -335,12 +341,13 @@ const defaultSceneProps: SceneProps = {
 export class Scene extends ImmutableRecord(defaultSceneProps) {
   constructor(json: Partial<SceneProps> = {}) {
     const layers = safeLoadMapList(json.layers, Layer, DefaultLayers);
+    const layerId = layers.first().get("id");
 
     super({
       ...json,
       grids: safeLoadMapList(json.grids, Grid, DefaultGrids),
       layers,
-      selectedLayer: layers.first()?.id || null,
+      selectedLayer: layerId || null,
       groups: safeLoadMapList(json.groups || {}, Group),
       meta: json.meta ? fromJS(json.meta) : Map<string, any>(),
       guides: json.guides
@@ -363,13 +370,15 @@ interface CatalogElementProps {
 }
 
 const defaultCatalogElementProps: CatalogElementProps = {
-  name: '',
-  prototype: '',
+  name: "",
+  prototype: "",
   info: Map<string, any>(),
   properties: Map<string, any>(),
 };
 
-export class CatalogElement extends ImmutableRecord(defaultCatalogElementProps) {
+export class CatalogElement extends ImmutableRecord(
+  defaultCatalogElementProps
+) {
   constructor(json: Partial<CatalogElementProps> = {}) {
     super({
       ...json,
@@ -389,18 +398,37 @@ interface CatalogProps {
 
 const defaultCatalogProps: CatalogProps = {
   ready: false,
-  page: 'root',
+  page: "root",
   path: List<string>(),
   elements: Map<string, CatalogElement>(),
 };
 
 export class Catalog extends ImmutableRecord(defaultCatalogProps) {
   constructor(json: Partial<CatalogProps> = {}) {
-    const elements = safeLoadMapList(json.elements, CatalogElement);
+    const elements = safeLoadMapList(json.elements || [], CatalogElement);
     super({
       elements,
       ready: !elements.isEmpty(),
+      page: json.page || defaultCatalogProps.page,
+      path: List(json.path || defaultCatalogProps.path),
     });
+  }
+
+  // Define getters for properties
+  get elements(): Map<string, CatalogElement> {
+    return this.get("elements");
+  }
+
+  get ready(): boolean {
+    return this.get("ready");
+  }
+
+  get page(): string {
+    return this.get("page");
+  }
+
+  get path(): List<string> {
+    return this.get("path");
   }
 
   factoryElement(
@@ -409,36 +437,37 @@ export class Catalog extends ImmutableRecord(defaultCatalogProps) {
     initialProperties?: Map<string, any>
   ): Line | Hole | Area | Item {
     if (!this.elements.has(type)) {
+      //@ts-ignore
       const catList = this.elements.map((element) => element.name).toArray();
       throw new Error(`Element ${type} does not exist in catalog ${catList}`);
     }
 
     const element = this.elements.get(type)!;
+    //@ts-ignore
     const properties = element.properties.map((value, key) =>
       initialProperties && initialProperties.has(key)
         ? initialProperties.get(key)
-        : value.get('defaultValue')
+        : value.get("defaultValue")
     );
-
+    //@ts-ignore
     switch (element.prototype) {
-      case 'lines':
+      case "lines":
         return new Line(options).merge({ properties }) as Line;
 
-      case 'holes':
+      case "holes":
         return new Hole(options).merge({ properties }) as Hole;
 
-      case 'areas':
+      case "areas":
         return new Area(options).merge({ properties }) as Area;
 
-      case 'items':
+      case "items":
         return new Item(options).merge({ properties }) as Item;
 
       default:
-        throw new Error('Prototype not valid');
+        throw new Error("Prototype not valid");
     }
   }
 }
-
 // HistoryStructure class
 interface HistoryStructureProps {
   undoList: List<Scene>;
@@ -454,13 +483,19 @@ const defaultHistoryStructureProps: HistoryStructureProps = {
   last: null,
 };
 
-export class HistoryStructure extends ImmutableRecord(defaultHistoryStructureProps) {
+export class HistoryStructure extends ImmutableRecord(
+  defaultHistoryStructureProps
+) {
   constructor(json: any = {}) {
     super({
       undoList: fromJS(json.undoList || []),
       redoList: fromJS(json.redoList || []),
       first: json.scene ? new Scene(json.scene) : null,
-      last: json.last ? new Scene(json.last) : json.scene ? new Scene(json.scene) : null,
+      last: json.last
+        ? new Scene(json.last)
+        : json.scene
+        ? new Scene(json.scene)
+        : null,
     });
   }
 }
