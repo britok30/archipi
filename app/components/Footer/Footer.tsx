@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useContext } from "react";
-import PropTypes from "prop-types";
+import React, { useContext } from "react";
+import { Map as ImmutableMap } from "immutable";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import FooterToggleButton from "./FooterToggleButton";
 import {
@@ -12,23 +12,52 @@ import {
   SNAP_GUIDE,
 } from "../../utils/snap";
 import { MODE_SNAPPING } from "../../utils/constants";
-import Link from "next/link";
 
-const Footer = ({
+interface FooterProps {
+  state: ImmutableMap<string, any>;
+  width: number;
+  height: number;
+  footerbarComponents: any[];
+  softwareSignature?: string;
+}
+
+interface ProjectActions {
+  toggleSnap: (snapMask: ImmutableMap<string, boolean>) => void;
+  // Add other project action methods if needed
+}
+
+interface Translator {
+  t: (key: string) => string;
+}
+
+interface ReactPlannerContextType {
+  translator: Translator;
+  projectActions: ProjectActions;
+}
+
+const Footer: React.FC<FooterProps> = ({
   state: globalState,
   width,
   height,
   footerbarComponents,
   softwareSignature,
 }) => {
-  const [state] = useState({});
   const { translator, projectActions } = useContext(ReactPlannerContext);
-  const { x, y } = globalState.get("mouse").toJS();
-  const zoom = globalState.get("zoom");
+
+  const mouse = globalState.get("mouse");
+  const { x, y } = mouse ? mouse.toJS() : { x: 0, y: 0 };
+
+  const zoom = globalState.get("zoom") || 1;
   const mode = globalState.get("mode");
 
-  let updateSnapMask = (val) =>
-    projectActions.toggleSnap(globalState.snapMask.merge(val));
+  const updateSnapMask = (val: { [key: string]: boolean }) => {
+    const snapMask = globalState.get("snapMask") as ImmutableMap<
+      string,
+      boolean
+    >;
+    const newSnapMask = snapMask ? snapMask.merge(val) : ImmutableMap(val);
+    projectActions.toggleSnap(newSnapMask);
+  };
 
   return (
     <div
@@ -61,63 +90,58 @@ const Footer = ({
 
           <div className="relative border-r border-white float-left py-0 px-[1rem] inline-block">
             <FooterToggleButton
-              //   state={state}
               toggleOn={() => {
-                updateSnapMask({ SNAP_POINT: true });
+                updateSnapMask({ [SNAP_POINT]: true });
               }}
               toggleOff={() => {
-                updateSnapMask({ SNAP_POINT: false });
+                updateSnapMask({ [SNAP_POINT]: false });
               }}
               text="Snap PT"
-              toggleState={globalState.snapMask.get(SNAP_POINT)}
+              toggleState={globalState.getIn(["snapMask", SNAP_POINT], false)}
               title={translator.t("Snap to Point")}
             />
             <FooterToggleButton
-              //   state={state}
               toggleOn={() => {
-                updateSnapMask({ SNAP_LINE: true });
+                updateSnapMask({ [SNAP_LINE]: true });
               }}
               toggleOff={() => {
-                updateSnapMask({ SNAP_LINE: false });
+                updateSnapMask({ [SNAP_LINE]: false });
               }}
               text="Snap LN"
-              toggleState={globalState.snapMask.get(SNAP_LINE)}
+              toggleState={globalState.getIn(["snapMask", SNAP_LINE], false)}
               title={translator.t("Snap to Line")}
             />
             <FooterToggleButton
-              //   state={state}
               toggleOn={() => {
-                updateSnapMask({ SNAP_SEGMENT: true });
+                updateSnapMask({ [SNAP_SEGMENT]: true });
               }}
               toggleOff={() => {
-                updateSnapMask({ SNAP_SEGMENT: false });
+                updateSnapMask({ [SNAP_SEGMENT]: false });
               }}
               text="Snap SEG"
-              toggleState={globalState.snapMask.get(SNAP_SEGMENT)}
+              toggleState={globalState.getIn(["snapMask", SNAP_SEGMENT], false)}
               title={translator.t("Snap to Segment")}
             />
             <FooterToggleButton
-              //   state={state}
               toggleOn={() => {
-                updateSnapMask({ SNAP_GRID: true });
+                updateSnapMask({ [SNAP_GRID]: true });
               }}
               toggleOff={() => {
-                updateSnapMask({ SNAP_GRID: false });
+                updateSnapMask({ [SNAP_GRID]: false });
               }}
               text="Snap GRD"
-              toggleState={globalState.snapMask.get(SNAP_GRID)}
+              toggleState={globalState.getIn(["snapMask", SNAP_GRID], false)}
               title={translator.t("Snap to Grid")}
             />
             <FooterToggleButton
-              //   state={state}
               toggleOn={() => {
-                updateSnapMask({ SNAP_GUIDE: true });
+                updateSnapMask({ [SNAP_GUIDE]: true });
               }}
               toggleOff={() => {
-                updateSnapMask({ SNAP_GUIDE: false });
+                updateSnapMask({ [SNAP_GUIDE]: false });
               }}
               text="Snap GDE"
-              toggleState={globalState.snapMask.get(SNAP_GUIDE)}
+              toggleState={globalState.getIn(["snapMask", SNAP_GUIDE], false)}
               title={translator.t("Snap to Guide")}
             />
           </div>
@@ -129,12 +153,6 @@ const Footer = ({
       </div>
     </div>
   );
-};
-
-Footer.propTypes = {
-  state: PropTypes.object.isRequired,
-  footerbarComponents: PropTypes.array.isRequired,
-  softwareSignature: PropTypes.string,
 };
 
 export default Footer;

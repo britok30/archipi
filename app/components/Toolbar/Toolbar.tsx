@@ -18,7 +18,7 @@ import {
 } from "../../utils/constants";
 
 interface ToolbarProps {
-  state: any; // Replace `any` with the actual state type if available
+  state: any;
   allowProjectFileSupport: boolean;
 }
 
@@ -54,7 +54,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <ToolbarButton
         active={mode === MODE_VIEWING_CATALOG}
-        tooltip={translator.t("Open catalog")}
+        tooltip="Open Catalog"
         onClick={() => projectActions.openCatalog()}
       >
         <FaBookOpen className="mb-0.5" size={23} />
@@ -63,7 +63,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <ToolbarButton
         active={mode === MODE_IDLE}
-        tooltip={translator.t("2D View")}
+        tooltip="2D View"
         onClick={() => projectActions.setMode(MODE_IDLE)}
       >
         {[MODE_3D_FIRST_PERSON, MODE_3D_VIEW].includes(mode) ? (
@@ -76,16 +76,25 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <ToolbarButton
         active={mode === MODE_3D_VIEW}
-        tooltip={translator.t("3D View")}
+        tooltip="3D View"
         onClick={() => viewer3DActions.selectTool3DView()}
       >
         <FaCube className="mb-0.5" size={23} />
         3D
       </ToolbarButton>
 
+      {/* <ToolbarButton
+        active={mode === MODE_3D_FIRST_PERSON}
+        tooltip={translator.t("3D View")}
+        onClick={() => viewer3DActions.selectTool3DView()}
+      >
+        <User className="mb-0.5" size={23} />
+        3D First
+      </ToolbarButton> */}
+
       <ToolbarButton
         active={false}
-        tooltip={translator.t("Undo (CTRL-Z)")}
+        tooltip="Undo (CTRL-Z)"
         onClick={() => projectActions.undo()}
       >
         <IoIosUndo className="mb-0.5" size={23} />
@@ -94,7 +103,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <ToolbarButton
         active={false}
-        tooltip={translator.t("Redo (CTRL-Y)")}
+        tooltip="Redo (CTRL-Y)"
         onClick={() => projectActions.redo()}
       >
         <IoIosRedo className="mb-0.5" size={23} />
@@ -103,7 +112,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <ToolbarButton
         active={mode === MODE_CONFIGURING_PROJECT}
-        tooltip={translator.t("Configure project")}
+        tooltip="Configure project"
         onClick={() => projectActions.openProjectConfigurator()}
       >
         <IoSettingsSharp className="mb-0.5" size={23} />
