@@ -21,8 +21,12 @@ interface FooterProps {
   softwareSignature?: string;
 }
 
+interface ToggleSnapAction {
+  // Define the properties of ToggleSnapAction if needed
+}
+
 interface ProjectActions {
-  toggleSnap: (snapMask: ImmutableMap<string, boolean>) => void;
+  toggleSnap: (snapMask: ImmutableMap<string, boolean>) => ToggleSnapAction;
   // Add other project action methods if needed
 }
 

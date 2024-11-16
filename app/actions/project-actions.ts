@@ -1,3 +1,4 @@
+import { Map } from "immutable";
 import {
   NEW_PROJECT,
   LOAD_PROJECT,
@@ -66,7 +67,7 @@ export interface ProjectActionsType {
     y: number;
   }) => UpdateMouseCoordAction;
   updateZoomScale: (scale: number) => UpdateZoomScaleAction;
-  toggleSnap: (mask: string) => ToggleSnapAction;
+  toggleSnap: (snapMask: Map<string, boolean>) => ToggleSnapAction;
   throwError: (error: string) => ThrowErrorAction;
   throwWarning: (warning: string) => ThrowWarningAction;
   copyProperties: (properties: Record<string, any>) => CopyPropertiesAction;
@@ -186,7 +187,7 @@ export interface UpdateZoomScaleAction {
 
 export interface ToggleSnapAction {
   type: typeof TOGGLE_SNAP;
-  mask: string;
+  mask: Map<string, boolean>;
 }
 
 export interface ThrowErrorAction {
@@ -394,7 +395,7 @@ export function updateZoomScale(scale: number): UpdateZoomScaleAction {
   return { type: UPDATE_ZOOM_SCALE, scale };
 }
 
-export function toggleSnap(mask: string): ToggleSnapAction {
+export function toggleSnap(mask: Map<string, boolean>): ToggleSnapAction {
   return { type: TOGGLE_SNAP, mask };
 }
 
