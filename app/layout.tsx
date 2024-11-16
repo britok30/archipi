@@ -8,27 +8,56 @@ import "./globals.css";
 import localFont from "next/font/local";
 
 export const metadata = {
-  title: "ArchiPi: Online Floor Plan Design & 3D Visualization Tool",
+  title: "ArchiPi - Free Online Floor Plan Design & 3D Visualization Tool",
   description:
-    "ArchiPi lets you draw 2D floor plans and navigate them in 3D, offering a drag & drop catalog of customizable objects. Transform your design ideas into reality, from 2D wireframes to detailed 3D models. Experience architectural design in your browser for free!",
+    "Design your dream space with ArchiPi! Create detailed 2D floor plans and explore them in 3D. Our intuitive drag-and-drop interface and customizable objects make architectural design accessible to everyone. Start designing for free in your browser today!",
   metadataBase: new URL("https://www.archipi.io"),
+  keywords: [
+    "ArchiPi",
+    "Floor Plan",
+    "3D Visualization",
+    "Architectural Design",
+    "Online Design Tool",
+    "Free Design Software",
+    "2D Floor Plan",
+    "3D Floor Plan",
+    "Interior Design",
+    "Architecture",
+    "Home Design",
+  ],
+  authors: [{ name: "ArchiPi Team", url: "https://www.archipi.io" }],
   openGraph: {
-    title: "ArchiPi: Online Floor Plan Design & 3D Visualization Tool",
+    title: "ArchiPi - Free Online Floor Plan Design & 3D Visualization Tool",
     description:
-      "ArchiPi lets you draw 2D floor plans and navigate them in 3D, offering a drag & drop catalog of customizable objects. Transform your design ideas into reality, from 2D wireframes to detailed 3D models. Experience architectural design in your browser for free!",
+      "Design your dream space with ArchiPi! Create detailed 2D floor plans and explore them in 3D. Our intuitive drag-and-drop interface and customizable objects make architectural design accessible to everyone. Start designing for free in your browser today!",
     url: "https://www.archipi.io",
     siteName: "ArchiPi",
-    images: ["/main.png"],
+    images: [
+      {
+        url: "/main.png",
+        width: 1200,
+        height: 630,
+        alt: "ArchiPi - Online Floor Plan Design & 3D Visualization Tool",
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ArchiPi: Online Floor Plan Design & 3D Visualization Tool",
+    site: "@ArchiPi",
+    creator: "@ArchiPi",
+    title: "ArchiPi - Free Online Floor Plan Design & 3D Visualization Tool",
     description:
-      "ArchiPi lets you draw 2D floor plans and navigate them in 3D, offering a drag & drop catalog of customizable objects. Transform your design ideas into reality, from 2D wireframes to detailed 3D models. Experience architectural design in your browser for free!",
+      "Design your dream space with ArchiPi! Create detailed 2D floor plans and explore them in 3D. Start designing for free in your browser today!",
     images: ["/main.png"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: true,
+  },
+  themeColor: "#ffffff",
 };
 
 const eudoxusSans = localFont({
