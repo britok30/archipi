@@ -7,6 +7,8 @@ import CatalogItem from "./CatalogItem";
 import CatalogBreadcrumb from "./CatalogBreadcrumb";
 import CatalogPageItem from "./CatalogPageItem";
 import CatalogTurnBackPageItem from "./CatalogTurnBackPageItem";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const searchContainer = {
   width: "100%",
@@ -137,13 +139,12 @@ const CatalogList = ({ state, width, height, style }) => {
       <h1 className="text-4xl text-white mb-4">Catalog</h1>
       {breadcrumbComponent}
 
-      <div className="flex space-x-1">
-        <label htmlFor="search">{translator.t("Search Element")}</label>
-        <input
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="search">Search Elements</Label>
+        <Input
           id="search"
           type="text"
           name="search"
-          className="bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none"
           placeholder="Search catalog"
           onChange={(e) => {
             matcharray(e.target.value);
