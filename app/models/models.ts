@@ -549,16 +549,61 @@ const defaultStateProps: StateProps = {
 
 export class State extends ImmutableRecord(defaultStateProps) {
   constructor(json: Partial<StateProps> = {}) {
+    // Destructure json to exclude properties you're initializing separately
+    const {
+      mode,
+      overlays,
+      mouse,
+      zoom,
+      snapMask,
+      snapElements,
+      activeSnapElement,
+      errors,
+      warnings,
+      clipboardProperties,
+      selectedElementsHistory,
+      alterate,
+      scene, // Exclude these properties from the spread
+      sceneHistory,
+      catalog,
+      viewer2D,
+      drawingSupport,
+      draggingSupport,
+      rotatingSupport,
+      misc,
+      ...rest
+    } = json;
+
     super({
-      ...json,
-      scene: new Scene(json.scene),
-      sceneHistory: new HistoryStructure(json),
-      catalog: new Catalog(json.catalog || {}),
-      viewer2D: Map(json.viewer2D || {}),
-      drawingSupport: Map(json.drawingSupport || {}),
-      draggingSupport: Map(json.draggingSupport || {}),
-      rotatingSupport: Map(json.rotatingSupport || {}),
-      misc: json.misc ? fromJS(json.misc) : Map<string, any>(),
+      // Spread the rest of the properties
+      ...rest,
+      // Initialize properties explicitly
+      mode: mode ?? MODE_IDLE,
+      overlays: overlays ?? List<any>(),
+      mouse: mouse ?? Map({ x: 0, y: 0 }),
+      zoom: zoom ?? 0,
+      snapMask: snapMask ?? SNAP_MASK,
+      snapElements: snapElements ?? List<any>(),
+      activeSnapElement: activeSnapElement ?? null,
+      errors: errors ?? List<any>(),
+      warnings: warnings ?? List<any>(),
+      clipboardProperties: clipboardProperties ?? Map<string, any>(),
+      selectedElementsHistory: selectedElementsHistory ?? List<any>(),
+      alterate: alterate ?? false,
+
+      // Initialize complex properties, ensuring correct types
+      scene: scene instanceof Scene ? scene : new Scene(scene),
+      sceneHistory:
+        sceneHistory instanceof HistoryStructure
+          ? sceneHistory
+          : new HistoryStructure(sceneHistory),
+      catalog:
+        catalog instanceof Catalog ? catalog : new Catalog(catalog || {}),
+      viewer2D: Map(viewer2D || {}),
+      drawingSupport: Map(drawingSupport || {}),
+      draggingSupport: Map(draggingSupport || {}),
+      rotatingSupport: Map(rotatingSupport || {}),
+      misc: misc ? fromJS(misc) : Map<string, any>(),
     });
   }
 }
