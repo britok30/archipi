@@ -7,15 +7,17 @@ import { Area } from "./area";
 import { Vertex } from "./vertex";
 import { Item } from "./item";
 import { Group } from "./group";
+import { Catalog } from "@/app/catalog";
 
 interface LayerProps {
   layer: LayerType;
   scene: SceneType;
-  catalog: CatalogType;
+  catalog: Catalog;
 }
 
 interface LayerType {
   id: string;
+  name: string;
   lines: ImmutableMap<string, any>;
   areas: ImmutableMap<string, any>;
   vertices: ImmutableMap<string, any>;
@@ -30,9 +32,9 @@ interface SceneType {
   // Add other properties of scene if necessary
 }
 
-interface CatalogType {
-  // Define the catalog type according to your application
-}
+// interface CatalogType {
+//   getElement: (type: string) => void;
+// }
 
 export const Layer: React.FC<LayerProps> = ({ layer, scene, catalog }) => {
   const { unit, groups } = scene;
