@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import MyCatalog from "./objCatalog/mycatalog";
 import "./styles/react-planner.css";
 import ReactPlanner from "./components/ReactPlanner";
@@ -31,14 +31,16 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen">
-      <ReactPlanner
-        store={store}
-        catalog={MyCatalog}
-        width={width}
-        height={height}
-        plugins={plugins}
-        stateExtractor={(state) => state.get("archipi")}
-      />
+      <Suspense fallback="Loading...">
+        <ReactPlanner
+          store={store}
+          catalog={MyCatalog}
+          width={width}
+          height={height}
+          plugins={plugins}
+          stateExtractor={(state) => state.get("archipi")}
+        />
+      </Suspense>
     </div>
   );
 }
