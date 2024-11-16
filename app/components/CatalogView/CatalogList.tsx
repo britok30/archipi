@@ -9,6 +9,7 @@ import CatalogPageItem from "./CatalogPageItem";
 import CatalogTurnBackPageItem from "./CatalogTurnBackPageItem";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const searchContainer = {
   width: "100%",
@@ -153,19 +154,14 @@ const CatalogList = ({ state, width, height, style }) => {
       </div>
 
       {selectedHistory.size ? (
-        <div className="w-full h-[3rem] mt-4 flex items-center bg-[#292929] border border-white relative px-2 rounded-lg">
-          <span className="inline-block mr-5">
+        <div className="w-full h-[3rem] mt-4 flex items-center bg-[#292929] relative px-2 rounded-lg">
+          <span className="inline-block mr-5 text-sm">
             {translator.t("Last Selected")}
           </span>
           {selectedHistory.map((el, ind) => (
-            <div
-              key={ind}
-              className="bg-white mr-3 last-of-type:mr-0 text-black rounded-xl cursor-pointer capitalize py-0 px-[1rem] inline-block text-center leading-8 w-auto"
-              title={el.name}
-              onClick={() => select(el)}
-            >
+            <Button key={ind} title={el.name} onClick={() => select(el)}>
               {el.name}
-            </div>
+            </Button>
           ))}
         </div>
       ) : null}
