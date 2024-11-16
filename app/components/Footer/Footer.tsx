@@ -60,7 +60,7 @@ const Footer: React.FC<FooterProps> = ({
       boolean
     >;
     const newSnapMask = snapMask ? snapMask.merge(val) : ImmutableMap(val);
-    projectActions.toggleSnap(newSnapMask);
+    projectActions.toggleSnap(newSnapMask.getIn["snapMask"]);
   };
 
   return (
@@ -101,7 +101,9 @@ const Footer: React.FC<FooterProps> = ({
                 updateSnapMask({ [SNAP_POINT]: false });
               }}
               text="Snap PT"
-              toggleState={globalState.getIn(["snapMask", SNAP_POINT], false)}
+              toggleState={
+                globalState.getIn(["snapMask", SNAP_POINT], false) as boolean
+              }
               title={translator.t("Snap to Point")}
             />
             <FooterToggleButton
@@ -112,7 +114,9 @@ const Footer: React.FC<FooterProps> = ({
                 updateSnapMask({ [SNAP_LINE]: false });
               }}
               text="Snap LN"
-              toggleState={globalState.getIn(["snapMask", SNAP_LINE], false)}
+              toggleState={
+                globalState.getIn(["snapMask", SNAP_LINE], false) as boolean
+              }
               title={translator.t("Snap to Line")}
             />
             <FooterToggleButton
@@ -123,7 +127,9 @@ const Footer: React.FC<FooterProps> = ({
                 updateSnapMask({ [SNAP_SEGMENT]: false });
               }}
               text="Snap SEG"
-              toggleState={globalState.getIn(["snapMask", SNAP_SEGMENT], false)}
+              toggleState={
+                globalState.getIn(["snapMask", SNAP_SEGMENT], false) as boolean
+              }
               title={translator.t("Snap to Segment")}
             />
             <FooterToggleButton
@@ -134,7 +140,9 @@ const Footer: React.FC<FooterProps> = ({
                 updateSnapMask({ [SNAP_GRID]: false });
               }}
               text="Snap GRD"
-              toggleState={globalState.getIn(["snapMask", SNAP_GRID], false)}
+              toggleState={
+                globalState.getIn(["snapMask", SNAP_GRID], false) as boolean
+              }
               title={translator.t("Snap to Grid")}
             />
             <FooterToggleButton
@@ -145,7 +153,9 @@ const Footer: React.FC<FooterProps> = ({
                 updateSnapMask({ [SNAP_GUIDE]: false });
               }}
               text="Snap GDE"
-              toggleState={globalState.getIn(["snapMask", SNAP_GUIDE], false)}
+              toggleState={
+                globalState.getIn(["snapMask", SNAP_GUIDE], false) as boolean
+              }
               title={translator.t("Snap to Guide")}
             />
           </div>
