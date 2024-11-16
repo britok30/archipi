@@ -16,7 +16,6 @@ interface AttributesEditorProps {
   onValid?: (valid: boolean) => void;
   attributeFormData: any;
   state: any;
-  // Include any additional props passed via `...rest`
   [key: string]: any;
 }
 

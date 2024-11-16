@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useContext } from "react";
-import { Map as ImmutableMap, fromJS, List as ImmutableList } from "immutable";
+import { Map as ImmutableMap, fromJS, Map, Seq } from "immutable";
 import AttributesEditor from "./AttributesEditor";
 import { GeometryUtils, MathUtils } from "../../utils/export";
 import convert from "convert-units";
@@ -19,9 +19,17 @@ const iconHeadStyle: React.CSSProperties = {
 };
 
 interface ElementEditorProps {
-  state: ImmutableMap<string, any>;
+  state: any; // Replace 'any' with the actual type of your app state if available
   element: ImmutableMap<string, any>;
   layer: ImmutableMap<string, any>;
+}
+
+interface AttributesFormData extends ImmutableMap<string, any> {}
+interface PropertiesFormData extends ImmutableMap<string, any> {}
+
+interface Vertex {
+  x: number;
+  y: number;
 }
 
 const ElementEditor: React.FC<ElementEditorProps> = ({
@@ -32,116 +40,114 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
   const { projectActions, catalog, translator } =
     useContext(ReactPlannerContext);
 
-  // Initialize attribute form data
   const initAttrData = (
     element: ImmutableMap<string, any>,
     layer: ImmutableMap<string, any>,
-    state: ImmutableMap<string, any>
-  ): ImmutableMap<string, any> | null => {
+    state: any
+  ): AttributesFormData | null => {
     element =
       typeof element.get("misc") === "object"
-        ? element.set("misc", ImmutableMap(element.get("misc")))
+        ? element.set("misc", Map(element.get("misc")))
         : element;
 
     switch (element.get("prototype")) {
       case "items": {
-        return ImmutableMap(element);
+        return element as AttributesFormData;
       }
+
       case "lines": {
-        const v_a = layer.getIn(["vertices", element.getIn(["vertices", 0])]);
-        const v_b = layer.getIn(["vertices", element.getIn(["vertices", 1])]);
-
+        const v_a = layer
+          .get("vertices")
+          .get(element.get("vertices").get(0)) as Vertex;
+        const v_b = layer
+          .get("vertices")
+          .get(element.get("vertices").get(1)) as Vertex;
         const distance = GeometryUtils.pointsDistance(
-          v_a.get("x"),
-          v_a.get("y"),
-          v_b.get("x"),
-          v_b.get("y")
+          v_a.x,
+          v_a.y,
+          v_b.x,
+          v_b.y
         );
-        const _unit = element.getIn(["misc", "_unitLength"]) || catalog?.unit;
-        const _length = convert(distance).from(catalog?.unit).to(_unit);
 
-        return ImmutableMap({
+        const _unit = element.get("misc").get("_unitLength") || catalog.unit;
+        const _length = convert(distance).from(catalog.unit).to(_unit);
+
+        return Map({
           vertexOne: v_a,
           vertexTwo: v_b,
-          lineLength: ImmutableMap({ length: distance, _length, _unit }),
-        });
+          lineLength: Map({ length: distance, _length, _unit }),
+        }) as AttributesFormData;
       }
-      case "holes": {
-        const line = layer.getIn(["lines", element.get("line")]);
-        const v0 = layer.getIn(["vertices", line.getIn(["vertices", 0])]);
-        const v1 = layer.getIn(["vertices", line.getIn(["vertices", 1])]);
 
-        const x0 = v0.get("x");
-        const y0 = v0.get("y");
-        const x1 = v1.get("x");
-        const y1 = v1.get("y");
+      case "holes": {
+        const line = layer.get("lines").get(element.get("line"));
+        const { x: x0, y: y0 } = layer
+          .get("vertices")
+          .get(line.get("vertices").get(0)) as Vertex;
+        const { x: x1, y: y1 } = layer
+          .get("vertices")
+          .get(line.get("vertices").get(1)) as Vertex;
 
         const lineLength = GeometryUtils.pointsDistance(x0, y0, x1, y1);
-        const widthLength =
-          element.getIn(["properties", "width", "length"]) || 0;
-        const halfWidthLength = widthLength / 2;
+        const width = element.get("properties").get("width").get("length");
+        const offset = element.get("offset");
 
-        const startAt = lineLength * element.get("offset") - halfWidthLength;
+        const startAt = lineLength * offset - width / 2;
+        const _unitA = element.get("misc").get("_unitA") || catalog.unit;
+        const _lengthA = convert(startAt).from(catalog.unit).to(_unitA);
 
-        const _unitA = element.getIn(["misc", "_unitA"]) || catalog?.unit;
-        const _lengthA = convert(startAt).from(catalog?.unit).to(_unitA);
+        const endAt = lineLength - lineLength * offset - width / 2;
+        const _unitB = element.get("misc").get("_unitB") || catalog.unit;
+        const _lengthB = convert(endAt).from(catalog.unit).to(_unitB);
 
-        const endAt =
-          lineLength - lineLength * element.get("offset") - halfWidthLength;
-        const _unitB = element.getIn(["misc", "_unitB"]) || catalog?.unit;
-        const _lengthB = convert(endAt).from(catalog?.unit).to(_unitB);
-
-        return ImmutableMap({
-          offset: element.get("offset"),
-          offsetA: ImmutableMap({
+        return Map({
+          offset: offset,
+          offsetA: Map({
             length: MathUtils.toFixedFloat(startAt, PRECISION),
             _length: MathUtils.toFixedFloat(_lengthA, PRECISION),
             _unit: _unitA,
           }),
-          offsetB: ImmutableMap({
+          offsetB: Map({
             length: MathUtils.toFixedFloat(endAt, PRECISION),
             _length: MathUtils.toFixedFloat(_lengthB, PRECISION),
             _unit: _unitB,
           }),
-        });
+        }) as AttributesFormData;
       }
+
       case "areas": {
-        return ImmutableMap({});
+        return Map({}) as AttributesFormData;
       }
+
       default:
         return null;
     }
   };
 
-  // Initialize property form data
   const initPropData = (
     element: ImmutableMap<string, any>,
     layer: ImmutableMap<string, any>,
-    state: ImmutableMap<string, any>
-  ): ImmutableMap<string, any> => {
-    const catalogElement = catalog?.getElement(element.get("type"));
+    state: any
+  ): PropertiesFormData => {
+    const catalogElement = catalog.getElement(element.get("type"));
+    const mapped = {};
 
-    const mapped: { [key: string]: ImmutableMap<string, any> } = {};
     for (const name in catalogElement.properties) {
-      mapped[name] = ImmutableMap({
-        currentValue: element.getIn(["properties", name])
-          ? element.getIn(["properties", name])
+      mapped[name] = Map({
+        currentValue: element.get("properties").has(name)
+          ? element.get("properties").get(name)
           : fromJS(catalogElement.properties[name].defaultValue),
         configs: catalogElement.properties[name],
       });
     }
 
-    return ImmutableMap(mapped);
+    return Map(mapped) as PropertiesFormData;
   };
 
-  const [attributesFormData, setAttributesFormData] = useState<ImmutableMap<
-    string,
-    any
-  > | null>(initAttrData(element, layer, appState));
-
-  const [propertiesFormData, setPropertiesFormData] = useState<
-    ImmutableMap<string, any>
-  >(initPropData(element, layer, appState));
+  const [attributesFormData, setAttributesFormData] =
+    useState<AttributesFormData | null>(initAttrData(element, layer, appState));
+  const [propertiesFormData, setPropertiesFormData] =
+    useState<PropertiesFormData>(initPropData(element, layer, appState));
 
   useEffect(() => {
     setAttributesFormData(initAttrData(element, layer, appState));
@@ -156,19 +162,18 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
         _attributesFormData = _attributesFormData?.set(attributeName, value);
         break;
       }
+
       case "lines": {
         switch (attributeName) {
           case "lineLength": {
             const v_0 = _attributesFormData?.get("vertexOne");
             const v_1 = _attributesFormData?.get("vertexTwo");
-
             const [v_a, v_b] = GeometryUtils.orderVertices([v_0, v_1]);
-
             const v_b_new = GeometryUtils.extendLine(
-              v_a.get("x"),
-              v_a.get("y"),
-              v_b.get("x"),
-              v_b.get("y"),
+              v_a.x,
+              v_a.y,
+              v_b.x,
+              v_b.y,
               value.get("length"),
               PRECISION
             );
@@ -182,28 +187,28 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
             });
             break;
           }
+
           case "vertexOne":
           case "vertexTwo": {
             _attributesFormData = _attributesFormData?.withMutations((attr) => {
               attr.set(attributeName, attr.get(attributeName).merge(value));
-
               const newDistance = GeometryUtils.verticesDistance(
                 attr.get("vertexOne"),
                 attr.get("vertexTwo")
               );
-
               attr.mergeIn(
                 ["lineLength"],
                 attr.get("lineLength").merge({
                   length: newDistance,
                   _length: convert(newDistance)
-                    .from(catalog?.unit)
-                    .to(attr.getIn(["lineLength", "_unit"])),
+                    .from(catalog.unit)
+                    .to(attr.get("lineLength").get("_unit")),
                 })
               );
             });
             break;
           }
+
           default: {
             _attributesFormData = _attributesFormData?.set(
               attributeName,
@@ -214,24 +219,22 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
         }
         break;
       }
+
       case "holes": {
         switch (attributeName) {
           case "offsetA": {
-            const line = layer.getIn(["lines", element.get("line")]);
-
+            const line = layer.get("lines").get(element.get("line"));
             const orderedVertices = GeometryUtils.orderVertices([
-              layer.getIn(["vertices", line.getIn(["vertices", 0])]),
-              layer.getIn(["vertices", line.getIn(["vertices", 1])]),
+              layer.get("vertices").get(line.get("vertices").get(0)),
+              layer.get("vertices").get(line.get("vertices").get(1)),
             ]);
-
-            const [{ x: x0, y: y0 }, { x: x1, y: y1 }] = orderedVertices.map(
-              (v) => ({ x: v.get("x"), y: v.get("y") })
-            );
-
+            const [{ x: x0, y: y0 }, { x: x1, y: y1 }] = orderedVertices;
             const alpha = GeometryUtils.angleBetweenTwoPoints(x0, y0, x1, y1);
             const lineLength = GeometryUtils.pointsDistance(x0, y0, x1, y1);
-            const widthLength =
-              element.getIn(["properties", "width", "length"]) || 0;
+            const widthLength = element
+              .get("properties")
+              .get("width")
+              .get("length");
             const halfWidthLength = widthLength / 2;
 
             let lengthValue = value.get("length");
@@ -255,8 +258,7 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               PRECISION
             );
             const offsetUnit = _attributesFormData?.getIn(["offsetB", "_unit"]);
-
-            const offsetB = ImmutableMap({
+            const offsetB = Map({
               length: endAt,
               _length: convert(endAt).from(catalog.unit).to(offsetUnit),
               _unit: offsetUnit,
@@ -266,11 +268,11 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               ?.set("offsetB", offsetB)
               .set("offset", offset);
 
-            const offsetAttribute = ImmutableMap({
+            const offsetAttribute = Map({
               length: MathUtils.toFixedFloat(lengthValue, PRECISION),
               _unit: value.get("_unit"),
               _length: MathUtils.toFixedFloat(
-                convert(lengthValue).from(catalog?.unit).to(value.get("_unit")),
+                convert(lengthValue).from(catalog.unit).to(value.get("_unit")),
                 PRECISION
               ),
             });
@@ -279,25 +281,22 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               attributeName,
               offsetAttribute
             );
-
             break;
           }
+
           case "offsetB": {
-            const line = layer.getIn(["lines", element.get("line")]);
-
+            const line = layer.get("lines").get(element.get("line"));
             const orderedVertices = GeometryUtils.orderVertices([
-              layer.getIn(["vertices", line.getIn(["vertices", 0])]),
-              layer.getIn(["vertices", line.getIn(["vertices", 1])]),
+              layer.get("vertices").get(line.get("vertices").get(0)),
+              layer.get("vertices").get(line.get("vertices").get(1)),
             ]);
-
-            const [{ x: x0, y: y0 }, { x: x1, y: y1 }] = orderedVertices.map(
-              (v) => ({ x: v.get("x"), y: v.get("y") })
-            );
-
+            const [{ x: x0, y: y0 }, { x: x1, y: y1 }] = orderedVertices;
             const alpha = GeometryUtils.angleBetweenTwoPoints(x0, y0, x1, y1);
             const lineLength = GeometryUtils.pointsDistance(x0, y0, x1, y1);
-            const widthLength =
-              element.getIn(["properties", "width", "length"]) || 0;
+            const widthLength = element
+              .get("properties")
+              .get("width")
+              .get("length");
             const halfWidthLength = widthLength / 2;
 
             let lengthValue = value.get("length");
@@ -321,10 +320,9 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               PRECISION
             );
             const offsetUnit = _attributesFormData?.getIn(["offsetA", "_unit"]);
-
-            const offsetA = ImmutableMap({
+            const offsetA = Map({
               length: startAt,
-              _length: convert(startAt).from(catalog?.unit).to(offsetUnit),
+              _length: convert(startAt).from(catalog.unit).to(offsetUnit),
               _unit: offsetUnit,
             });
 
@@ -332,11 +330,11 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               ?.set("offsetA", offsetA)
               .set("offset", offset);
 
-            const offsetAttribute = ImmutableMap({
+            const offsetAttribute = Map({
               length: MathUtils.toFixedFloat(lengthValue, PRECISION),
               _unit: value.get("_unit"),
               _length: MathUtils.toFixedFloat(
-                convert(lengthValue).from(catalog?.unit).to(value.get("_unit")),
+                convert(lengthValue).from(catalog.unit).to(value.get("_unit")),
                 PRECISION
               ),
             });
@@ -345,9 +343,9 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               attributeName,
               offsetAttribute
             );
-
             break;
           }
+
           default: {
             _attributesFormData = _attributesFormData?.set(
               attributeName,
@@ -358,6 +356,7 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
         }
         break;
       }
+
       default:
         break;
     }
@@ -380,14 +379,13 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
     propertiesFormData,
     attributesFormData,
   }: {
-    propertiesFormData?: ImmutableMap<string, any>;
-    attributesFormData?: ImmutableMap<string, any> | null;
+    propertiesFormData?: PropertiesFormData;
+    attributesFormData?: AttributesFormData | null;
   }) => {
     if (propertiesFormData) {
-      const properties = propertiesFormData.map(
-        (data: ImmutableMap<string, any>) => data.get("currentValue")
-      ) as ImmutableMap<string, any>;
-
+      const properties = propertiesFormData.map((data) =>
+        data.get("currentValue")
+      );
       projectActions.setProperties(properties);
     }
 
@@ -405,13 +403,11 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
           projectActions.setHolesAttributes(attributesFormData);
           break;
         }
-        default:
-          break;
       }
     }
   };
 
-  const copyProperties = (properties: ImmutableMap<string, any>) => {
+  const copyProperties = (properties: any) => {
     projectActions.copyProperties(properties);
   };
 
@@ -422,6 +418,7 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
   return (
     <div>
       <AttributesEditor
+        //@ts-ignore
         element={element}
         onUpdate={updateAttribute}
         attributeFormData={attributesFormData}
@@ -442,7 +439,7 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
             <div
               title={translator.t("Paste")}
               style={iconHeadStyle}
-              onClick={() => pasteProperties()}
+              onClick={pasteProperties}
             >
               <MdContentPaste />
             </div>
@@ -451,12 +448,11 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
       </div>
 
       {propertiesFormData
-        ?.entrySeq()
-        .map(([propertyName, data]: [string, ImmutableMap<string, any>]) => {
-          const currentValue = data.get("currentValue");
-          const configs = data.get("configs");
-
-          const { Editor } = catalog.getPropertyType(configs.type);
+        .entrySeq()
+        .map(([propertyName, data]) => {
+          const currentValue = data.currentValue;
+          const configs = data.configs;
+          const Editor = catalog.getPropertyType(configs.type).Editor;
 
           return (
             <Editor
@@ -470,7 +466,8 @@ const ElementEditor: React.FC<ElementEditorProps> = ({
               internalState={{ attributesFormData, propertiesFormData }}
             />
           );
-        })}
+        })
+        .toArray()}
     </div>
   );
 };

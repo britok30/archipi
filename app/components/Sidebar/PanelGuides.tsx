@@ -86,7 +86,7 @@ const PanelGuides = ({ state }) => {
               <span className="text-xs mb-4 inline-block">{`Value must be between 0 and ${state.getIn(
                 ["scene", "width"]
               )} `}</span>
-              <div classNames="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <FormNumberInput
                   value={0}
                   onChange={(e) => {
@@ -131,10 +131,7 @@ const PanelGuides = ({ state }) => {
           </div>
 
           {addVGVisible && (
-            <Button
-              onClick={(e) => setAddVGVisible(false)}
-              className="bg-white text-black px-3 py-2 rounded-md"
-            >
+            <Button variant="secondary" size="sm" onClick={(e) => setAddVGVisible(false)}>
               Add Vertical Guide
             </Button>
           )}
