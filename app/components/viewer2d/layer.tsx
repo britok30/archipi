@@ -7,7 +7,6 @@ import { Area } from "./area";
 import { Vertex } from "./vertex";
 import { Item } from "./item";
 import { Group } from "./group";
-import { Hole } from "./hole"; // Assuming you have a Hole component
 
 interface LayerProps {
   layer: LayerType;

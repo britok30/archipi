@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useMemo } from "react";
-import PropTypes from "prop-types";
 import polylabel from "polylabel";
 import areapolygon from "area-polygon";
+import { Map as ImmutableMap, List as ImmutableList } from "immutable";
 
-const styleText = {
+const styleText: React.CSSProperties = {
   textAnchor: "middle",
   fontSize: "12px",
   fontFamily: "'Helvetica', 'Arial', sans-serif",
@@ -14,64 +14,129 @@ const styleText = {
   WebkitTouchCallout: "none", // iOS Safari
   WebkitUserSelect: "none", // Chrome/Safari/Opera
   MozUserSelect: "none", // Firefox
-  MsUserSelect: "none", // Internet Explorer/Edge
   userSelect: "none",
 };
 
-const calculatePolygonWithHoles = (area, layer) => {
-  let polygonWithHoles = area.vertices.toArray().map((vertexID) => {
-    const { x, y } = layer.vertices.get(vertexID);
-    return [x, y];
-  });
+interface Vertex {
+  x: number;
+  y: number;
+}
 
-  area.holes.forEach((holeID) => {
-    const holePolygon = layer.areas
-      .get(holeID)
-      .vertices.toArray()
-      .map((vertexID) => {
-        const { x, y } = layer.vertices.get(vertexID);
-        return [x, y];
-      });
+interface AreaType {
+  id: string;
+  name: string;
+  type: string;
+  prototype: string;
+  selected: boolean;
+  vertices: ImmutableList<string>;
+  holes: ImmutableList<string>;
+}
 
-    polygonWithHoles = polygonWithHoles.concat(holePolygon.reverse());
-  });
+interface LayerType {
+  id: string;
+  name: string;
+  vertices: ImmutableMap<string, Vertex>;
+  areas: ImmutableMap<string, AreaType>;
+}
 
-  return polygonWithHoles;
+interface CatalogElement {
+  render2D: (element: AreaType, layer: LayerType) => React.ReactNode;
+}
+
+interface CatalogType {
+  getElement: (type: string) => CatalogElement;
+}
+
+interface AreaProps {
+  layer: LayerType;
+  area: AreaType;
+  catalog: CatalogType;
+}
+
+const calculatePolygonWithHoles = (
+  area: AreaType,
+  layer: LayerType
+): number[][][] => {
+  // Outer ring
+  const outerRing: number[][] = area.vertices
+    .toArray()
+    .map((vertexID: string) => {
+      const vertex = layer.vertices.get(vertexID);
+      if (vertex) {
+        return [vertex.x, vertex.y];
+      }
+      throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
+    });
+
+  // Holes
+  const holesRings: number[][][] = area.holes
+    .map((holeID: string) => {
+      const holeArea = layer.areas.get(holeID);
+      if (holeArea) {
+        const holeRing = holeArea.vertices.toArray().map((vertexID: string) => {
+          const vertex = layer.vertices.get(vertexID);
+          if (vertex) {
+            return [vertex.x, vertex.y];
+          }
+          throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
+        });
+        return holeRing;
+      }
+      throw new Error(`Hole area ${holeID} not found in layer.areas`);
+    })
+    .toArray();
+
+  return [outerRing, ...holesRings];
 };
 
-const calculateAreaSize = (area, layer) => {
-  const polygon = area.vertices.toArray().map((vertexID) => {
-    const { x, y } = layer.vertices.get(vertexID);
-    return [x, y];
-  });
-
-  let areaSize = areapolygon(polygon, false);
-
-  area.holes.forEach((areaID) => {
-    const hole = layer.areas.get(areaID);
-    const holePolygon = hole.vertices.toArray().map((vertexID) => {
-      const { x, y } = layer.vertices.get(vertexID);
-      return [x, y];
+const calculateAreaSize = (area: AreaType, layer: LayerType): number => {
+  // Outer ring
+  const outerRing: number[][] = area.vertices
+    .toArray()
+    .map((vertexID: string) => {
+      const vertex = layer.vertices.get(vertexID);
+      if (vertex) {
+        return [vertex.x, vertex.y];
+      }
+      throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
     });
-    areaSize -= areapolygon(holePolygon, false);
+
+  let areaSize = areapolygon(outerRing, false);
+
+  // Subtract hole areas
+  area.holes.forEach((holeID: string) => {
+    const holeArea = layer.areas.get(holeID);
+    if (holeArea) {
+      const holeRing = holeArea.vertices.toArray().map((vertexID: string) => {
+        const vertex = layer.vertices.get(vertexID);
+        if (vertex) {
+          return [vertex.x, vertex.y];
+        }
+        throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
+      });
+      areaSize -= areapolygon(holeRing, false);
+    }
   });
 
   return areaSize;
 };
 
-export const Area = ({ layer, area, catalog }) => {
+export const Area: React.FC<AreaProps> = ({ layer, area, catalog }) => {
   const rendered = useMemo(
     () => catalog.getElement(area.type).render2D(area, layer),
     [area, catalog, layer]
   );
+
   const polygonWithHoles = useMemo(
     () => calculatePolygonWithHoles(area, layer),
     [area, layer]
   );
+
   const center = useMemo(
-    () => polylabel([polygonWithHoles], 1.0),
+    () => polylabel(polygonWithHoles, 1.0),
     [polygonWithHoles]
   );
+
   const areaSize = useMemo(() => calculateAreaSize(area, layer), [area, layer]);
 
   return (
@@ -105,8 +170,4 @@ export const Area = ({ layer, area, catalog }) => {
   );
 };
 
-Area.propTypes = {
-  area: PropTypes.object.isRequired,
-  layer: PropTypes.object.isRequired,
-  catalog: PropTypes.object.isRequired,
-};
+export default Area;
