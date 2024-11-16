@@ -31,12 +31,42 @@ export const metadata = {
   },
 };
 
-const gtWalsheim = localFont({ src: "../app/fonts/GT-Walsheim-Regular.otf" });
+const eudoxusSans = localFont({
+  src: [
+    {
+      path: "../app/fonts/EudoxusSans-Light.woff",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/EudoxusSans-Regular.woff",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/EudoxusSans-Medium.woff",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/EudoxusSans-Bold.woff",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/EudoxusSans-ExtraBold.woff",
+      weight: "900",
+      style: "normal",
+    },
+  ],
+});
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`bg-black text-white ${gtWalsheim.className}`}>
+      <body
+        className={`bg-black text-white ${eudoxusSans.className} antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
       <GoogleAdsense />

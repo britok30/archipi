@@ -2070,10 +2070,15 @@ ignore@^5.2.0:
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.3.1.tgz"
   integrity sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==
 
-immutable@3.8.2, immutable@^3.2.1:
+immutable@^3.2.1:
   version "3.8.2"
   resolved "https://registry.npmjs.org/immutable/-/immutable-3.8.2.tgz"
   integrity sha512-15gZoQ38eYjEjxkorfbcgBKBL6R7T459OuK+CpcWt7O3KF4uPCx2tD0uFETlUDIyo+1789crbMhTvQBSR5yBMg==
+
+immutable@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.0.2.tgz#bb8a987349a73efbe6b3b292a9cbaf1b530d296b"
+  integrity sha512-1NU7hWZDkV7hJ4PJ9dur9gTNQ4ePNPN4k9/0YhwjzykTi/+3Q5pF93YU5QoVj8BuOnhLgaY8gs0U2pj4kSYVcw==
 
 immutablediff@^0.4.4:
   version "0.4.4"

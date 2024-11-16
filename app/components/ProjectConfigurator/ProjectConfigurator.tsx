@@ -3,6 +3,9 @@
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const ProjectConfigurator = ({ state }) => {
   const { projectActions, translator } = useContext(ReactPlannerContext);
@@ -25,40 +28,30 @@ const ProjectConfigurator = ({ state }) => {
 
   return (
     <div className="bg-black flex flex-col w-full min-h-screen items-center justify-center">
-      <h1 className="text-4xl text-white mb-4">
-        {translator.t("Project config")}
-      </h1>
+      <h1 className="text-4xl text-white mb-4">Project Config</h1>
 
       <form onSubmit={onSubmit} className="w-[500px]">
         <div className="mb-3">
-          <label
-            htmlFor="width"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
+          <Label htmlFor="width" className="mb-2">
             Width
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             id="width"
             name="width"
-            className="bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none"
             placeholder="width"
             value={dataWidth}
             onChange={(e) => setDataWidth(e.target.value)}
           />
         </div>
         <div className="mb-3">
-          <label
-            htmlFor="height"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
+          <Label htmlFor="height" className="mb-2">
             Height
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             id="height"
             name="height"
-            className="bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none"
             placeholder="height"
             value={dataHeight}
             onChange={(e) => setDataHeight(e.target.value)}
@@ -66,18 +59,15 @@ const ProjectConfigurator = ({ state }) => {
         </div>
 
         <div className="flex space-x-3 items-center">
-          <button
-            className="text-white bg-[#292929] hover:bg-black focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
+          <Button
+            variant="destructive"
             onClick={(e) => projectActions.rollback()}
           >
-            {translator.t("Cancel")}
-          </button>
-          <button
-            className="text-black bg-white hover:bg-zinc-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center transition duration-200 ease-in-out"
-            type="submit"
-          >
+            Cancel
+          </Button>
+          <Button variant="secondary" type="submit">
             Save
-          </button>
+          </Button>
         </div>
       </form>
     </div>

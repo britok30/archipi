@@ -7,6 +7,7 @@ import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { FaTrash, FaTimes } from "react-icons/fa";
 import { FormNumberInput } from "../style/export";
 import classNames from "classnames";
+import { Button } from "@/components/ui/button";
 
 const PanelGuides = ({ state }) => {
   const { projectActions, translator } = useContext(ReactPlannerContext);
@@ -130,12 +131,12 @@ const PanelGuides = ({ state }) => {
           </div>
 
           {addVGVisible && (
-            <button
+            <Button
               onClick={(e) => setAddVGVisible(false)}
               className="bg-white text-black px-3 py-2 rounded-md"
             >
               Add Vertical Guide
-            </button>
+            </Button>
           )}
 
           {!addVGVisible && (

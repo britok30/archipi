@@ -1,19 +1,33 @@
 "use client";
 
 import React from "react";
-import PropTypes from "prop-types";
 import ItemAttributesEditor from "./ItemsAttributeEditor";
 import LineAttributesEditor from "./LineAttributesEditor";
 import HoleAttributesEditor from "./HoleAttributesEditor";
 
-export default function AttributesEditor({
+interface Element {
+  prototype: "items" | "lines" | "holes" | "areas" | string;
+  // Add other properties of `element` as needed
+}
+
+interface AttributesEditorProps {
+  element: Element;
+  onUpdate: (data: any, callback?: (arg: any) => void) => void;
+  onValid?: (valid: boolean) => void;
+  attributeFormData: any;
+  state: any;
+  // Include any additional props passed via `...rest`
+  [key: string]: any;
+}
+
+const AttributesEditor: React.FC<AttributesEditorProps> = ({
   element,
   onUpdate,
   onValid,
   attributeFormData,
   state,
   ...rest
-}) {
+}) => {
   switch (element.prototype) {
     case "items":
       return (
@@ -50,15 +64,9 @@ export default function AttributesEditor({
       );
     case "areas":
       return null;
+    default:
+      return null;
   }
-
-  return null;
-}
-
-AttributesEditor.propTypes = {
-  element: PropTypes.object.isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  onValid: PropTypes.func,
-  attributeFormData: PropTypes.object.isRequired,
-  state: PropTypes.object.isRequired,
 };
+
+export default AttributesEditor;
