@@ -89,8 +89,8 @@ const PanelGuides = ({ state }) => {
               <div className="flex items-center justify-between">
                 <FormNumberInput
                   value={0}
-                  onChange={(e) => {
-                    projectActions.addHorizontalGuide(e.target.value);
+                  onChange={(value) => {
+                    projectActions.addHorizontalGuide(value);
                     setAddHGVisible(true);
                   }}
                   min={0}
@@ -131,7 +131,11 @@ const PanelGuides = ({ state }) => {
           </div>
 
           {addVGVisible && (
-            <Button variant="secondary" size="sm" onClick={(e) => setAddVGVisible(false)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => setAddVGVisible(false)}
+            >
               Add Vertical Guide
             </Button>
           )}
@@ -144,8 +148,8 @@ const PanelGuides = ({ state }) => {
               <div className="flex items-center justify-between">
                 <FormNumberInput
                   value={0}
-                  onChange={(e) => {
-                    projectActions.addVerticalGuide(e.target.value);
+                  onChange={(value) => {
+                    projectActions.addVerticalGuide(value);
                     setAddVGVisible(true);
                   }}
                   min={0}
