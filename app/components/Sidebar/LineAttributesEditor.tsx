@@ -82,8 +82,7 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             onUpdate("name", event.target.value)
           }
-          placeholder={translator.t("Enter name")}
-          className="bg-[#292929] text-white border-none rounded-md h-[40px] px-3 outline-none"
+          placeholder="Enter name"
         />
       </div>
 

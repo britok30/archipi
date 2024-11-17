@@ -7,6 +7,8 @@ import { GeometryUtils, MathUtils } from "../../utils/export";
 import convert from "convert-units";
 import { MdContentCopy, MdContentPaste } from "react-icons/md";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { Clipboard, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
 const PRECISION = 2;
 const iconHeadStyle = {
   float: "right",
@@ -14,12 +16,6 @@ const iconHeadStyle = {
   padding: 0,
   cursor: "pointer",
   fontSize: "1.4em",
-};
-const shouldUpdate = (prevProps, nextProps) => {
-  return (
-    prevProps.state.clipboardProperties.hashCode() !==
-    nextProps.state.clipboardProperties.hashCode()
-  );
 };
 const ElementEditor = ({ state: appState, element, layer }) => {
   const { projectActions, catalog, translator } =
@@ -105,6 +101,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
     setAttributesFormData(initAttrData(element, layer, appState));
     setPropertiesFormData(initPropData(element, layer, appState));
   }, [element, layer, appState]);
+
   const updateAttribute = (attributeName, value) => {
     let _attributesFormData = attributesFormData;
     switch (element.prototype) {
@@ -285,6 +282,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
     setAttributesFormData(_attributesFormData);
     save({ attributesFormData: _attributesFormData });
   };
+
   const updateProperty = (propertyName, value) => {
     let _propertiesFormData = propertiesFormData;
     _propertiesFormData = _propertiesFormData.setIn(
@@ -335,44 +333,40 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         attributeFormData={attributesFormData}
         state={appState}
       />
-      <div className="relative my-1 mx-2 border border-white rounded-md">
-        <div className="flex items-center justify-end space-x-3 py-2">
-          <div
-            title={translator.t("Copy")}
-            style={iconHeadStyle}
-            onClick={(e) => copyProperties(element.properties)}
-          >
-            <MdContentCopy />
-          </div>
-          {appState.get("clipboardProperties") &&
-          appState.get("clipboardProperties").size ? (
-            <div
-              title={translator.t("Paste")}
-              style={iconHeadStyle}
-              onClick={(e) => pasteProperties()}
-            >
-              <MdContentPaste />
-            </div>
-          ) : null}
-        </div>
+
+      <div className="flex items-center justify-end space-x-3 py-2 mt-3">
+        <Button onClick={(e) => copyProperties(element.properties)}>
+          <Copy />
+        </Button>
+
+        {appState.get("clipboardProperties") &&
+        appState.get("clipboardProperties").size ? (
+          <Button variant="ghost" onClick={(e) => pasteProperties()}>
+            <Clipboard />
+          </Button>
+        ) : null}
       </div>
-      {propertiesFormData?.entrySeq().map(([propertyName, data]) => {
-        let currentValue = data.get("currentValue"),
-          configs = data.get("configs");
-        let { Editor } = catalog.getPropertyType(configs.type);
-        return (
-          <Editor
-            key={propertyName}
-            propertyName={propertyName}
-            value={currentValue}
-            configs={configs}
-            onUpdate={(value) => updateProperty(propertyName, value)}
-            state={appState}
-            sourceElement={element}
-            internalState={{ attributesFormData, propertiesFormData }}
-          />
-        );
-      })}
+
+      {propertiesFormData
+        ?.entrySeq()
+        .map(([propertyName, data]) => {
+          let currentValue = data.get("currentValue"),
+            configs = data.get("configs");
+          let { Editor } = catalog.getPropertyType(configs.type);
+          return (
+            <Editor
+              key={propertyName}
+              propertyName={propertyName}
+              value={currentValue}
+              configs={configs}
+              onUpdate={(value) => updateProperty(propertyName, value)}
+              state={appState}
+              sourceElement={element}
+              internalState={{ attributesFormData, propertiesFormData }}
+            />
+          );
+        })
+        .toArray()}
     </div>
   );
 };
