@@ -36,7 +36,7 @@ const ProjectConfigurator = ({ state }) => {
             Width
           </Label>
           <Input
-            type="text"
+            type="number"
             id="width"
             name="width"
             placeholder="width"
@@ -49,7 +49,7 @@ const ProjectConfigurator = ({ state }) => {
             Height
           </Label>
           <Input
-            type="text"
+            type="number"
             id="height"
             name="height"
             placeholder="height"
