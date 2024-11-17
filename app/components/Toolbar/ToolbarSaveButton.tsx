@@ -57,7 +57,7 @@ export default function ToolbarSaveButton({ state }) {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent side="top" className="w-80 bg-white">
+      <PopoverContent side="right" className="w-80 bg-white">
         <Label>Save as</Label>
         <div>
           <Button className="w-full mb-2" onClick={saveProjectToJSONFile}>
