@@ -98,7 +98,7 @@ const Footer: React.FC<FooterProps> = ({
 
           {/* Zoom Section */}
           <div
-            className="px-4 border-r border-gray-700"
+            className="px-4 border-r border-gray-700 w-[150px]"
             title={translator.t("Scene Zoom Level")}
           >
             Zoom: {zoom.toFixed(3)}X
