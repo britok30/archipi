@@ -3,16 +3,15 @@
 import React from "react";
 import { Map as ImmutableMap, List as ImmutableList } from "immutable";
 import { Line } from "./line";
-import { Area } from "./area";
+import { Area, CatalogType } from "./area";
 import { Vertex } from "./vertex";
 import { Item } from "./item";
 import { Group } from "./group";
-import { Catalog } from "@/app/catalog";
 
 interface LayerProps {
   layer: LayerType;
   scene: SceneType;
-  catalog: Catalog;
+  catalog: CatalogType;
 }
 
 interface LayerType {
@@ -31,10 +30,6 @@ interface SceneType {
   groups: ImmutableMap<string, any>;
   // Add other properties of scene if necessary
 }
-
-// interface CatalogType {
-//   getElement: (type: string) => void;
-// }
 
 export const Layer: React.FC<LayerProps> = ({ layer, scene, catalog }) => {
   const { unit, groups } = scene;

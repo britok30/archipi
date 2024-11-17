@@ -42,7 +42,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const mode = state.get("mode");
 
   return (
-    <div className="fixed flex flex-col space-y-2 h-[96vh] top-4 left-4 z-[999]  bg-black p-2 rounded-lg">
+    <div className="fixed flex flex-col space-y-2 h-fit top-4 left-4 z-[999]  bg-black p-2 rounded-lg">
       {allowProjectFileSupport && (
         <ToolbarButton
           active={false}

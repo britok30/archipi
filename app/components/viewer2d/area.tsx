@@ -43,7 +43,7 @@ interface CatalogElement {
   render2D: (element: AreaType, layer: LayerType) => React.ReactNode;
 }
 
-interface CatalogType {
+export interface CatalogType {
   getElement: (type: string) => CatalogElement;
 }
 
