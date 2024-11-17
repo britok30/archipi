@@ -2,7 +2,6 @@
 
 import Button from "./button";
 import CancelButton from "./cancel-button";
-import ContentContainer from "./content-container";
 import ContentTitle from "./content-title";
 import DeleteButton from "./delete-button";
 import FormBlock from "./form-block";
@@ -17,7 +16,6 @@ import FormTextInput from "./form-text-input";
 export {
   Button,
   CancelButton,
-  ContentContainer,
   ContentTitle,
   DeleteButton,
   FormBlock,

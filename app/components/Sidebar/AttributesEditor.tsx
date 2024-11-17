@@ -12,7 +12,7 @@ interface Element {
 
 interface AttributesEditorProps {
   element: Element;
-  onUpdate: (data: any, callback?: (arg: any) => void) => void;
+  onUpdate: any;
   onValid?: (valid: boolean) => void;
   attributeFormData: any;
   state: any;

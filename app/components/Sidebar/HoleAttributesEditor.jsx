@@ -27,7 +27,7 @@ const HoleAttributesEditor = ({
       <PropertyString
         value={name}
         onUpdate={(mapped) => onUpdate("name", mapped)}
-        configs={{ label: "Nome" }}
+        configs={{ label: "Name" }}
         state={state}
         {...rest}
       />
