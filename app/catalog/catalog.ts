@@ -12,8 +12,61 @@ import {
 
 import { UNIT_CENTIMETER } from "../utils/constants";
 
+interface PropertyConfig {
+  type: string;
+  defaultValue: any;
+  [key: string]: any;
+}
+
+interface ElementInfo {
+  tag: string;
+  description: string;
+  image: string;
+  [key: string]: any;
+}
+
+interface Element {
+  name: string;
+  prototype: string;
+  info: ElementInfo;
+  properties: { [key: string]: PropertyConfig };
+  render2D: (element: any, layer: any, scene: any) => React.ReactElement;
+  render3D: (element: any, layer: any, scene: any) => Promise<any>;
+  [key: string]: any;
+}
+
+interface Category {
+  name: string;
+  label: string;
+  elements: Element[];
+  categories: Category[];
+}
+
+interface PropertyType {
+  type: string;
+  Viewer: React.ComponentType<any>;
+  Editor: React.ComponentType<any>;
+}
+
+interface Categories {
+  [key: string]: Category;
+}
+
+interface Elements {
+  [key: string]: Element;
+}
+
+interface PropertyTypes {
+  [key: string]: PropertyType;
+}
+
 export default class Catalog {
-  constructor(unit = UNIT_CENTIMETER) {
+  private elements: Elements;
+  private categories: Categories;
+  private propertyTypes: PropertyTypes;
+  readonly unit: string;
+
+  constructor(unit: string = UNIT_CENTIMETER) {
     this.elements = {};
     this.categories = {
       root: { name: "root", label: "/", elements: [], categories: [] },
@@ -34,44 +87,28 @@ export default class Catalog {
     ]);
   }
 
-  /** @description Get catalog's element
-   *  @param {string} type Element's type
-   *  @return {?object} Element
-   */
-  getElement(type) {
+  getElement(type: string): Element {
     if (this.hasElement(type)) {
       return this.elements[type];
     }
     throw new Error(`Element ${type} does not exist in catalog`);
   }
 
-  /** @description Get catalog category
-   *  @param {string} categoryName Name of category
-   *  @return {object} Category
-   */
-  getCategory(categoryName) {
+  getCategory(categoryName: string): Category {
     if (this.hasCategory(categoryName)) {
       return this.categories[categoryName];
     }
     throw new Error(`Category ${categoryName} does not exist in catalog`);
   }
 
-  /** @description Return type of a specfied property
-   *  @param {string} type Property type
-   *  @return {?object} Property
-   */
-  getPropertyType(type) {
+  getPropertyType(type: string): PropertyType {
     if (this.propertyTypes.hasOwnProperty(type)) {
       return this.propertyTypes[type];
     }
     throw new Error(`Element ${type} does not exist in catalog`);
   }
 
-  /** @description Register a new element
-   *  @param {object} json Element structure
-   *  @return {void}
-   */
-  registerElement(json) {
+  registerElement(json: Element): void {
     json.properties = json.properties || {};
     if (this.validateElement(json)) {
       this.elements[json.name] = json;
@@ -79,40 +116,32 @@ export default class Catalog {
     }
   }
 
-  /** @description Register multiple elements
-   *  @param {array} [elementArray] Array of elements
-   *  @return {void}
-   */
-  registerMultipleElements(elementArray) {
+  registerMultipleElements(elementArray: Element[]): void {
     elementArray.forEach((el) => this.registerElement(el));
   }
 
-  /** @description Register a new property
-   *  @param {string} type Type of property
-   *  @param {object} Viewer Property viewer component
-   *  @param {object} Editor Property editor component
-   *  @return {void}
-   */
-  registerPropertyType(type, Viewer, Editor) {
+  registerPropertyType(
+    type: string,
+    Viewer: React.ComponentType<any>,
+    Editor: React.ComponentType<any>
+  ): void {
     this.propertyTypes[type] = { type, Viewer, Editor };
   }
 
-  /** @description Register multiple property
-   *  @param {array} propertyTypeArray Array of properties
-   *  @return {void}
-   */
-  registerMultiplePropertyType(propertyTypeArray) {
+  registerMultiplePropertyType(
+    propertyTypeArray: [
+      string,
+      React.ComponentType<any>,
+      React.ComponentType<any>
+    ][]
+  ): void {
     propertyTypeArray.forEach((el) => this.registerPropertyType(...el));
   }
 
-  /** @description Validate an element
-   *  @param {object} json Element's structure
-   *  @return {?boolean}
-   */
-  validateElement(json) {
+  private validateElement(json: Element): boolean {
     if (!json.hasOwnProperty("name")) throw new Error("Element not valid");
 
-    let name = json.name;
+    const name = json.name;
     if (!json.hasOwnProperty("prototype"))
       throw new Error(`Element ${name} doesn't have prototype`);
 
@@ -132,8 +161,8 @@ export default class Catalog {
     if (!json.hasOwnProperty("properties"))
       throw new Error(`Element ${name} doesn't have properties`);
 
-    for (let propertyName in json.properties) {
-      let propertyConfigs = json.properties[propertyName];
+    for (const propertyName in json.properties) {
+      const propertyConfigs = json.properties[propertyName];
       if (!propertyConfigs.hasOwnProperty("type"))
         throw new Error(
           `Element ${name}, Property ${propertyName} doesn't have type`
@@ -147,21 +176,15 @@ export default class Catalog {
     return true;
   }
 
-  /** @description Check if catalog has element
-   *  @param {string} type Element's type
-   *  @return {boolean}
-   */
-  hasElement(type) {
+  hasElement(type: string): boolean {
     return this.elements.hasOwnProperty(type);
   }
 
-  /** @description Register a new category
-   *  @param {string} name Name of category
-   *  @param {string} label Label of category
-   *  @param {array} [childs] Category's childs
-   *  @return {?object} Registered category
-   */
-  registerCategory(name, label, childs) {
+  registerCategory(
+    name: string,
+    label: string,
+    childs?: Element[]
+  ): Category | null {
     if (this.validateCategory(name, label)) {
       this.categories[name] = { name, label, categories: [], elements: [] };
       this.categories.root.categories.push(this.categories[name]);
@@ -175,35 +198,25 @@ export default class Catalog {
     return null;
   }
 
-  /** @description Add an element to the specified category
-   *  @param {string} name Name of category
-   *  @param {object} child Element's structure
-   *  @return {?void}
-   */
-  addToCategory(name, child) {
+  addToCategory(name: string, child: Element | Category): void {
     if (this.hasElement(child.name)) {
-      this.categories[name].elements.push(child);
+      this.categories[name].elements.push(child as Element);
       this.categories.root.elements.splice(
-        this.categories.root.elements.indexOf(child),
+        this.categories.root.elements.indexOf(child as Element),
         1
       );
     } else if (this.hasCategory(child.name)) {
-      this.categories[name].categories.push(child);
+      this.categories[name].categories.push(child as Category);
       this.categories.root.categories.splice(
-        this.categories.root.categories.indexOf(child),
+        this.categories.root.categories.indexOf(child as Category),
         1
       );
     } else {
-      throw new Error(`child ${child} is either category nor element`);
+      throw new Error(`child ${child.name} is neither category nor element`);
     }
   }
 
-  /** @description Check if category contain element
-   *  @param {string} categoryName Name of category
-   *  @param {string} elementName Name of element
-   *  @return {boolean}
-   */
-  categoryHasElement(categoryName, elementName) {
+  categoryHasElement(categoryName: string, elementName: string): boolean {
     return (
       this.hasCategory(categoryName) &&
       this.categories[categoryName].elements.some(
@@ -212,12 +225,7 @@ export default class Catalog {
     );
   }
 
-  /** @description Validate a category
-   *  @param {string} name Name of category
-   *  @param {string} label Label of category
-   *  @return {?boolean}
-   */
-  validateCategory(name, label) {
+  private validateCategory(name: string, label: string): boolean {
     if (!name) {
       throw new Error("Category has undefined name");
     }
@@ -231,11 +239,7 @@ export default class Catalog {
     return true;
   }
 
-  /** @description Verify if catalog already contain a category with specified name
-   *  @param {string} categoryName Name of category
-   *  @return {boolean}
-   */
-  hasCategory(categoryName) {
+  hasCategory(categoryName: string): boolean {
     return this.categories.hasOwnProperty(categoryName);
   }
 }

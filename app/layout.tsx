@@ -92,7 +92,10 @@ const eudoxusSans = localFont({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className="scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black"
+    >
       <body
         className={`bg-black text-white ${eudoxusSans.className} antialiased`}
       >

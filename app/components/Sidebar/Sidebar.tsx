@@ -77,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ state }) => {
 
   return (
     <aside
-      className="overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5"
+      className="overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5 scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black"
       onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
         event.stopPropagation()
       }

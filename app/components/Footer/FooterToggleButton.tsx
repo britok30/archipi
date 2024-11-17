@@ -43,7 +43,7 @@ const FooterToggleButton: React.FC<FooterToggleButtonProps> = ({
   return (
     <Badge
       className={classNames(
-        "w-[5.5rem] text-xs !p-0 text-white text-center cursor-pointer select-none border border-transparent mt-[-1px] mx-[5px] mb-0 rounded-md inline-block transition duration-200 ease-in-out",
+        "w-[5.5rem] text-xs !p-0 text-white text-center cursor-pointer select-none border border-transparent mx-[5px] mb-0 rounded-md inline-block transition duration-200 ease-in-out",
         { "bg-[#292929] border-white": over || active }
       )}
       onMouseOver={toggleOver}

@@ -67,7 +67,9 @@ const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
     const merged = value.merge({
       length:
         unitInput !== UNIT_CENTIMETER
-          ? convert(newLength).from(unitInput as typeof UNIT_CENTIMETER).to(UNIT_CENTIMETER)
+          ? convert(newLength)
+              .from(unitInput as typeof UNIT_CENTIMETER)
+              .to(UNIT_CENTIMETER)
           : newLength,
       _length: lengthInput,
       _unit: unitInput,
@@ -83,11 +85,11 @@ const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
 
   return (
     <div
-      className="property-length-measure flex flex-col gap-2"
+      className="property-length-measure flex flex-col gap-2 mb-2"
       style={PropertyStyle.containerStyle}
     >
       <div className="flex flex-col">
-        <Label className="text-xs mb-2">{label}</Label>
+        <Label className="text-xs mb-2 capitalize">{label}</Label>
 
         <div className="flex gap-3">
           <FormNumberInput
