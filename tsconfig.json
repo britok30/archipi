@@ -28,13 +28,13 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "app/plugins/autosave.js",
+    "app/plugins/autosave.ts",
     "app/components/Toolbar/export.ts",
     "app/class/line.js",
     "app/class/index.js",
     "app/class/project.js",
     "app/components/style/form-text-input.jsx",
     "app/components/style/FormNumberInput.tsx"
-  ],
+, "app/customMiddlewares"  ],
   "exclude": ["node_modules"]
 }

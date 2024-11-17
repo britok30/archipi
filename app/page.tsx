@@ -4,11 +4,11 @@ import React, { Suspense } from "react";
 import MyCatalog from "./objCatalog/mycatalog";
 import "./styles/react-planner.css";
 import ReactPlanner from "./components/ReactPlanner";
-import { Plugins as PlannerPlugins } from "./plugins";
+import { Plugins as PlannerPlugins } from "./customMiddlewares";
 import { useWindowSize } from "./hooks/useWindowSize";
 import { store } from "./components/Providers";
 
-let plugins = [PlannerPlugins.Keyboard(), PlannerPlugins.Autosave("archipi")];
+let plugins = [];
 
 export default function Home() {
   const { windowSize, isMobile } = useWindowSize();
