@@ -16,7 +16,7 @@ import Sidebar from "./Sidebar/Sidebar";
 import Content from "./Content";
 import Toolbar from "./Toolbar/Toolbar";
 
-const footerBarH = 20;
+const footerBarH = 25;
 
 const ReactPlannerContent = (props) => {
   const { width, height, state, stateExtractor, ...otherProps } = props;
