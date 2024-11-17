@@ -31,7 +31,6 @@ export {
 export default {
   Button,
   CancelButton,
-  ContentContainer,
   ContentTitle,
   DeleteButton,
   FormBlock,
