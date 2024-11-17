@@ -1,23 +1,54 @@
 "use client";
 
 import React from "react";
-import PropTypes from "prop-types";
-import { UNITS_LENGTH, UNIT_CENTIMETER } from "../../utils/constants";
+import { Map } from "immutable";
 import convert from "convert-units";
+import { UNITS_LENGTH, UNIT_CENTIMETER } from "../../utils/constants";
 import {
   FormLabel,
   FormNumberInput,
   FormSelect,
 } from "../../components/style/export";
-import { Map } from "immutable";
 import { toFixedFloat } from "../../utils/math";
 import PropertyStyle from "./shared-property-style";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { SelectTrigger } from "@radix-ui/react-select";
+import { Input } from "@/components/ui/input";
 
-const internalTableStyle = { borderCollapse: "collapse" };
-const secondTdStyle = { padding: 0 };
-const unitContainerStyle = { width: "5em" };
+interface LengthValue extends Map<string, any> {
+  get(key: "length"): number;
+  get(key: "_length"): number;
+  get(key: "_unit"): string;
+  merge(obj: object): LengthValue;
+}
 
-const PropertyLengthMeasure = ({
+interface PropertyLengthMeasureProps {
+  value: LengthValue;
+  onUpdate: (value: LengthValue) => void;
+  onValid?: (value: boolean) => void;
+  configs: {
+    hook?: (
+      value: LengthValue,
+      sourceElement?: object,
+      internalState?: object,
+      state?: object
+    ) => Promise<LengthValue>;
+    label: string;
+    [key: string]: any;
+  };
+  sourceElement?: object;
+  internalState?: object;
+  state: object;
+}
+
+const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
   value,
   onUpdate,
   onValid,
@@ -26,80 +57,64 @@ const PropertyLengthMeasure = ({
   internalState,
   state,
 }) => {
-  let length = value.get("length") || 0;
-  let _length = value.get("_length") || length;
-  let _unit = value.get("_unit") || UNIT_CENTIMETER;
-  let { hook, label, ...configRest } = configs;
+  const length = value.get("length") || 0;
+  const _length = value.get("_length") || length;
+  const _unit = value.get("_unit") || UNIT_CENTIMETER;
+  const { hook, label, ...configRest } = configs;
 
-  let update = (lengthInput, unitInput) => {
-    let newLength = toFixedFloat(lengthInput);
-    let merged = value.merge({
+  const update = async (lengthInput: number, unitInput: string) => {
+    const newLength = toFixedFloat(lengthInput);
+    const merged = value.merge({
       length:
         unitInput !== UNIT_CENTIMETER
-          ? convert(newLength).from(unitInput).to(UNIT_CENTIMETER)
+          ? convert(newLength).from(unitInput as typeof UNIT_CENTIMETER).to(UNIT_CENTIMETER)
           : newLength,
       _length: lengthInput,
       _unit: unitInput,
     });
 
     if (hook) {
-      return hook(merged, sourceElement, internalState, state).then((val) => {
-        return onUpdate(val);
-      });
+      const val = await hook(merged, sourceElement, internalState, state);
+      return onUpdate(val);
     }
 
     return onUpdate(merged);
   };
 
   return (
-    <table className="PropertyLengthMeasure" style={PropertyStyle.tableStyle}>
-      <tbody>
-        <tr>
-          <td style={PropertyStyle.firstTdStyle}>
-            <FormLabel>{label}</FormLabel>
-          </td>
-          <td style={secondTdStyle}>
-            <table style={internalTableStyle}>
-              <tbody>
-                <tr>
-                  <td>
-                    <FormNumberInput
-                      value={_length}
-                      onChange={(event) => update(event.target.value, _unit)}
-                      onValid={onValid}
-                      {...configRest}
-                    />
-                  </td>
-                  <td style={unitContainerStyle}>
-                    <FormSelect
-                      value={_unit}
-                      onChange={(event) => update(_length, event.target.value)}
-                    >
-                      {UNITS_LENGTH.map((el) => (
-                        <option key={el} value={el}>
-                          {el}
-                        </option>
-                      ))}
-                    </FormSelect>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  );
-};
+    <div
+      className="property-length-measure flex flex-col gap-2"
+      style={PropertyStyle.containerStyle}
+    >
+      <div className="flex flex-col">
+        <Label className="text-xs mb-2">{label}</Label>
 
-PropertyLengthMeasure.propTypes = {
-  value: PropTypes.instanceOf(Map).isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  onValid: PropTypes.func,
-  configs: PropTypes.object.isRequired,
-  sourceElement: PropTypes.object,
-  internalState: PropTypes.object,
-  state: PropTypes.object.isRequired,
+        <div className="flex gap-3">
+          <FormNumberInput
+            className="flex-1"
+            value={_length}
+            onChange={(value: number) => update(value, _unit)}
+          />
+
+          <Select
+            value={_unit}
+            onValueChange={(value) => update(_length, value)}
+          >
+            <SelectTrigger className="w-[50px] border rounded-lg">
+              <SelectValue placeholder="Choose a unit" />
+            </SelectTrigger>
+            <SelectContent>
+              {UNITS_LENGTH.map((el) => (
+                <SelectItem key={el} value={el}>
+                  {el}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PropertyLengthMeasure;
