@@ -37,6 +37,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { v4 as uuid } from "uuid";
+import { StateType } from "@/app/models/models";
 
 interface PanelLayersProps {
   state: any; // Replace 'any' with your actual state type
@@ -62,7 +63,11 @@ const VISIBILITY_MODE = {
   MODE_FITTING_IMAGE,
 };
 
-const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
+const PanelLayers: React.FC<PanelLayersProps> = ({
+  state,
+}: {
+  state: StateType;
+}) => {
   const { sceneActions, translator } = useContext(ReactPlannerContext);
   const [layerAddUIVisible, setLayerAddUIVisible] = useState(false);
   const [editingLayer, setEditingLayer] = useState<Map<string, any> | null>(
@@ -76,6 +81,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
         name: "",
         opacity: 1,
         altitude: 0,
+        //  @ts-ignore
         order: state.scene.layers.size,
       });
       setEditingLayer(newLayer);
@@ -110,6 +116,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
       sceneActions.addLayer(name, parseInt(altitude, 10));
 
       // Get the new layer's ID
+      //  @ts-ignore
       const newLayerID = state.scene.layers.keySeq().last();
 
       // Set additional properties for the new layer
@@ -133,6 +140,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
   if (!VISIBILITY_MODE[state.mode]) return null;
 
   const scene = state.scene;
+  //  @ts-ignore
   const isLastLayer = scene.layers.size === 1;
 
   const selectClick = (e: React.MouseEvent, layerID: string) => {
@@ -153,6 +161,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
     });
   };
 
+  //  @ts-ignore
   const isCurrentLayer = (layerID: string) => layerID === scene.selectedLayer;
 
   return (
@@ -163,6 +172,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
         <div className="text-sm text-right">Actions</div>
       </div>
 
+      {/* @ts-ignore */}
       {scene.layers.entrySeq().map(([layerID, layer]: [string, any]) => {
         return (
           <div
@@ -210,14 +220,12 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
           </div>
         );
       })}
-
       <div className="flex justify-center my-3">
         <Button variant="default" onClick={addLayer}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New Layer
         </Button>
       </div>
-
       {layerAddUIVisible && editingLayer && (
         <div className="p-4 bg-[#1e1e1e] rounded-md">
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -242,7 +250,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
             <label className="text-white">{translator.t("Altitude")}:</label>
             <Input
               type="number"
-              value={editingLayer.get("altitude")}
+              value={editingLayer.get("altitude") || 0}
               onChange={(e) =>
                 setEditingLayer(
                   editingLayer.set("altitude", parseInt(e.target.value, 10))
@@ -263,7 +271,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button variant="secondary" onClick={resetLayerMod}>
+            <Button variant="destructive" onClick={resetLayerMod}>
               <XCircle className="mr-2 h-4 w-4" />
               Reset
             </Button>

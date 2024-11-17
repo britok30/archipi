@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import FormNumberInput from "../style/form-number-input";
+import FormNumberInput from "../style/FormNumberInput";
 import FormTextInput from "../style/form-text-input";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 

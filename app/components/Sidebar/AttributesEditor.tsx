@@ -42,6 +42,7 @@ const AttributesEditor: React.FC<AttributesEditorProps> = ({
     case "lines":
       return (
         <LineAttributesEditor
+          // @ts-ignore
           element={element}
           onUpdate={onUpdate}
           onValid={onValid}
