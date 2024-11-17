@@ -501,7 +501,7 @@ export class HistoryStructure extends ImmutableRecord(
 }
 
 // State class
-export interface StateProps {
+export interface StateType {
   mode: string;
   overlays: List<any>;
   scene: Scene;
@@ -524,7 +524,7 @@ export interface StateProps {
   alterate: boolean;
 }
 
-const defaultStateProps: StateProps = {
+const defaultStateProps: StateType = {
   mode: MODE_IDLE,
   overlays: List<any>(),
   scene: new Scene(),
@@ -548,7 +548,7 @@ const defaultStateProps: StateProps = {
 };
 
 export class State extends ImmutableRecord(defaultStateProps) {
-  constructor(json: Partial<StateProps> = {}) {
+  constructor(json: Partial<StateType> = {}) {
     // Destructure json to exclude properties you're initializing separately
     const {
       mode,

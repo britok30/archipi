@@ -11,10 +11,10 @@ import { SceneActionsType } from "../actions/scene-actions";
 import { VertexActionsType } from "../actions/vertices-actions";
 import { Viewer2DActionsType } from "../actions/viewer2d-actions";
 import { Viewer3DActionsType } from "../actions/viewer3d-actions";
-import { StateProps } from "../models/models";
+import { StateType } from "../models/models";
 
 interface ReactPlannerContextType {
-  state: StateProps | {};
+  state: StateType | {};
   areaActions: AreaActionsType;
   translator: null | any;
   catalog: null | any;

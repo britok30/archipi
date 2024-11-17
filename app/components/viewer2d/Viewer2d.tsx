@@ -17,10 +17,10 @@ import { State } from "./state";
 import * as SharedStyle from "../../styles/shared-style";
 import { RulerX } from "./rulerX";
 import { RulerY } from "./rulerY";
-import { Map as ImmutableMap } from "immutable";
+import { StateType } from "@/app/models/models";
 
 interface Viewer2DProps {
-  state: any; // Replace 'any' with the actual type of your app state if available
+  state: StateType;
   width: number;
   height: number;
 }
@@ -126,15 +126,15 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
     catalog,
   } = useContext(ReactPlannerContext);
 
-  const { viewer2D, mode, scene } = state;
+  const { viewer2D, mode, scene, zoom } = state;
 
-  const layerID = scene.selectedLayer;
+  const layerID = scene.get("selectedLayer");
 
   const mapCursorPosition = useCallback(
     ({ x, y }: { x: number; y: number }) => {
-      return { x, y: -y + scene.height };
+      return { x, y: -y + scene.get("height") };
     },
-    [scene.height]
+    [scene.get("height")]
   );
 
   const onMouseMove = (viewerEvent: any) => {
@@ -149,7 +149,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
 
     switch (mode) {
       case constants.MODE_DRAWING_LINE:
-        linesActions.updateDrawingLine(x, y, state.snapMask);
+        linesActions.updateDrawingLine(x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAWING_HOLE:
@@ -165,11 +165,11 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
         break;
 
       case constants.MODE_DRAGGING_LINE:
-        linesActions.updateDraggingLine(x, y, state.snapMask);
+        linesActions.updateDraggingLine(x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAGGING_VERTEX:
-        verticesActions.updateDraggingVertex(x, y, state.snapMask);
+        verticesActions.updateDraggingVertex(x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAGGING_ITEM:
@@ -205,7 +205,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
             elementData.id,
             x,
             y,
-            state.snapMask
+            String(state.snapMask)
           );
           break;
 
@@ -215,7 +215,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
             elementData.id,
             x,
             y,
-            state.snapMask
+            String(state.snapMask)
           );
           break;
 
@@ -291,12 +291,12 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
         break;
 
       case constants.MODE_WAITING_DRAWING_LINE:
-        linesActions.beginDrawingLine(layerID, x, y, state.snapMask);
+        linesActions.beginDrawingLine(layerID, x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAWING_LINE:
-        linesActions.endDrawingLine(x, y, state.snapMask);
-        linesActions.beginDrawingLine(layerID, x, y, state.snapMask);
+        linesActions.endDrawingLine(x, y, String(state.snapMask));
+        linesActions.beginDrawingLine(layerID, x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAWING_HOLE:
@@ -308,11 +308,11 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
         break;
 
       case constants.MODE_DRAGGING_LINE:
-        linesActions.endDraggingLine(x, y, state.snapMask);
+        linesActions.endDraggingLine(x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAGGING_VERTEX:
-        verticesActions.endDraggingVertex(x, y, state.snapMask);
+        verticesActions.endDraggingVertex(x, y, String(state.snapMask));
         break;
 
       case constants.MODE_DRAGGING_ITEM:
@@ -363,9 +363,10 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
   const rulerBgColor = "#292929";
   const rulerFnColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
   const rulerMkColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
-  const sceneWidth = SVGWidth || scene.width;
-  const sceneHeight = SVGHeight || scene.height;
-  const sceneZoom = viewer2D.get("zoom") || 1;
+  const sceneWidth = SVGWidth || scene.get("width");
+  const sceneHeight = SVGHeight || scene.get("height");
+  const sceneZoom = zoom || 1;
+
   const rulerXElements = Math.ceil(sceneWidth / rulerUnitPixelSize) + 1;
   const rulerYElements = Math.ceil(sceneHeight / rulerUnitPixelSize) + 1;
 
@@ -439,7 +440,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
           height: 80,
         }}
       >
-        <svg width={scene.width} height={scene.height}>
+        <svg width={scene.get("width")} height={scene.get("height")}>
           <defs>
             <pattern
               id="diagonalFill"
