@@ -8,6 +8,7 @@ import { FaTrash, FaTimes } from "react-icons/fa";
 import { FormNumberInput } from "../style/export";
 import classNames from "classnames";
 import { Button } from "@/components/ui/button";
+import { Trash, X } from "lucide-react";
 
 const PanelGuides = ({ state }) => {
   const { projectActions, translator } = useContext(ReactPlannerContext);
@@ -60,25 +61,27 @@ const PanelGuides = ({ state }) => {
                   >
                     <span>{index + 1}</span>
                     <span>{hgValue}</span>
-                    <FaTrash
-                      size={14}
-                      className="cursor-pointer"
+                    <Button
+                      variant="ghost"
                       onClick={(e) =>
                         projectActions.removeHorizontalGuide(hgKey)
                       }
-                    />
+                    >
+                      <Trash size={14} />
+                    </Button>
                   </div>
                 );
               })}
           </div>
 
           {addHGVisible && (
-            <button
+            <Button
+              size="sm"
+              variant="secondary"
               onClick={(e) => setAddHGVisible(false)}
-              className="bg-white text-black px-3 py-2 rounded-md"
             >
               Add Horizontal Guide
-            </button>
+            </Button>
           )}
 
           {!addHGVisible && (
@@ -98,9 +101,9 @@ const PanelGuides = ({ state }) => {
                   className="w-[280px] mr-3"
                 />
 
-                <button onClick={(e) => setAddHGVisible(true)}>
-                  <FaTimes />
-                </button>
+                <Button variant="ghost" onClick={(e) => setAddHGVisible(true)}>
+                  <X size={20} />
+                </Button>
               </div>
             </>
           )}
@@ -121,10 +124,12 @@ const PanelGuides = ({ state }) => {
                   >
                     <span>{index + 1}</span>
                     <span>{vgValue}</span>
-                    <FaTrash
-                      size={14}
+                    <Button
+                      variant="ghost"
                       onClick={(e) => projectActions.removeVerticalGuide(vgKey)}
-                    />
+                    >
+                      <Trash size={14} />
+                    </Button>
                   </div>
                 );
               })}
@@ -157,9 +162,9 @@ const PanelGuides = ({ state }) => {
                   className="w-[280px] mr-3"
                 />
 
-                <button onClick={(e) => setAddVGVisible(true)}>
-                  <FaTimes />
-                </button>
+                <Button variant="ghost" onClick={(e) => setAddVGVisible(true)}>
+                  <X size={20} />
+                </Button>
               </div>
             </>
           )}
