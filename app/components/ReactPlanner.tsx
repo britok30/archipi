@@ -22,16 +22,8 @@ const ReactPlannerContent = (props) => {
   const { width, height, state, stateExtractor, ...otherProps } = props;
 
   const contentH = height - footerBarH;
-
   const extractedState = stateExtractor(state);
   const contextValue = useContext(ReactPlannerContext);
-
-  useEffect(() => {
-    let { store } = contextValue;
-    let { projectActions, catalog, stateExtractor, plugins } = props;
-    plugins.forEach((plugin) => plugin(store, stateExtractor));
-    projectActions.initCatalog(catalog);
-  }, []);
 
   useEffect(() => {
     const { stateExtractor, state, projectActions, catalog } = props;

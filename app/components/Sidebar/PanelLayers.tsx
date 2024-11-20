@@ -36,11 +36,10 @@ import {
 } from "../../utils/constants";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { v4 as uuid } from "uuid";
 import { StateType } from "@/app/models/models";
 
 interface PanelLayersProps {
-  state: any; // Replace 'any' with your actual state type
+  state: StateType;
 }
 
 const VISIBILITY_MODE = {
@@ -63,16 +62,15 @@ const VISIBILITY_MODE = {
   MODE_FITTING_IMAGE,
 };
 
-const PanelLayers: React.FC<PanelLayersProps> = ({
-  state,
-}: {
-  state: StateType;
-}) => {
+const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
+  const scene = state.scene;
   const { sceneActions, translator } = useContext(ReactPlannerContext);
   const [layerAddUIVisible, setLayerAddUIVisible] = useState(false);
   const [editingLayer, setEditingLayer] = useState<Map<string, any> | null>(
     null
   );
+  const layers = scene.get("layers");
+  const selectedLayer = scene.get("selectedLayer");
 
   const addLayer = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,8 +79,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({
         name: "",
         opacity: 1,
         altitude: 0,
-        //  @ts-ignore
-        order: state.scene.layers.size,
+        order: layers.size,
       });
       setEditingLayer(newLayer);
       setLayerAddUIVisible(true);
@@ -103,7 +100,6 @@ const PanelLayers: React.FC<PanelLayersProps> = ({
     const { name, opacity, altitude, order } = layerData.toJS();
 
     if (layerId) {
-      // Update existing layer
       sceneActions.setLayerProperties(layerId, {
         name,
         opacity,
@@ -111,15 +107,8 @@ const PanelLayers: React.FC<PanelLayersProps> = ({
         order,
       });
     } else {
-      // Create new layer
-      // Use sceneActions.addLayer to add a new layer
       sceneActions.addLayer(name, parseInt(altitude, 10));
-
-      // Get the new layer's ID
-      //  @ts-ignore
-      const newLayerID = state.scene.layers.keySeq().last();
-
-      // Set additional properties for the new layer
+      const newLayerID = layers.keySeq().last();
       sceneActions.setLayerProperties(newLayerID, {
         opacity,
         order,
@@ -137,12 +126,6 @@ const PanelLayers: React.FC<PanelLayersProps> = ({
     setEditingLayer(null);
   };
 
-  if (!VISIBILITY_MODE[state.mode]) return null;
-
-  const scene = state.scene;
-  //  @ts-ignore
-  const isLastLayer = scene.layers.size === 1;
-
   const selectClick = (e: React.MouseEvent, layerID: string) => {
     e.stopPropagation();
     sceneActions.selectLayer(layerID);
@@ -156,13 +139,17 @@ const PanelLayers: React.FC<PanelLayersProps> = ({
 
   const swapVisibility = (e: React.MouseEvent, layer: any, layerID: string) => {
     e.stopPropagation();
+    const currentVisibility = layer.get("visible");
     sceneActions.setLayerProperties(layerID, {
-      visible: !layer.get("visible"),
+      visible: !currentVisibility,
     });
   };
 
-  //  @ts-ignore
-  const isCurrentLayer = (layerID: string) => layerID === scene.selectedLayer;
+  const isCurrentLayer = (layerID: string) => layerID === selectedLayer;
+
+  if (!VISIBILITY_MODE[state.mode]) return null;
+
+  const isLastLayer = layers.size === 1;
 
   return (
     <Panel name="Layers">
@@ -172,60 +159,59 @@ const PanelLayers: React.FC<PanelLayersProps> = ({
         <div className="text-sm text-right">Actions</div>
       </div>
 
-      {/* @ts-ignore */}
-      {scene.layers.entrySeq().map(([layerID, layer]: [string, any]) => {
-        return (
-          <div
-            key={layerID}
-            className={`grid grid-cols-4 gap-3 text-white cursor-pointer hover:bg-[#292929] transition duration-200 ease-in-out py-3 px-3 ${
-              isCurrentLayer(layerID) ? "bg-[#333]" : ""
-            }`}
-            onClick={(e) => selectClick(e, layerID)}
-          >
-            <div className="text-sm">[ h : {layer.get("altitude")} ]</div>
-            <div className="text-sm col-span-2">{layer.get("name")}</div>
+      {layers.entrySeq().map(([layerID, layer]: [string, any]) => (
+        <div
+          key={layerID}
+          className={`grid grid-cols-4 gap-3 text-white cursor-pointer hover:bg-[#292929] transition duration-200 ease-in-out py-3 px-3 ${
+            isCurrentLayer(layerID) ? "bg-[#333]" : ""
+          }`}
+          onClick={(e) => selectClick(e, layerID)}
+        >
+          <div className="text-sm">[ h : {layer.get("altitude")} ]</div>
+          <div className="text-sm col-span-2">{layer.get("name")}</div>
 
-            <div className="flex items-center justify-end space-x-2">
-              {!isCurrentLayer && (
-                <Button
-                  onClick={(e) => swapVisibility(e, layer, layerID)}
-                  className="p-1"
-                >
-                  {layer.get("visible") ? (
-                    <Eye className="w-4 h-4 text-white" />
-                  ) : (
-                    <EyeOff className="w-4 h-4 text-gray-500" />
-                  )}
-                </Button>
-              )}
-
+          <div className="flex items-center justify-end space-x-2">
+            {!isCurrentLayer(layerID) && (
               <Button
-                variant="ghost"
-                onClick={(e) => configureClick(e, layer, layerID)}
+                onClick={(e) => swapVisibility(e, layer, layerID)}
                 className="p-1"
               >
-                <PencilIcon size={18} />
+                {layer.get("visible") ? (
+                  <Eye className="w-4 h-4 text-white" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-gray-500" />
+                )}
               </Button>
+            )}
 
-              {!isLastLayer && (
-                <Button
-                  variant="ghost"
-                  onClick={(e) => delLayer(e, layerID)}
-                  className="p-1"
-                >
-                  <Trash size={18} />
-                </Button>
-              )}
-            </div>
+            <Button
+              variant="ghost"
+              onClick={(e) => configureClick(e, layer, layerID)}
+              className="p-1"
+            >
+              <PencilIcon size={18} />
+            </Button>
+
+            {!isLastLayer && (
+              <Button
+                variant="ghost"
+                onClick={(e) => delLayer(e, layerID)}
+                className="p-1"
+              >
+                <Trash size={18} />
+              </Button>
+            )}
           </div>
-        );
-      })}
+        </div>
+      ))}
+
       <div className="flex justify-center my-3">
         <Button variant="default" onClick={addLayer}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New Layer
         </Button>
       </div>
+
       {layerAddUIVisible && editingLayer && (
         <div className="p-4 bg-[#1e1e1e] rounded-md">
           <div className="grid grid-cols-2 gap-4 mb-4">
