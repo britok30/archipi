@@ -57,7 +57,7 @@ const Content: React.FC<ContentProps> = ({
       );
 
     case constants.MODE_VIEWING_CATALOG:
-      return <CatalogList state={state} width={width} height={height} />;
+      return <CatalogList state={state} />;
 
     case constants.MODE_CONFIGURING_PROJECT:
       return <ProjectConfigurator state={state} />;

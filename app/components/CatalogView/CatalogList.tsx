@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
-import PropTypes from "prop-types";
+import { useContext, useState } from "react";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import CatalogItem from "./CatalogItem";
 import CatalogBreadcrumb from "./CatalogBreadcrumb";
@@ -11,34 +10,49 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const searchContainer = {
-  width: "100%",
-  height: "3em",
-  padding: "0.625em",
-  background: "#f7f7f9",
-  border: "1px solid #e1e1e8",
-  cursor: "pointer",
-  position: "relative",
-  boxShadow: "0 1px 6px 0 rgba(0, 0, 0, 0.11), 0 1px 4px 0 rgba(0, 0, 0, 0.11)",
-  borderRadius: "2px",
-  transition: "all .2s ease-in-out",
-  WebkitTransition: "all .2s ease-in-out",
-  marginBottom: "1em",
-};
+// Types
+interface ElementInfo {
+  title: string;
+  visibility?: {
+    catalog: boolean;
+  };
+  image: string;
+  tag: string[];
+  description: string;
+}
 
-const historyContainer = {
-  ...searchContainer,
-  padding: "0.2em 0.625em",
-};
+export interface CatalogElement {
+  name: string;
+  prototype: "lines" | "items" | "holes";
+  info: ElementInfo;
+}
 
-const itemsStyle = {
+interface Category {
+  name: string;
+  label: string;
+  categories: Category[];
+  elements: CatalogElement[];
+}
+
+interface BreadcrumbItem {
+  name: string;
+  action: () => void;
+}
+
+interface CatalogListProps {
+  state: any;
+  onClose?: () => void;
+}
+
+// Styles
+const ITEMS_GRID: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(14em, 1fr))",
   gridGap: "10px",
   marginTop: "1em",
 };
 
-const CatalogList = ({ state, width, height, style }) => {
+const CatalogList: React.FC<CatalogListProps> = ({ state, onClose }) => {
   const {
     catalog,
     translator,
@@ -47,49 +61,39 @@ const CatalogList = ({ state, width, height, style }) => {
     holesActions,
     projectActions,
   } = useContext(ReactPlannerContext);
+
   const currentCategory = catalog.getCategory(state.catalog.page);
   const categoriesToDisplay = currentCategory.categories;
   const elementsToDisplay = currentCategory.elements.filter((element) =>
     element.info.visibility ? element.info.visibility.catalog : true
   );
 
-  const [categories, setCategories] = useState(currentCategory.categories);
-  const [elements, setElements] = useState(elementsToDisplay);
+  const [categories] = useState<Category[]>(currentCategory.categories);
+  const [elements] = useState<CatalogElement[]>(elementsToDisplay);
   const [matchString, setMatchString] = useState("");
-  const [matchedElements, setMatchedElements] = useState([]);
+  const [matchedElements, setMatchedElements] = useState<CatalogElement[]>([]);
 
-  const flattenCategories = (categories) => {
-    let toRet = [];
-
-    for (let x = 0; x < categories.length; x++) {
-      let curr = categories[x];
-      toRet = toRet.concat(curr.elements);
-      if (curr.categories.length)
-        toRet = toRet.concat(flattenCategories(curr.categories));
-    }
-
-    return toRet;
+  const flattenCategories = (categories: Category[]): CatalogElement[] => {
+    return categories.reduce((acc: CatalogElement[], curr: Category) => {
+      return [...acc, ...curr.elements, ...flattenCategories(curr.categories)];
+    }, []);
   };
 
-  const matcharray = (text) => {
-    let array = elements.concat(flattenCategories(categories));
+  const handleSearch = (text: string) => {
+    const array = [...elements, ...flattenCategories(categories)];
+    let filtered: CatalogElement[] = [];
 
-    let filtered = [];
-
-    if (text !== "") {
-      let regexp = new RegExp(text, "i");
-      for (let i = 0; i < array.length; i++) {
-        if (regexp.test(array[i].info.title)) {
-          filtered.push(array[i]);
-        }
-      }
+    if (text) {
+      const regexp = new RegExp(text, "i");
+      filtered = array.filter((item) => regexp.test(item.info.title));
     }
 
     setMatchString(text);
     setMatchedElements(filtered);
   };
 
-  const select = (element) => {
+  const handleElementSelect = (element: CatalogElement) => {
+    console.log(element);
     switch (element.prototype) {
       case "lines":
         linesActions.selectToolDrawingLine(element.name);
@@ -103,42 +107,99 @@ const CatalogList = ({ state, width, height, style }) => {
     }
 
     projectActions.pushLastSelectedCatalogElementToHistory(element);
+    onClose();
   };
 
-  let breadcrumbComponent = null;
-  const page = state.catalog.page;
+  const renderBreadcrumb = () => {
+    if (state.catalog.page === "root") return null;
 
-  if (page !== "root") {
-    let breadcrumbsNames = [];
+    const breadcrumbsItems: BreadcrumbItem[] = [];
 
-    state.catalog.path.forEach((pathName) => {
-      breadcrumbsNames.push({
+    state.catalog.path.forEach((pathName: string) => {
+      breadcrumbsItems.push({
         name: catalog.getCategory(pathName).label,
         action: () => projectActions.goBackToCatalogPage(pathName),
       });
     });
 
-    breadcrumbsNames.push({ name: currentCategory.label, action: "" });
+    breadcrumbsItems.push({
+      name: currentCategory.label,
+      action: () => {},
+    });
 
-    breadcrumbComponent = <CatalogBreadcrumb names={breadcrumbsNames} />;
-  }
+    return <CatalogBreadcrumb names={breadcrumbsItems} />;
+  };
 
-  let pathSize = state.catalog.path.size;
+  const renderTurnBackButton = () => {
+    const pathSize = state.catalog.path.size;
+    if (pathSize === 0) return null;
 
-  let turnBackButton =
-    pathSize > 0 ? (
+    return (
       <CatalogTurnBackPageItem
         key={pathSize}
         page={catalog.categories[state.catalog.path.get(pathSize - 1)]}
       />
-    ) : null;
+    );
+  };
 
-  const selectedHistory = state.get("selectedElementsHistory");
+  const renderSelectedHistory = () => {
+    const selectedHistory = state.get("selectedElementsHistory");
+    if (!selectedHistory.size) return null;
+
+    return (
+      <div className="w-full overflow-x-scroll mt-4 flex items-center relative px-2 rounded-lg">
+        <Label className="inline-block mr-5 text-sm">Last Selected</Label>
+        {selectedHistory.map((element: CatalogElement, index: number) => (
+          <Button
+            variant="secondary"
+            className="mr-2"
+            key={index}
+            title={element.name}
+            onClick={() => handleElementSelect(element)}
+          >
+            {element.name}
+          </Button>
+        ))}
+      </div>
+    );
+  };
+
+  const renderCatalogItems = () => {
+    if (matchString) {
+      return matchedElements.map((elem) => (
+        <CatalogItem
+          key={elem.name}
+          element={elem}
+          onSelect={handleElementSelect}
+        />
+      ));
+    }
+
+    return (
+      <>
+        {renderTurnBackButton()}
+        {categoriesToDisplay.map((cat) => (
+          <CatalogPageItem
+            key={cat.name}
+            page={cat}
+            oldPage={currentCategory}
+          />
+        ))}
+        {elementsToDisplay.map((elem) => (
+          <CatalogItem
+            key={elem.name}
+            element={elem}
+            onSelect={handleElementSelect}
+          />
+        ))}
+      </>
+    );
+  };
 
   return (
-    <div className="bg-black w-full min-h-screen p-4 ">
+    <div className="w-full px-2">
       <h1 className="text-4xl text-white mb-4">Catalog</h1>
-      {breadcrumbComponent}
+      {renderBreadcrumb()}
 
       <div className="flex flex-col space-y-2">
         <Label htmlFor="search">Search Elements</Label>
@@ -147,53 +208,15 @@ const CatalogList = ({ state, width, height, style }) => {
           type="text"
           name="search"
           placeholder="Search catalog"
-          onChange={(e) => {
-            matcharray(e.target.value);
-          }}
+          onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
 
-      {selectedHistory.size ? (
-        <div className="w-full h-[3rem] mt-4 flex items-center bg-[#292929] relative px-2 rounded-lg">
-          <span className="inline-block mr-5 text-sm">
-            {translator.t("Last Selected")}
-          </span>
-          {selectedHistory.map((el, ind) => (
-            <Button key={ind} title={el.name} onClick={() => select(el)}>
-              {el.name}
-            </Button>
-          ))}
-        </div>
-      ) : null}
+      {renderSelectedHistory()}
 
-      <div style={itemsStyle}>
-        {matchString === ""
-          ? [
-              turnBackButton,
-              categoriesToDisplay.map((cat) => (
-                <CatalogPageItem
-                  key={cat.name}
-                  page={cat}
-                  oldPage={currentCategory}
-                />
-              )),
-              elementsToDisplay.map((elem) => (
-                <CatalogItem key={elem.name} element={elem} />
-              )),
-            ]
-          : matchedElements.map((elem) => (
-              <CatalogItem key={elem.name} element={elem} />
-            ))}
-      </div>
+      <div style={ITEMS_GRID}>{renderCatalogItems()}</div>
     </div>
   );
-};
-
-CatalogList.propTypes = {
-  state: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  style: PropTypes.object,
 };
 
 export default CatalogList;

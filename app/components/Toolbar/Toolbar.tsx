@@ -27,6 +27,9 @@ import {
   Square,
   Undo,
 } from "lucide-react";
+import TipsButton from "./TipsButton";
+import SettingsButton from "./SettingsButton";
+import CatalogButton from "./CatalogButton";
 
 interface ToolbarProps {
   state: any;
@@ -42,7 +45,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const mode = state.get("mode");
 
   return (
-    <div className="fixed flex flex-col space-y-2 h-fit top-4 left-4 z-[999]  bg-black p-2 rounded-lg">
+    <div className="fixed flex flex-col space-y-2 h-fit top-4 left-4 z-50  bg-black p-2 rounded-lg">
       {allowProjectFileSupport && (
         <ToolbarButton
           active={false}
@@ -63,14 +66,16 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {allowProjectFileSupport && <ToolbarSaveButton state={state} />}
       {allowProjectFileSupport && <ToolbarLoadButton state={state} />}
 
-      <ToolbarButton
+      <CatalogButton state={state} mode={mode} />
+
+      {/* <ToolbarButton
         active={mode === MODE_VIEWING_CATALOG}
         tooltip="Open Catalog"
         onClick={() => projectActions.openCatalog()}
       >
         <Book size={23} />
         Catalog
-      </ToolbarButton>
+      </ToolbarButton> */}
 
       <ToolbarButton
         active={mode === MODE_IDLE}
@@ -121,14 +126,17 @@ const Toolbar: React.FC<ToolbarProps> = ({
         Redo
       </ToolbarButton>
 
-      <ToolbarButton
+      {/* <ToolbarButton
         active={mode === MODE_CONFIGURING_PROJECT}
         tooltip="Configure project"
         onClick={() => projectActions.openProjectConfigurator()}
       >
         <Settings size={23} />
         Settings
-      </ToolbarButton>
+      </ToolbarButton> */}
+
+      <SettingsButton state={state} />
+      <TipsButton />
 
       <ScreenshotToolbarButton mode={mode} />
     </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import PropertyLengthMeasure from "../../catalog/properties/PropertyLengthMeasure";
-import PropertyString from "../../catalog/properties/property-string";
+import PropertyString from "../../catalog/properties/PropertyString";
 
 const HoleAttributesEditor = ({
   element,

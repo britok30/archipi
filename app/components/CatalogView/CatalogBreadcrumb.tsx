@@ -1,39 +1,69 @@
 "use client";
 
-import React from "react";
-import { MdArrowBack as Arrow } from "react-icons/md";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
-interface BreadcrumbItem {
+type BreadcrumbItem = {
   name: string;
   action?: () => void;
-}
+};
 
-interface CatalogBreadcrumbProps {
+type BreadcrumbProps = {
   names: BreadcrumbItem[];
-}
+  className?: string;
+};
 
-const CatalogBreadcrumb: React.FC<CatalogBreadcrumbProps> = ({ names }) => {
-  const labelNames = names.map((name, ind) => {
-    const lastElement = ind === names.length - 1;
+const BreadcrumbItem = ({
+  item,
+  isLast,
+}: {
+  item: BreadcrumbItem;
+  isLast: boolean;
+}) => {
+  const isClickable = Boolean(item.action);
 
-    return (
-      <div className="flex" key={ind}>
-        <div
-          className={`text-lg text-white ${lastElement ? "font-bold" : ""} ${
-            name.action ? "cursor-pointer" : ""
-          }`}
-          onClick={name.action ? () => name.action!() : undefined}
-        >
-          {name.name}
-        </div>
-        {!lastElement ? (
-          <Arrow className="fill-black text-2xl mx-[10px]" />
-        ) : null}
-      </div>
-    );
-  });
+  return (
+    <div className="flex items-center">
+      <Button
+        onClick={item.action}
+        disabled={!isClickable}
+        className={`
+          text-lg text-white
+          ${isLast ? "font-bold" : ""}
+          ${isClickable ? "hover:opacity-80 cursor-pointer" : "cursor-default"}
+          disabled:cursor-text disabled:opacity-100
+          transition-opacity
+        `}
+        aria-current={isLast ? "page" : undefined}
+      >
+        {item.name}
+      </Button>
 
-  return <div className="m-6 flex">{labelNames}</div>;
+      {!isLast && (
+        <ArrowLeft
+          className="text-2xl mx-2.5 fill-black"
+          aria-hidden="true"
+          role="presentation"
+        />
+      )}
+    </div>
+  );
+};
+
+const CatalogBreadcrumb = ({ names, className = "" }: BreadcrumbProps) => {
+  if (!names.length) return null;
+
+  return (
+    <nav aria-label="Breadcrumb navigation" className={`py-6 ${className}`}>
+      <ol className="flex flex-wrap gap-1">
+        {names.map((item, index) => (
+          <li key={`${item.name}-${index}`} className="flex items-center">
+            <BreadcrumbItem item={item} isLast={index === names.length - 1} />
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
 };
 
 export default CatalogBreadcrumb;
