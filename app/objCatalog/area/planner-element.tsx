@@ -1,15 +1,29 @@
 "use client";
 
-import { ElementsFactories } from "../../catalog";
+import AreaFactory from "@/app/catalog/factories/AreaFactory";
 
-let info = {
+interface AreaInfo {
+  title: string;
+  tag: string[];
+  description: string;
+  image: string;
+}
+
+interface TextureDefinition {
+  name: string;
+  uri: string;
+  lengthRepeatScale: number;
+  heightRepeatScale: number;
+}
+
+const info: AreaInfo = {
   title: "area",
   tag: ["area"],
   description: "Generic Room",
   image: "",
 };
 
-let textures = {
+const textures: Record<string, TextureDefinition> = {
   parquet: {
     name: "Parquet",
     uri: "/images/textures/parquet.jpg",
@@ -42,4 +56,4 @@ let textures = {
   },
 };
 
-export default ElementsFactories.AreaFactory("area", info, textures);
+export default AreaFactory("area", info, textures);

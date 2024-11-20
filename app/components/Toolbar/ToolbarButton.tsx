@@ -30,7 +30,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
             {children}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="right">
           <p>{tooltip}</p>
         </TooltipContent>
       </Tooltip>

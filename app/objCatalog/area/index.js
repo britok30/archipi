@@ -1,1 +1,1 @@
-export { default as areas } from "./planner-element.jsx";
+export { default as areas } from "./planner-element.tsx";

@@ -1,15 +1,8 @@
-"use client";
-
 import React from "react";
 import { createArea, updatedArea } from "./area-factory-3d";
 import * as SharedStyle from "../../styles/shared-style";
 import Translator from "../../translator/translator";
-import { Mesh, Object3D } from "three";
-
-interface Vertex {
-  x: number;
-  y: number;
-}
+import { Object3D, Mesh } from "three";
 
 interface TextureDefinition {
   name: string;
@@ -25,51 +18,65 @@ interface TextureDefinition {
   };
 }
 
-interface TextureMap {
-  [key: string]: TextureDefinition;
+interface Vertex {
+  x: number;
+  y: number;
 }
 
 interface AreaInfo {
+  visibility?: {
+    catalog: boolean;
+    layerElementsVisible: boolean;
+  };
   [key: string]: any;
+}
+
+interface Element {
+  selected: boolean;
+  vertices: string[];
+  holes: string[];
+  properties: {
+    get: (key: string) => any;
+  };
+}
+
+export interface Layer {
+  vertices: Map<string, Vertex>;
+  areas: Map<
+    string,
+    {
+      vertices: string[];
+    }
+  >;
+  getIn: (path: string[]) => any;
 }
 
 interface PropertyDefinition {
   label: string;
   type: string;
   defaultValue: any;
-  values?: { [key: string]: string };
+  values?: Record<string, string>;
 }
 
 interface AreaElement {
   name: string;
   prototype: string;
-  info: {
-    visibility: {
-      catalog: boolean;
-      layerElementsVisible: boolean;
-    };
-    [key: string]: any;
-  };
+  info: AreaInfo;
   properties: {
     [key: string]: PropertyDefinition;
   };
-  render2D: (element: any, layer: any, scene: any) => React.ReactElement;
-  render3D: (element: any, layer: any, scene: any) => Promise<Mesh>;
+  render2D: (element: Element, layer: Layer, scene: any) => React.ReactElement;
+  render3D: (element: Element, layer: Layer, scene: Object3D) => Promise<Mesh>;
   updateRender3D: (
-    element: any,
-    layer: any,
-    scene: any,
+    element: Element,
+    layer: Layer,
+    scene: Object3D,
     mesh: Object3D,
-    oldElement: any,
+    oldElement: Element,
     differences: string[],
     selfDestroy: () => void,
     selfBuild: () => Promise<Mesh>
   ) => Promise<Object3D>;
-}
-
-interface Layer {
-  vertices: Map<string, Vertex>;
-  areas: Map<string, any>;
 }
 
 const translator = new Translator();
@@ -77,7 +84,7 @@ const translator = new Translator();
 export default function AreaFactory(
   name: string,
   info: AreaInfo,
-  textures?: TextureMap
+  textures?: Record<string, TextureDefinition>
 ): AreaElement {
   const areaElement: AreaElement = {
     name,
@@ -91,27 +98,23 @@ export default function AreaFactory(
     },
     properties: {
       patternColor: {
-        label: translator.t("color"),
+        label: "color",
         type: "color",
         defaultValue: SharedStyle.AREA_MESH_COLOR.unselected,
       },
       thickness: {
-        label: translator.t("thickness"),
+        label: "thickness",
         type: "length-measure",
         defaultValue: {
           length: 0,
         },
       },
     },
-    render2D: function (
-      element: any,
-      layer: Layer,
-      scene: any
-    ): React.ReactElement {
+    render2D: function (element: Element, layer: Layer, scene: any) {
       let path = "";
 
       // Print area path
-      element.vertices.forEach((vertexID: string, ind: number) => {
+      element.vertices.forEach((vertexID, ind) => {
         const vertex = layer.vertices.get(vertexID);
         if (vertex) {
           path += (ind ? "L" : "M") + vertex.x + " " + vertex.y + " ";
@@ -119,17 +122,15 @@ export default function AreaFactory(
       });
 
       // Add holes
-      element.holes.forEach((areaID: string) => {
+      element.holes.forEach((areaID) => {
         const area = layer.areas.get(areaID);
         if (area) {
-          [...area.vertices]
-            .reverse()
-            .forEach((vertexID: string, ind: number) => {
-              const vertex = layer.vertices.get(vertexID);
-              if (vertex) {
-                path += (ind ? "L" : "M") + vertex.x + " " + vertex.y + " ";
-              }
-            });
+          [...area.vertices].reverse().forEach((vertexID, ind) => {
+            const vertex = layer.vertices.get(vertexID);
+            if (vertex) {
+              path += (ind ? "L" : "M") + vertex.x + " " + vertex.y + " ";
+            }
+          });
         }
       });
 
@@ -140,16 +141,16 @@ export default function AreaFactory(
       return <path d={path} fill={fill} />;
     },
 
-    render3D: function (element: any, layer: any, scene: any) {
+    render3D: function (element: Element, layer: Layer, scene: Object3D) {
       return createArea(element, layer, scene, textures || {});
     },
 
     updateRender3D: (
-      element: any,
-      layer: any,
-      scene: any,
+      element: Element,
+      layer: Layer,
+      scene: Object3D,
       mesh: Object3D,
-      oldElement: any,
+      oldElement: Element,
       differences: string[],
       selfDestroy: () => void,
       selfBuild: () => Promise<Mesh>
@@ -168,8 +169,8 @@ export default function AreaFactory(
     },
   };
 
-  if (textures && Object.keys(textures).length !== 0) {
-    const textureValues: { [key: string]: string } = { none: "None" };
+  if (textures && Object.keys(textures).length > 0) {
+    const textureValues: Record<string, string> = { none: "None" };
 
     for (const textureName in textures) {
       textureValues[textureName] = textures[textureName].name;

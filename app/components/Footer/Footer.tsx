@@ -71,15 +71,7 @@ const Footer: React.FC<FooterProps> = ({
 
   return (
     <footer
-      className="
-        fixed bottom-0 z-50
-        w-full h-10
-        bg-gray-900 text-gray-100
-        flex items-center
-        text-xs
-        shadow-lg
-        select-none
-      "
+      className="fixed bottom-0 z-50 w-full h-10 bg-zinc-900 text-gray-100 flex items-center text-xs shadow-lg select-none"
       style={{ width, height }}
     >
       {MODE_SNAPPING.includes(mode) && (
