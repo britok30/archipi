@@ -10,9 +10,10 @@ import PanelGroups from "./PanelGroups";
 import PanelLayerElements from "./PanelLayerElements";
 
 import * as constants from "../../utils/constants";
+import { StateType } from "@/app/models/models";
 
 interface SidebarProps {
-  state: ImmutableMap<string, any>;
+  state: any;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ state }) => {
