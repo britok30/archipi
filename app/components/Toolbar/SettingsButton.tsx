@@ -80,12 +80,10 @@ const SettingsButton = ({ state }) => {
             </div>
           </div>
           <div className="flex space-x-3 items-center">
-            <Button variant="destructive" type="button" onClick={handleCancel}>
+            <Button variant="secondary" type="button" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button variant="secondary" type="submit">
-              Save
-            </Button>
+            <Button type="submit">Save</Button>
           </div>
         </form>
       </DialogContent>
