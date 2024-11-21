@@ -27,32 +27,32 @@ const textures: Record<string, TextureDefinition> = {
   parquet: {
     name: "Parquet",
     uri: "/images/textures/parquet.jpg",
-    lengthRepeatScale: 0.004,
-    heightRepeatScale: 0.004,
+    lengthRepeatScale: 0.25,
+    heightRepeatScale: 0.25,
   },
   tile1: {
     name: "Tile1",
     uri: "/images/textures/tile1.jpg",
-    lengthRepeatScale: 0.01,
-    heightRepeatScale: 0.01,
+    lengthRepeatScale: 0.5,
+    heightRepeatScale: 0.5,
   },
   ceramic: {
     name: "Ceramic Tile",
     uri: "/images/textures/ceramic-tile.jpg",
-    lengthRepeatScale: 0.02,
-    heightRepeatScale: 0.02,
+    lengthRepeatScale: 0.4,
+    heightRepeatScale: 0.4,
   },
   strand_porcelain: {
     name: "Strand Porcelain Tile",
     uri: "/images/textures/strand-porcelain.jpg",
-    lengthRepeatScale: 0.02,
-    heightRepeatScale: 0.02,
+    lengthRepeatScale: 0.4,
+    heightRepeatScale: 0.4,
   },
   grass: {
     name: "Grass",
     uri: "/images/textures/grass.jpg",
-    lengthRepeatScale: 0.01,
-    heightRepeatScale: 0.01,
+    lengthRepeatScale: 0.3,
+    heightRepeatScale: 0.3,
   },
 };
 

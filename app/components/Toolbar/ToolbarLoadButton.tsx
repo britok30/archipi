@@ -26,7 +26,7 @@ export default function ToolbarLoadButton({ state }) {
       onClick={(e) => loadProjectFromFile(e)}
     >
       <Upload size={18} />
-      Upload
+      Upload JSON
     </ToolbarButton>
   );
 }
