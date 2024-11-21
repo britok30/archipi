@@ -13,6 +13,14 @@ import {
   Vector2,
   Raycaster,
   Object3DEventMap,
+  PCFSoftShadowMap,
+  LinearMipMapLinearFilter,
+  LinearFilter,
+  DirectionalLight,
+  ACESFilmicToneMapping,
+  HemisphereLight,
+  SRGBColorSpace,
+  ReinhardToneMapping,
 } from "three";
 import { parseData, updateScene } from "./scene-creator";
 import { disposeScene } from "./three-memory-cleaner";
@@ -151,9 +159,21 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
       preserveDrawingBuffer: true,
       antialias: true,
       powerPreference: "high-performance",
+      logarithmicDepthBuffer: true,
     });
 
     rendererRef.current = renderer;
+
+    // Improve texture handling
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFSoftShadowMap;
+    renderer.outputColorSpace = SRGBColorSpace;
+    renderer.toneMapping = ReinhardToneMapping;
+    renderer.toneMappingExposure = 1.3;
+
+    // Get max anisotropy for better texture quality at angles
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
 
     renderer.domElement.addEventListener(
       "webglcontextlost",
@@ -168,6 +188,7 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
 
     const scene3D = new Scene();
     sceneRef.current = scene3D;
+    scene3D.background = new Color(0xf5f5f5);
 
     renderer.setClearColor(new Color(SharedStyle.COLORS.white));
     renderer.setSize(width, height);
@@ -175,11 +196,33 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
     const planData = parseData(state.scene, actions, catalog);
     planDataRef.current = planData;
 
+    // Apply enhanced material settings
+    planData.plan.traverse((node: any) => {
+      if (node.material) {
+        if (node.material.map) {
+          node.material.map.anisotropy =
+            renderer.capabilities.getMaxAnisotropy();
+          node.material.map.minFilter = LinearMipMapLinearFilter;
+          node.material.map.magFilter = LinearFilter;
+
+          // Enhance texture contrast
+          node.material.map.encoding = SRGBColorSpace;
+          node.material.map.needsUpdate = true;
+        }
+
+        // Enhance material settings
+        node.material.shadowSide = true;
+        node.material.envMapIntensity = 1.0; // Increased from 0.8
+        node.material.roughness = 0.8; // Adjust if materials look too glossy
+        node.material.metalness = 0.1; // Slight metallic feel for better light interaction
+        node.material.needsUpdate = true;
+      }
+    });
     scene3D.add(planData.plan);
     scene3D.add(planData.grid);
 
     const aspectRatio = width / height;
-    const camera = new PerspectiveCamera(45, aspectRatio, 1, 300000);
+    const camera = new PerspectiveCamera(45, width / height, 0.1, 1000000);
     cameraRef.current = camera;
     scene3D.add(camera);
 
@@ -193,11 +236,42 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
     camera.position.set(cameraPositionX, cameraPositionY, cameraPositionZ);
     camera.up = new Vector3(0, 1, 0);
 
-    const ambientLight = new AmbientLight(0xafafaf, Math.PI);
+    const ambientLight = new AmbientLight(0xffffff, 0.7);
     scene3D.add(ambientLight);
 
-    const spotLight = new SpotLight(SharedStyle.COLORS.white, 0.3);
+    // Warmer hemisphere light
+    const hemisphereLight = new HemisphereLight(
+      0xffffff, // Sky color
+      0xffa07a, // Ground color - warmer tone
+      0.5
+    );
+    scene3D.add(hemisphereLight);
+
+    // Main directional light with increased intensity
+    const mainLight = new DirectionalLight(0xffffff, 1.0);
+    mainLight.position.set(1, 1.5, 1);
+    mainLight.castShadow = true;
+    mainLight.shadow.bias = -0.0001;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    scene3D.add(mainLight);
+
+    // Secondary fill light with warm color
+    const fillLight = new DirectionalLight(0xffd700, 0.4); // Golden color for warmth
+    fillLight.position.set(-1, 0.5, -1);
+    scene3D.add(fillLight);
+
+    // Enhanced spot light
+    const spotLight = new SpotLight(0xffffff, 0.6); // Increased intensity
     spotLight.position.set(cameraPositionX, cameraPositionY, cameraPositionZ);
+    spotLight.angle = Math.PI / 4;
+    spotLight.penumbra = 0.2;
+    spotLight.decay = 1.2;
+    spotLight.distance = 2000;
+    spotLight.castShadow = true;
+    spotLight.shadow.bias = -0.0001;
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
     scene3D.add(spotLight);
 
     const toIntersect = [planData.plan];
@@ -249,8 +323,15 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
       canvasWrapper.current.appendChild(renderer.domElement);
     }
 
+    // Configure OrbitControls
     const orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControlsRef.current = orbitControls;
+    orbitControls.enableDamping = true;
+    orbitControls.dampingFactor = 0.05;
+    orbitControls.minDistance = 1;
+    orbitControls.maxDistance = 1000000;
+    orbitControls.maxPolarAngle = Math.PI / 1.5;
+    orbitControls.update();
 
     const spotLightTarget = new Object3D();
     spotLightTarget.name = "spotLightTarget";
@@ -332,7 +413,7 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
     }
   }, [props.width, props.height, props.state.scene]);
 
-  return <div className="saturate-[1.8] contrast-125" ref={canvasWrapper} />;
+  return <div className="saturate-[1.5] contrast-125" ref={canvasWrapper} />;
 };
 
 export default Viewer3D;

@@ -26,6 +26,7 @@ import {
   Settings,
   Square,
   Undo,
+  User,
 } from "lucide-react";
 import TipsButton from "./TipsButton";
 import SettingsButton from "./SettingsButton";
@@ -101,8 +102,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       {/* <ToolbarButton
         active={mode === MODE_3D_FIRST_PERSON}
-        tooltip={translator.t("3D View")}
-        onClick={() => viewer3DActions.selectTool3DView()}
+        tooltip="3D First Person"
+        onClick={() => viewer3DActions.selectTool3DFirstPerson()}
       >
         <User className="mb-0.5" size={23} />
         3D First
