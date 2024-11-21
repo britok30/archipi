@@ -38,6 +38,15 @@ interface AttributeValue extends Map<string, any> {
   merge: (value: any) => AttributeValue;
 }
 
+interface UpdateAttributeParams {
+  element: Element;
+  layer: Layer;
+  catalog: Catalog;
+  attributesFormData: Map<string, any>;
+  setAttributesFormData: (data: Map<string, any>) => void;
+  save: (params: SaveParams) => void;
+}
+
 const PRECISION = 2;
 
 const ElementEditor = ({ state: appState, element, layer }) => {
@@ -124,25 +133,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
     setPropertiesFormData(initPropData(element, layer, appState));
   }, [element, layer, appState]);
 
-  const updateAttribute = (
-    attributeName: string,
-    value: Map<string, any>,
-    {
-      element,
-      layer,
-      catalog,
-      attributesFormData,
-      setAttributesFormData,
-      save,
-    }: {
-      element: Element;
-      layer: Layer;
-      catalog: Catalog;
-      attributesFormData: Map<string, any>;
-      setAttributesFormData: (data: Map<string, any>) => void;
-      save: (params: SaveParams) => void;
-    }
-  ): void => {
+  const updateAttribute = (attributeName: string, value: Map<string, any>) => {
     let _attributesFormData = attributesFormData;
 
     switch (element.prototype) {
@@ -231,7 +222,6 @@ const ElementEditor = ({ state: appState, element, layer }) => {
             const halfWidthLength = widthLength / 2;
             let lengthValue = value.get("length");
 
-            // Constrain length value
             lengthValue = Math.max(
               0,
               Math.min(lengthValue, lineLength - widthLength)
@@ -330,8 +320,8 @@ const ElementEditor = ({ state: appState, element, layer }) => {
     propertiesFormData,
     attributesFormData,
   }: {
-    propertiesFormData?: Map<string, { [key: string]: any }>;
-    attributesFormData?: Map<string, { [key: string]: any }>;
+    propertiesFormData?: Map<string, any> | Map<unknown, unknown>;
+    attributesFormData?: Map<string, any> | Map<unknown, unknown>;
   }) => {
     if (propertiesFormData) {
       let properties = propertiesFormData.map((data) => {
