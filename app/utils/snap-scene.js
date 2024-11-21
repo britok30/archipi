@@ -39,10 +39,16 @@ export function sceneSnapElements(
 
       if (snapMask.get(SNAP_SEGMENT)) {
         lines.forEach(({ id: lineID, vertices: [v0, v1] }) => {
-          let { x: x1, y: y1 } = vertices.get(v0);
-          let { x: x2, y: y2 } = vertices.get(v1);
+          try {
+            const x1 = vertices?.get(v0)?.x ?? 0;
+            const y1 = vertices?.get(v0)?.y ?? 0;
+            const x2 = vertices?.get(v1)?.x ?? 0;
+            const y2 = vertices?.get(v1)?.y ?? 0;
 
-          addLineSegmentSnap(snapElements, x1, y1, x2, y2, 20, 1, lineID);
+            addLineSegmentSnap(snapElements, x1, y1, x2, y2, 20, 1, lineID);
+          } catch (err) {
+            console.warn(`Error processing line ${lineID}:`, err);
+          }
         });
       }
     });

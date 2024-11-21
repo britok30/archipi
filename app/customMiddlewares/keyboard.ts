@@ -60,18 +60,24 @@ export const createKeyboardMiddleware = (): Middleware => {
           break;
         }
         case KEYBOARD_BUTTON_CODE.Y: {
+          let sceneHistory = state.sceneHistory;
+
           if (
-            event.getModifierState("Control") ||
-            event.getModifierState("Meta")
+            (event.getModifierState("Control") ||
+              event.getModifierState("Meta")) &&
+            sceneHistory.redoList.size > 0
           ) {
             store.dispatch(redo() as AnyAction);
           }
           break;
         }
         case KEYBOARD_BUTTON_CODE.Z: {
+          let sceneHistory = state.sceneHistory;
+
           if (
-            event.getModifierState("Control") ||
-            event.getModifierState("Meta")
+            (event.getModifierState("Control") ||
+              event.getModifierState("Meta")) &&
+            sceneHistory.undoList.size > 1
           ) {
             store.dispatch(undo() as AnyAction);
           }

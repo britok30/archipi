@@ -17,19 +17,36 @@ class Edge {
 
 class Graph {
   constructor(v) {
-    this.count = 0; // count is number of biconnected components
-    this.subgraphs = []; //biconnected components
-    this.time = 0; // time is used to find discovery times
+    if (typeof v !== "number" || v < 0) {
+      throw new Error("Number of vertices must be a positive number");
+    }
 
-    this.V = v; // No. of vertices
-    this.E = 0; // No. of Edges
-    this.adj = []; // Adjacency List
+    this.count = 0;
+    this.subgraphs = [];
+    this.time = 0;
+    this.V = v;
+    this.E = 0;
 
-    this.adj = create_array(v);
+    // Initialize adjacency list with arrays
+    this.adj = Array.from({ length: v }, () => []);
   }
 
-  //Function to add an edge into the graph
   addEdge(v, w) {
+    // Validate vertex indices
+    if (typeof v !== "number" || typeof w !== "number") {
+      throw new Error("Vertices must be numbers");
+    }
+
+    if (v < 0 || w < 0) {
+      throw new Error("Vertices must be non-negative");
+    }
+
+    if (v >= this.V || w >= this.V) {
+      throw new Error(
+        `Vertex index out of bounds: ${v}, ${w}. Max index is ${this.V - 1}`
+      );
+    }
+
     this.adj[v].push(w);
     this.E++;
   }
