@@ -7,7 +7,7 @@ import ProjectConfigurator from "./ProjectConfigurator/ProjectConfigurator";
 import * as constants from "../utils/constants";
 import Scene3DViewer from "./viewer3d/Viewer3d";
 import Viewer3D from "./viewer3d/Viewer3d";
-import Viewer3DFirstPerson from "./viewer3d/Viewer3DFirstPerson";
+// import Viewer3DFirstPerson from "./viewer3d/Viewer3DFirstPerson";
 
 interface ContentProps {
   width: number;
@@ -51,10 +51,10 @@ const Content: React.FC<ContentProps> = ({
     case constants.MODE_3D_VIEW:
       return <Viewer3D state={state} width={width} height={height} />;
 
-    case constants.MODE_3D_FIRST_PERSON:
-      return (
-        <Viewer3DFirstPerson state={state} width={width} height={height} />
-      );
+    // case constants.MODE_3D_FIRST_PERSON:
+    //   return (
+    //     <Viewer3DFirstPerson state={state} width={width} height={height} />
+    //   );
 
     case constants.MODE_VIEWING_CATALOG:
       return <CatalogList state={state} />;
