@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 import localFont from "next/font/local";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata = {
   title: "ArchiPi - Free Online Floor Plan Design & 3D Visualization Tool",
@@ -99,7 +100,9 @@ export default function RootLayout({ children }) {
       <body
         className={`bg-black text-white ${eudoxusSans.className} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <SidebarProvider>
+          <Providers>{children}</Providers>
+        </SidebarProvider>
       </body>
       <GoogleAdsense />
       <GoogleAnalytics />

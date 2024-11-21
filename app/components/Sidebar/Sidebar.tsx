@@ -11,6 +11,13 @@ import PanelLayerElements from "./PanelLayerElements";
 
 import * as constants from "../../utils/constants";
 import { StateType } from "@/app/models/models";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+} from "@/components/ui/sidebar";
 
 interface SidebarProps {
   state: any;
@@ -77,8 +84,8 @@ const Sidebar: React.FC<SidebarProps> = ({ state }) => {
   const selectedGroup = groups.findEntry((g) => g.get("selected"));
 
   return (
-    <aside
-      className="overflow-y-auto h-screen w-[350px] fixed right-0 min-h-screen bg-[#292929] overflow-x-hidden pb-5 scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black"
+    <ShadcnSidebar
+      side="right"
       onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
         event.stopPropagation()
       }
@@ -86,51 +93,53 @@ const Sidebar: React.FC<SidebarProps> = ({ state }) => {
         event.stopPropagation()
       }
     >
-      {/* PanelGuides */}
-      <div style={{ position: "relative" }}>
-        <PanelGuides state={state} />
-      </div>
-
-      {/* PanelLayers */}
-      <div style={{ position: "relative" }}>
-        <PanelLayers state={state} />
-      </div>
-
-      {/* PanelLayerElements */}
-      <div style={{ position: "relative" }}>
-        <PanelLayerElements
-          mode={state.get("mode")}
-          layers={state.getIn(["scene", "layers"])}
-          selectedLayer={state.getIn(["scene", "selectedLayer"])}
-        />
-      </div>
-
-      {/* PanelGroups */}
-      <div style={{ position: "relative" }}>
-        <PanelGroups
-          mode={state.get("mode")}
-          groups={state.getIn(["scene", "groups"])}
-          layers={state.getIn(["scene", "layers"])}
-        />
-      </div>
-
-      {/* PanelElementEditor */}
-      {!multiselected && (
+      <SidebarContent className="bg-black text-white scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black ">
+        {/* PanelGuides */}
         <div style={{ position: "relative" }}>
-          <PanelElementEditor state={state} />
+          <PanelGuides state={state} />
         </div>
-      )}
 
-      {/* PanelGroupEditor */}
-      {selectedGroup && (
+        {/* PanelLayers */}
         <div style={{ position: "relative" }}>
-          <PanelGroupEditor
-            state={state}
-            groupID={selectedGroup ? selectedGroup[0] : null}
+          <PanelLayers state={state} />
+        </div>
+
+        {/* PanelLayerElements */}
+        <div style={{ position: "relative" }}>
+          <PanelLayerElements
+            mode={state.get("mode")}
+            layers={state.getIn(["scene", "layers"])}
+            selectedLayer={state.getIn(["scene", "selectedLayer"])}
           />
         </div>
-      )}
-    </aside>
+
+        {/* PanelGroups */}
+        <div style={{ position: "relative" }}>
+          <PanelGroups
+            mode={state.get("mode")}
+            groups={state.getIn(["scene", "groups"])}
+            layers={state.getIn(["scene", "layers"])}
+          />
+        </div>
+
+        {/* PanelElementEditor */}
+        {!multiselected && (
+          <div style={{ position: "relative" }}>
+            <PanelElementEditor state={state} />
+          </div>
+        )}
+
+        {/* PanelGroupEditor */}
+        {selectedGroup && (
+          <div style={{ position: "relative" }}>
+            <PanelGroupEditor
+              state={state}
+              groupID={selectedGroup ? selectedGroup[0] : null}
+            />
+          </div>
+        )}
+      </SidebarContent>
+    </ShadcnSidebar>
   );
 };
 

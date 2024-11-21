@@ -31,6 +31,12 @@ import {
 import TipsButton from "./TipsButton";
 import SettingsButton from "./SettingsButton";
 import CatalogButton from "./CatalogButton";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ToolbarProps {
   state: any;
@@ -44,9 +50,20 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const { projectActions, viewer3DActions, translator } =
     useContext(ReactPlannerContext);
   const mode = state.get("mode");
+  const { open } = useSidebar();
 
   return (
     <div className="fixed flex flex-col space-y-2 h-fit top-4 left-4 z-50  bg-black p-2 rounded-lg">
+      <Tooltip delayDuration={0} defaultOpen={false}>
+        <TooltipTrigger asChild>
+          <SidebarTrigger className="mr-2 w-full" />
+        </TooltipTrigger>
+
+        <TooltipContent side="right">
+          <p className="text-xs">{open ? "Close Sidebar" : "Open Sidebar"}</p>
+        </TooltipContent>
+      </Tooltip>
+
       {allowProjectFileSupport && (
         <ToolbarButton
           active={false}
