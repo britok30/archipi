@@ -41,6 +41,7 @@ export { default as schoolDeskDouble } from "./school-desk-double/planner-elemen
 export { default as simpleStair } from "./simple-stair/planner-element.jsx";
 export { default as sink } from "./sink/planner-element.jsx";
 export { default as sofa } from "./sofa/planner-element.jsx";
+export { default as bed } from "./bed/planner-element.tsx";
 export { default as table } from "./table/planner-element.jsx";
 export { default as teachingPost } from "./teaching-post/planner-element.jsx";
 export { default as text3D } from "./text-3d/planner-element.jsx";

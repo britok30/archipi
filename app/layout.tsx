@@ -100,9 +100,7 @@ export default function RootLayout({ children }) {
       <body
         className={`bg-black text-white ${eudoxusSans.className} antialiased`}
       >
-        <SidebarProvider>
-          <Providers>{children}</Providers>
-        </SidebarProvider>
+        <Providers>{children}</Providers>
       </body>
       <GoogleAdsense />
       <GoogleAnalytics />

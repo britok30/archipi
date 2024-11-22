@@ -31,7 +31,6 @@ export default function PropertyNumber({
 
     return onUpdate(number);
   };
-
   return (
     <table className="PropertyNumber" style={PropertyStyle.tableStyle}>
       <tbody>
@@ -42,7 +41,9 @@ export default function PropertyNumber({
           <td>
             <FormNumberInput
               value={value}
-              onChange={(event) => update(event.target.value)}
+              onChange={(value) => {
+                update(value);
+              }}
               onValid={onValid}
               min={configs.min}
               max={configs.max}

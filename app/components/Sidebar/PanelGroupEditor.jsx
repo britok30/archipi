@@ -125,12 +125,8 @@ const PanelGroupEditor = (props) => {
               <td>
                 <FormNumberInput
                   value={group.get("x")}
-                  onChange={(e) =>
-                    groupsActions.groupTranslate(
-                      groupID,
-                      e.target.value,
-                      group.get("y")
-                    )
+                  onChange={(value) =>
+                    groupsActions.groupTranslate(groupID, value, group.get("y"))
                   }
                   style={inputStyle}
                   state={state}
@@ -143,12 +139,8 @@ const PanelGroupEditor = (props) => {
               <td>
                 <FormNumberInput
                   value={group.get("y")}
-                  onChange={(e) =>
-                    groupsActions.groupTranslate(
-                      groupID,
-                      group.get("x"),
-                      e.target.value
-                    )
+                  onChange={(value) =>
+                    groupsActions.groupTranslate(groupID, group.get("x"), value)
                   }
                   style={inputStyle}
                   state={state}
@@ -161,8 +153,8 @@ const PanelGroupEditor = (props) => {
               <td>
                 <FormNumberInput
                   value={group.get("rotation")}
-                  onChange={(e) =>
-                    groupsActions.groupRotate(groupID, e.target.value)
+                  onChange={(value) =>
+                    groupsActions.groupRotate(groupID, value)
                   }
                   style={inputStyle}
                   state={state}

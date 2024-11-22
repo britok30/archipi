@@ -50,7 +50,7 @@ const ItemAttributesEditor = ({
           <td>
             <FormNumberInput
               value={renderedX}
-              onChange={(event) => onUpdate("x", event.target.value)}
+              onChange={(value) => onUpdate("x", value)}
               style={inputStyle}
               state={state}
               precision={2}
@@ -63,7 +63,7 @@ const ItemAttributesEditor = ({
           <td>
             <FormNumberInput
               value={renderedY}
-              onChange={(event) => onUpdate("y", event.target.value)}
+              onChange={(value) => onUpdate("y", value)}
               style={inputStyle}
               state={state}
               precision={2}
@@ -76,7 +76,9 @@ const ItemAttributesEditor = ({
           <td>
             <FormNumberInput
               value={renderedR}
-              onChange={(event) => onUpdate("rotation", event.target.value)}
+              onChange={(value) => {
+                onUpdate("rotation", value);
+              }}
               style={inputStyle}
               state={state}
               precision={2}

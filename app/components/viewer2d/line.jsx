@@ -9,7 +9,7 @@ export const Line = ({ line, layer, scene, catalog }) => {
   let vertex0 = layer.vertices.get(line.vertices.get(0));
   let vertex1 = layer.vertices.get(line.vertices.get(1));
 
-  if (vertex0.id === vertex1.id || GeometryUtils.samePoints(vertex0, vertex1))
+  if (vertex0?.id === vertex1?.id || GeometryUtils.samePoints(vertex0, vertex1))
     return null; //avoid 0-length lines
 
   let { x: x1, y: y1 } = vertex0;
