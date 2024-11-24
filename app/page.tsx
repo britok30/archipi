@@ -7,6 +7,7 @@ import ReactPlanner from "./components/ReactPlanner";
 import { Plugins as PlannerPlugins } from "./customMiddlewares";
 import { useWindowSize } from "./hooks/useWindowSize";
 import { store } from "./components/Providers";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 let plugins = [];
 
@@ -31,7 +32,8 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen overflow-hidden">
-      <Suspense fallback="Loading...">
+      <SidebarProvider>
+         <Suspense fallback="Loading...">
         <ReactPlanner
           store={store}
           catalog={MyCatalog}
@@ -41,6 +43,7 @@ export default function Home() {
           stateExtractor={(state) => state.get("archipi")}
         />
       </Suspense>
+      </SidebarProvider>
     </div>
   );
 }
