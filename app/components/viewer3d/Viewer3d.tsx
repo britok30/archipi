@@ -8,7 +8,7 @@ import {
   SoftShadows,
   useHelper,
 } from "@react-three/drei";
-import { Vector2, Raycaster, Object3D } from "three";
+import { Vector2, Raycaster, Object3D, Object3DEventMap } from "three";
 import { parseData, updateScene } from "./scene-creator";
 import diff from "immutablediff";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
@@ -19,6 +19,14 @@ type Scene3DViewerProps = {
   width: number;
   height: number;
 };
+
+interface InteractiveObject extends Object3D<Object3DEventMap> {
+  interact?: () => void;
+  userData: {
+    interact?: () => void;
+    [key: string]: any;
+  };
+}
 
 const Scene = ({ state, planData, projectActions }) => {
   const { scene, camera } = useThree();
@@ -140,7 +148,8 @@ const InteractionHandler = ({ projectActions, toIntersect }) => {
     raycaster.current.setFromCamera(mouse, camera);
     const intersects = raycaster.current.intersectObjects(toIntersect, true);
     if (intersects.length > 0 && !isNaN(intersects[0].distance)) {
-      let object = intersects[0].object;
+      // Cast the intersected object to InteractiveObject
+      let object = intersects[0].object as InteractiveObject;
       let interactionFound = false;
       while (object) {
         if (object.interact && typeof object.interact === "function") {
@@ -157,7 +166,7 @@ const InteractionHandler = ({ projectActions, toIntersect }) => {
           interactionFound = true;
           break;
         }
-        object = object.parent;
+        object = object.parent as InteractiveObject;
       }
       if (!interactionFound) {
         projectActions.unselectAll();
@@ -166,7 +175,6 @@ const InteractionHandler = ({ projectActions, toIntersect }) => {
       projectActions.unselectAll();
     }
   };
-
   useEffect(() => {
     const canvas = gl.domElement;
     canvas.addEventListener("pointerdown", handlePointerDown);
@@ -220,7 +228,7 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
   if (!planData) return null;
 
   const { boundingBox } = planData;
-  const cameraPosition = [
+  const cameraPosition: [number, number, number] = [
     -(boundingBox.max.x - boundingBox.min.x) / 2,
     ((boundingBox.max.y - boundingBox.min.y) / 2) * 10,
     (boundingBox.max.z - boundingBox.min.z) / 2,
