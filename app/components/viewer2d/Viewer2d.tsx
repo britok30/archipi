@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useCallback, memo } from "react";
+import React, { useContext, useCallback, memo, useMemo } from "react";
 import {
   ReactSVGPanZoom,
   TOOL_NONE,
@@ -125,306 +125,330 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
     projectActions,
     catalog,
   } = useContext(ReactPlannerContext);
-
-  const { viewer2D, mode, scene, zoom } = state;
+  const { viewer2D, mode, scene, zoom, mouse, snapMask } = state;
 
   const layerID = scene.get("selectedLayer");
+  const sceneWidth = scene.get("width");
+  const sceneHeight = scene.get("height");
 
+  // Cache the scene height for mapping function
   const mapCursorPosition = useCallback(
-    ({ x, y }: { x: number; y: number }) => {
-      return { x, y: -y + scene.get("height") };
-    },
-    [scene.get("height")]
+    ({ x, y }: { x: number; y: number }) => ({
+      x,
+      y: -y + sceneHeight,
+    }),
+    [sceneHeight]
   );
 
-  const onMouseMove = (viewerEvent: any) => {
-    // Workaround to allow imageful component to work
-    const evt = new Event("mousemove-planner-event") as any;
-    evt.viewerEvent = viewerEvent;
-    document.dispatchEvent(evt);
+  const onMouseMove = useCallback(
+    (viewerEvent: any) => {
+      const evt = new Event("mousemove-planner-event") as any;
+      evt.viewerEvent = viewerEvent;
+      document.dispatchEvent(evt);
 
-    const { x, y } = mapCursorPosition(viewerEvent);
+      const { x, y } = mapCursorPosition(viewerEvent);
+      projectActions.updateMouseCoord({ x, y });
 
-    projectActions.updateMouseCoord({ x, y });
-
-    switch (mode) {
-      case constants.MODE_DRAWING_LINE:
-        linesActions.updateDrawingLine(x, y, String(state.snapMask));
-        break;
-
-      case constants.MODE_DRAWING_HOLE:
-        holesActions.updateDrawingHole(layerID, x, y);
-        break;
-
-      case constants.MODE_DRAWING_ITEM:
-        itemsActions.updateDrawingItem(layerID, x, y);
-        break;
-
-      case constants.MODE_DRAGGING_HOLE:
-        holesActions.updateDraggingHole(x, y);
-        break;
-
-      case constants.MODE_DRAGGING_LINE:
-        linesActions.updateDraggingLine(x, y, String(state.snapMask));
-        break;
-
-      case constants.MODE_DRAGGING_VERTEX:
-        verticesActions.updateDraggingVertex(x, y, String(state.snapMask));
-        break;
-
-      case constants.MODE_DRAGGING_ITEM:
-        itemsActions.updateDraggingItem(x, y);
-        break;
-
-      case constants.MODE_ROTATING_ITEM:
-        itemsActions.updateRotatingItem(x, y);
-        break;
-    }
-
-    viewerEvent.originalEvent.stopPropagation();
-  };
-
-  const onMouseDown = (viewerEvent: any) => {
-    const event = viewerEvent.originalEvent;
-
-    // Workaround to allow imageful component to work
-    const evt = new Event("mousedown-planner-event") as any;
-    evt.viewerEvent = viewerEvent;
-    document.dispatchEvent(evt);
-
-    const { x, y } = mapCursorPosition(viewerEvent);
-
-    if (mode === constants.MODE_IDLE) {
-      const elementData = extractElementData(event.target as HTMLElement);
-      if (!elementData || !elementData.selected) return;
-
-      switch (elementData.prototype) {
-        case "lines":
-          linesActions.beginDraggingLine(
-            elementData.layer,
-            elementData.id,
-            x,
-            y,
-            String(state.snapMask)
-          );
+      switch (mode) {
+        case constants.MODE_DRAWING_LINE:
+          linesActions.updateDrawingLine(x, y, String(snapMask));
           break;
-
-        case "vertices":
-          verticesActions.beginDraggingVertex(
-            elementData.layer,
-            elementData.id,
-            x,
-            y,
-            String(state.snapMask)
-          );
+        case constants.MODE_DRAWING_HOLE:
+          holesActions.updateDrawingHole(layerID, x, y);
           break;
-
-        case "items":
-          if (elementData.part === "rotation-anchor")
-            itemsActions.beginRotatingItem(
-              elementData.layer,
-              elementData.id,
-              x,
-              y
-            );
-          else
-            itemsActions.beginDraggingItem(
-              elementData.layer,
-              elementData.id,
-              x,
-              y
-            );
+        case constants.MODE_DRAWING_ITEM:
+          itemsActions.updateDrawingItem(layerID, x, y);
           break;
-
-        case "holes":
-          holesActions.beginDraggingHole(
-            elementData.layer,
-            elementData.id,
-            x,
-            y
-          );
+        case constants.MODE_DRAGGING_HOLE:
+          holesActions.updateDraggingHole(x, y);
           break;
-
+        case constants.MODE_DRAGGING_LINE:
+          linesActions.updateDraggingLine(x, y, String(snapMask));
+          break;
+        case constants.MODE_DRAGGING_VERTEX:
+          verticesActions.updateDraggingVertex(x, y, String(snapMask));
+          break;
+        case constants.MODE_DRAGGING_ITEM:
+          itemsActions.updateDraggingItem(x, y);
+          break;
+        case constants.MODE_ROTATING_ITEM:
+          itemsActions.updateRotatingItem(x, y);
+          break;
         default:
           break;
       }
-    }
-    event.stopPropagation();
-  };
+      viewerEvent.originalEvent.stopPropagation();
+    },
+    [
+      mapCursorPosition,
+      mode,
+      projectActions,
+      linesActions,
+      holesActions,
+      itemsActions,
+      verticesActions,
+      snapMask,
+      layerID,
+    ]
+  );
 
-  const onMouseUp = (viewerEvent: any) => {
-    const event = viewerEvent.originalEvent;
+  const onMouseDown = useCallback(
+    (viewerEvent: any) => {
+      const event = viewerEvent.originalEvent;
+      const evt = new Event("mousedown-planner-event") as any;
+      evt.viewerEvent = viewerEvent;
+      document.dispatchEvent(evt);
 
-    const evt = new Event("mouseup-planner-event") as any;
-    evt.viewerEvent = viewerEvent;
-    document.dispatchEvent(evt);
+      const { x, y } = mapCursorPosition(viewerEvent);
 
-    const { x, y } = mapCursorPosition(viewerEvent);
-
-    switch (mode) {
-      case constants.MODE_IDLE:
+      if (mode === constants.MODE_IDLE) {
         const elementData = extractElementData(event.target as HTMLElement);
+        if (!elementData || !elementData.selected) return;
 
-        if (elementData && elementData.selected) return;
-
-        switch (elementData ? elementData.prototype : "none") {
-          case "areas":
-            areaActions.selectArea(elementData.layer, elementData.id);
-            break;
-
+        switch (elementData.prototype) {
           case "lines":
-            linesActions.selectLine(elementData.layer, elementData.id);
+            linesActions.beginDraggingLine(
+              elementData.layer,
+              elementData.id,
+              x,
+              y,
+              String(snapMask)
+            );
             break;
-
-          case "holes":
-            holesActions.selectHole(elementData.layer, elementData.id);
+          case "vertices":
+            verticesActions.beginDraggingVertex(
+              elementData.layer,
+              elementData.id,
+              x,
+              y,
+              String(snapMask)
+            );
             break;
-
           case "items":
-            itemsActions.selectItem(elementData.layer, elementData.id);
+            if (elementData.part === "rotation-anchor")
+              itemsActions.beginRotatingItem(
+                elementData.layer,
+                elementData.id,
+                x,
+                y
+              );
+            else
+              itemsActions.beginDraggingItem(
+                elementData.layer,
+                elementData.id,
+                x,
+                y
+              );
             break;
-
-          case "none":
-            projectActions.unselectAll();
+          case "holes":
+            holesActions.beginDraggingHole(
+              elementData.layer,
+              elementData.id,
+              x,
+              y
+            );
+            break;
+          default:
             break;
         }
-        break;
+      }
+      event.stopPropagation();
+    },
+    [
+      mode,
+      mapCursorPosition,
+      linesActions,
+      verticesActions,
+      itemsActions,
+      holesActions,
+      snapMask,
+    ]
+  );
 
-      case constants.MODE_WAITING_DRAWING_LINE:
-        linesActions.beginDrawingLine(layerID, x, y, String(state.snapMask));
-        break;
+  const onMouseUp = useCallback(
+    (viewerEvent: any) => {
+      const event = viewerEvent.originalEvent;
+      const evt = new Event("mouseup-planner-event") as any;
+      evt.viewerEvent = viewerEvent;
+      document.dispatchEvent(evt);
 
-      case constants.MODE_DRAWING_LINE:
-        linesActions.endDrawingLine(x, y, String(state.snapMask));
-        linesActions.beginDrawingLine(layerID, x, y, String(state.snapMask));
-        break;
+      const { x, y } = mapCursorPosition(viewerEvent);
 
-      case constants.MODE_DRAWING_HOLE:
-        holesActions.endDrawingHole(layerID, x, y);
-        break;
+      switch (mode) {
+        case constants.MODE_IDLE: {
+          const elementData = extractElementData(event.target as HTMLElement);
+          if (elementData && elementData.selected) return;
+          const proto = elementData ? elementData.prototype : "none";
+          switch (proto) {
+            case "areas":
+              areaActions.selectArea(elementData!.layer, elementData!.id);
+              break;
+            case "lines":
+              linesActions.selectLine(elementData!.layer, elementData!.id);
+              break;
+            case "holes":
+              holesActions.selectHole(elementData!.layer, elementData!.id);
+              break;
+            case "items":
+              itemsActions.selectItem(elementData!.layer, elementData!.id);
+              break;
+            case "none":
+              projectActions.unselectAll();
+              break;
+            default:
+              break;
+          }
+          break;
+        }
+        case constants.MODE_WAITING_DRAWING_LINE:
+          linesActions.beginDrawingLine(layerID, x, y, String(snapMask));
+          break;
+        case constants.MODE_DRAWING_LINE:
+          linesActions.endDrawingLine(x, y, String(snapMask));
+          linesActions.beginDrawingLine(layerID, x, y, String(snapMask));
+          break;
+        case constants.MODE_DRAWING_HOLE:
+          holesActions.endDrawingHole(layerID, x, y);
+          break;
+        case constants.MODE_DRAWING_ITEM:
+          itemsActions.endDrawingItem(layerID, x, y);
+          break;
+        case constants.MODE_DRAGGING_LINE:
+          linesActions.endDraggingLine(x, y, String(snapMask));
+          break;
+        case constants.MODE_DRAGGING_VERTEX:
+          verticesActions.endDraggingVertex(x, y, String(snapMask));
+          break;
+        case constants.MODE_DRAGGING_ITEM:
+          itemsActions.endDraggingItem(x, y);
+          break;
+        case constants.MODE_DRAGGING_HOLE:
+          holesActions.endDraggingHole(x, y);
+          break;
+        case constants.MODE_ROTATING_ITEM:
+          itemsActions.endRotatingItem(x, y);
+          break;
+        default:
+          break;
+      }
+      event.stopPropagation();
+    },
+    [
+      mode,
+      mapCursorPosition,
+      areaActions,
+      linesActions,
+      holesActions,
+      itemsActions,
+      verticesActions,
+      projectActions,
+      layerID,
+      snapMask,
+    ]
+  );
 
-      case constants.MODE_DRAWING_ITEM:
-        itemsActions.endDrawingItem(layerID, x, y);
-        break;
+  const onChangeValue = useCallback(
+    (value: Value) => {
+      projectActions.updateZoomScale(value.a);
+      viewer2DActions.updateCameraView(value);
+    },
+    [projectActions, viewer2DActions]
+  );
 
-      case constants.MODE_DRAGGING_LINE:
-        linesActions.endDraggingLine(x, y, String(state.snapMask));
-        break;
+  const onChangeTool = useCallback(
+    (tool: Tool) => {
+      switch (tool) {
+        case TOOL_NONE:
+          projectActions.selectToolEdit();
+          break;
+        case TOOL_PAN:
+          viewer2DActions.selectToolPan();
+          break;
+        case TOOL_ZOOM_IN:
+          viewer2DActions.selectToolZoomIn();
+          break;
+        case TOOL_ZOOM_OUT:
+          viewer2DActions.selectToolZoomOut();
+          break;
+      }
+    },
+    [projectActions, viewer2DActions]
+  );
 
-      case constants.MODE_DRAGGING_VERTEX:
-        verticesActions.endDraggingVertex(x, y, String(state.snapMask));
-        break;
+  // Compute viewer2D value once (if not empty)
+  const viewer2DValue = useMemo(
+    () => (viewer2D.isEmpty() ? {} : viewer2D.toJS()),
+    [viewer2D]
+  );
 
-      case constants.MODE_DRAGGING_ITEM:
-        itemsActions.endDraggingItem(x, y);
-        break;
-
-      case constants.MODE_DRAGGING_HOLE:
-        holesActions.endDraggingHole(x, y);
-        break;
-
-      case constants.MODE_ROTATING_ITEM:
-        itemsActions.endRotatingItem(x, y);
-        break;
-    }
-
-    event.stopPropagation();
-  };
-
-  const onChangeValue = (value: Value) => {
-    projectActions.updateZoomScale(value.a);
-    viewer2DActions.updateCameraView(value);
-  };
-
-  const onChangeTool = (tool: Tool) => {
-    switch (tool) {
-      case TOOL_NONE:
-        projectActions.selectToolEdit();
-        break;
-
-      case TOOL_PAN:
-        viewer2DActions.selectToolPan();
-        break;
-
-      case TOOL_ZOOM_IN:
-        viewer2DActions.selectToolZoomIn();
-        break;
-
-      case TOOL_ZOOM_OUT:
-        viewer2DActions.selectToolZoomOut();
-        break;
-    }
-  };
-
-  const { e, f, SVGWidth, SVGHeight } = viewer2D.toJS();
-
+  // Ruler properties
   const rulerSize = 15; // px
   const rulerUnitPixelSize = 100;
   const rulerBgColor = "#292929";
   const rulerFnColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
   const rulerMkColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
-  const sceneWidth = SVGWidth || scene.get("width");
-  const sceneHeight = SVGHeight || scene.get("height");
   const sceneZoom = zoom || 1;
-
   const rulerXElements = Math.ceil(sceneWidth / rulerUnitPixelSize) + 1;
   const rulerYElements = Math.ceil(sceneHeight / rulerUnitPixelSize) + 1;
 
+  // Container grid style
+  const containerStyle = useMemo(
+    () => ({
+      gridTemplateColumns: `${rulerSize}px ${width - rulerSize}px`,
+      gridTemplateRows: `${rulerSize}px ${height - rulerSize}px`,
+    }),
+    [width, height, rulerSize]
+  );
+
   return (
-    <div
-      className="m-0 p-0 grid gap-0 relative"
-      style={{
-        gridTemplateColumns: `${rulerSize}px ${width - rulerSize}px`,
-        gridTemplateRows: `${rulerSize}px ${height - rulerSize}px`,
-      }}
-    >
+    <div className="m-0 p-0 grid gap-0 relative" style={containerStyle}>
       <div
         className="grid-col-1 grid-rows-1"
         style={{ backgroundColor: rulerBgColor }}
-      ></div>
+      />
       <div
         className="grid-rows-1 grid-cols-2 relative overflow-hidden"
         id="rulerX"
       >
-        {sceneWidth ? (
+        {sceneWidth && (
           <RulerX
             unitPixelSize={rulerUnitPixelSize}
             zoom={sceneZoom}
-            mouseX={state.mouse.get("x") || 0}
+            mouseX={mouse.get("x") || 0}
             width={width - rulerSize}
-            zeroLeftPosition={e || 0}
+            zeroLeftPosition={viewer2D.get("e") || 0}
             backgroundColor={rulerBgColor}
             fontColor={rulerFnColor}
             markerColor={rulerMkColor}
             positiveUnitsNumber={rulerXElements}
             negativeUnitsNumber={0}
           />
-        ) : null}
+        )}
       </div>
       <div
         className="grid-rows-1 grid-cols-2 relative overflow-hidden"
         id="rulerY"
       >
-        {sceneHeight ? (
+        {sceneHeight && (
           <RulerY
             unitPixelSize={rulerUnitPixelSize}
             zoom={sceneZoom}
-            mouseY={state.mouse.get("y") || 0}
+            mouseY={mouse.get("y") || 0}
             height={height - rulerSize}
-            zeroTopPosition={sceneHeight * sceneZoom + f || 0}
+            zeroTopPosition={sceneHeight * sceneZoom + (viewer2D.get("f") || 0)}
             backgroundColor={rulerBgColor}
             fontColor={rulerFnColor}
             markerColor={rulerMkColor}
             positiveUnitsNumber={rulerYElements}
             negativeUnitsNumber={0}
           />
-        ) : null}
+        )}
       </div>
       <ReactSVGPanZoom
         style={{ gridColumn: 2, gridRow: 2 }}
         width={width - rulerSize}
         height={height - rulerSize}
-        value={viewer2D.isEmpty() ? {} : viewer2D.toJS()}
+        value={viewer2DValue}
         onChangeValue={onChangeValue}
         tool={mode2Tool(mode)}
         onChangeTool={onChangeTool}
@@ -440,7 +464,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
           height: 80,
         }}
       >
-        <svg width={scene.get("width")} height={scene.get("height")}>
+        <svg width={sceneWidth} height={sceneHeight}>
           <defs>
             <pattern
               id="diagonalFill"

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Viewer2D } from "./viewer2d/Viewer2d";
 import CatalogList from "./CatalogView/CatalogList";
 import ProjectConfigurator from "./ProjectConfigurator/ProjectConfigurator";
@@ -49,7 +49,11 @@ const Content: React.FC<ContentProps> = ({
 
   switch (mode) {
     case constants.MODE_3D_VIEW:
-      return <Viewer3D state={state} width={width} height={height} />;
+      return (
+        <Suspense>
+          <Viewer3D state={state} width={width} height={height} />
+        </Suspense>
+      );
 
     // case constants.MODE_3D_FIRST_PERSON:
     //   return (
