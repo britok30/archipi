@@ -103,7 +103,7 @@ const ElementEditor = ({ element, layer }: { element: SceneElement; layer: Layer
   useEffect(() => {
     setAttributesFormData(initAttrData(element, layer));
     setPropertiesFormData(initPropData(element));
-  }, [element, layer]);
+  }, [element, layer, catalog]);
 
   const updateAttribute = (attributeName: string, value: Map<string, any>) => {
     let _attributesFormData: any = attributesFormData;
@@ -331,13 +331,13 @@ const ElementEditor = ({ element, layer }: { element: SceneElement; layer: Layer
       />
 
       <div className="flex items-center justify-end space-x-3 py-2 mt-3">
-        <Button onClick={() => handleCopyProperties(element.properties)}>
-          <Copy />
+        <Button variant="secondary" size="sm" onClick={() => handleCopyProperties(element.properties)}>
+          <Copy className="w-4 h-4" />
         </Button>
 
         {clipboardProperties && Object.keys(clipboardProperties).length > 0 ? (
-          <Button variant="ghost" onClick={handlePasteProperties}>
-            <Clipboard />
+          <Button variant="ghost" size="sm" onClick={handlePasteProperties}>
+            <Clipboard className="w-4 h-4" />
           </Button>
         ) : null}
       </div>

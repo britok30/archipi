@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import {
@@ -22,7 +22,7 @@ import {
   MODE_UPLOADING_IMAGE,
   MODE_ROTATING_ITEM,
 } from "../../store/types";
-import { Search } from "lucide-react";
+import { Boxes, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePlannerStore } from "../../store";
@@ -59,11 +59,6 @@ const VISIBILITY_MODE = new Set([
   MODE_ROTATING_ITEM,
 ]);
 
-const categoryDividerStyle = {
-  paddingBottom: "0.5em",
-  borderBottom: "1px solid #888",
-};
-
 const filterElements = (
   elements: Record<string, ElementType>,
   regexp: RegExp
@@ -89,52 +84,27 @@ const PanelLayerElement: React.FC = () => {
   const selectedLayer = scene.selectedLayer;
 
   const [matchString, setMatchString] = useState<string>("");
-  const [elements, setElements] = useState<ElementsType>({
-    lines: {},
-    holes: {},
-    items: {},
-  });
-  const [matchedElements, setMatchedElements] =
-    useState<ElementsType>(elements);
 
-  useEffect(() => {
-    if (!selectedLayer) return;
+  const elements: ElementsType = useMemo(() => {
+    if (!selectedLayer) return { lines: {}, holes: {}, items: {} };
     const layer = layers[selectedLayer];
-    if (!layer) return;
-    const newElements: ElementsType = {
+    if (!layer) return { lines: {}, holes: {}, items: {} };
+    return {
       lines: layer.lines || {},
       holes: layer.holes || {},
       items: layer.items || {},
     };
-    setElements(newElements);
-    if (matchString !== "") {
-      const regexp = new RegExp(matchString, "i");
-      setMatchedElements({
-        lines: filterElements(newElements.lines, regexp),
-        holes: filterElements(newElements.holes, regexp),
-        items: filterElements(newElements.items, regexp),
-      });
-    } else {
-      setMatchedElements(newElements);
-    }
-  }, [layers, selectedLayer, matchString]);
+  }, [layers, selectedLayer]);
 
-  const matchArray = (text: string) => {
-    if (text === "") {
-      setMatchString("");
-      setMatchedElements(elements);
-      return;
-    }
-
-    const regexp = new RegExp(text, "i");
-
-    setMatchString(text);
-    setMatchedElements({
+  const matchedElements: ElementsType = useMemo(() => {
+    if (matchString === "") return elements;
+    const regexp = new RegExp(matchString, "i");
+    return {
       lines: filterElements(elements.lines, regexp),
       holes: filterElements(elements.holes, regexp),
       items: filterElements(elements.items, regexp),
-    });
-  };
+    };
+  }, [elements, matchString]);
 
   if (!VISIBILITY_MODE.has(mode)) return null;
   if (!selectedLayer) return null;
@@ -147,30 +117,34 @@ const PanelLayerElement: React.FC = () => {
   const itemEntries = Object.entries(matchedElements.items);
 
   return (
-    <Panel name={`Elements on layer ${layer.name}`}>
+    <Panel
+      name={`Elements on layer ${layer.name}`}
+      value="layer-elements"
+      icon={<Boxes className="w-3.5 h-3.5" />}
+    >
       <div className="h-auto overflow-y-auto max-h-40 cursor-pointer mb-2 select-none w-full px-3">
         <div className="flex items-center space-x-3 mb-3">
           <Search />
           <Input
             type="text"
             onChange={(e) => {
-              matchArray(e.target.value);
+              setMatchString(e.target.value);
             }}
           />
         </div>
 
         {lineEntries.length ? (
           <div>
-            <p style={categoryDividerStyle} className="mb-2">
+            <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
               {translator?.t("Lines") ?? "Lines"}
             </p>
             {lineEntries.map(([lineID, line]) => (
               <Button
                 key={lineID}
                 size="sm"
-                variant={line.selected ? "secondary" : "default"}
+                variant={line.selected ? "default" : "secondary"}
                 onClick={() => selectLine(layer.id, line.id)}
-                className="mr-3"
+                className={`mr-3 ${line.selected ? "bg-primary text-primary-foreground" : ""}`}
               >
                 {line.name}
               </Button>
@@ -180,16 +154,16 @@ const PanelLayerElement: React.FC = () => {
 
         {holeEntries.length ? (
           <div>
-            <p style={categoryDividerStyle} className="mb-2">
+            <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
               Holes
             </p>
             {holeEntries.map(([holeID, hole]) => (
               <Button
                 key={holeID}
                 size="sm"
-                variant={hole.selected ? "secondary" : "default"}
+                variant={hole.selected ? "default" : "secondary"}
                 onClick={() => selectHole(layer.id, hole.id)}
-                className="mr-3"
+                className={`mr-3 ${hole.selected ? "bg-primary text-primary-foreground" : ""}`}
               >
                 {hole.name}
               </Button>
@@ -199,16 +173,16 @@ const PanelLayerElement: React.FC = () => {
 
         {itemEntries.length ? (
           <div>
-            <p style={categoryDividerStyle} className="mb-2">
+            <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
               Items
             </p>
             {itemEntries.map(([itemID, item]) => (
               <Button
                 key={itemID}
                 size="sm"
-                variant={item.selected ? "secondary" : "default"}
+                variant={item.selected ? "default" : "secondary"}
                 onClick={() => selectItem(layer.id, item.id)}
-                className="mr-3"
+                className={`mr-3 ${item.selected ? "bg-primary text-primary-foreground" : ""}`}
               >
                 {item.name}
               </Button>

@@ -5,7 +5,7 @@ import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { FormNumberInput } from "../style/export";
 import { Button } from "@/components/ui/button";
-import { Trash, X } from "lucide-react";
+import { Ruler, Trash, X } from "lucide-react";
 import { Tabs, TabsList } from "@/components/ui/tabs";
 import { TabsContent, TabsTrigger } from "@radix-ui/react-tabs";
 import { usePlannerStore } from "../../store";
@@ -22,23 +22,21 @@ const PanelGuides: React.FC = () => {
   const horizontalEntries = Object.entries(guides.horizontal || {});
   const verticalEntries = Object.entries(guides.vertical || {});
 
-  const [selectedTab, setSelectedTab] = useState("Horizontal");
-
   const [addHGVisible, setAddHGVisible] = useState(true);
   const [addVGVisible, setAddVGVisible] = useState(true);
 
   return (
-    <Panel name="Guides">
+    <Panel name="Guides" value="guides" icon={<Ruler className="w-3.5 h-3.5" />}>
       <Tabs defaultValue="horizontal" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger
-            className="data-[state=active]:bg-black data-[state=active]:text-white p-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground p-2"
             value="horizontal"
           >
             Horizontal
           </TabsTrigger>
           <TabsTrigger
-            className="data-[state=active]:bg-black data-[state=active]:text-white p-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground p-2"
             value="vertical"
           >
             Vertical
@@ -54,7 +52,7 @@ const PanelGuides: React.FC = () => {
                   className="flex items-center justify-between mb-2"
                 >
                   <span>{index + 1}</span>
-                  <span>{(hgValue as any) as string | number}</span>
+                  <span>{(hgValue as { y: number }).y}</span>
                   <Button
                     variant="ghost"
                     onClick={() => removeHorizontalGuide(hgKey)}
@@ -77,7 +75,7 @@ const PanelGuides: React.FC = () => {
 
             {!addHGVisible && (
               <>
-                <span className="text-xs mb-4 inline-block">{`Value must be between 0 and ${scene.width} `}</span>
+                <span className="text-xs mb-4 inline-block text-muted-foreground">{`Value must be between 0 and ${scene.width} `}</span>
                 <div className="flex items-center justify-between">
                   <FormNumberInput
                     value={0}
@@ -111,7 +109,7 @@ const PanelGuides: React.FC = () => {
                   className="flex items-center justify-between mb-2"
                 >
                   <span>{index + 1}</span>
-                  <span>{(vgValue as any) as string | number}</span>
+                  <span>{(vgValue as { x: number }).x}</span>
                   <Button
                     variant="ghost"
                     onClick={() => removeVerticalGuide(vgKey)}
@@ -134,7 +132,7 @@ const PanelGuides: React.FC = () => {
 
             {!addVGVisible && (
               <>
-                <span className="text-xs mb-4 inline-block">{`Value must be between 0 and ${scene.height}`}</span>
+                <span className="text-xs mb-4 inline-block text-muted-foreground">{`Value must be between 0 and ${scene.height}`}</span>
                 <div className="flex items-center justify-between">
                   <FormNumberInput
                     value={0}

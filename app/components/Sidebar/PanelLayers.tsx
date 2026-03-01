@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useContext } from "react";
-import { Map } from "immutable";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import {
@@ -12,6 +11,7 @@ import {
   XCircle,
   CheckCircle,
   PencilIcon,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import {
   MODE_UPLOADING_IMAGE,
   MODE_ROTATING_ITEM,
 } from "../../store/types";
+import type { Layer } from "../../store/types";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { usePlannerStore } from "../../store";
@@ -58,6 +59,14 @@ const VISIBILITY_MODES = [
   MODE_FITTING_IMAGE,
 ];
 
+interface EditingLayer {
+  id?: string;
+  name: string;
+  opacity: number;
+  altitude: number;
+  order: number;
+}
+
 const PanelLayers: React.FC = () => {
   const { translator } = useContext(ReactPlannerContext);
   const mode = usePlannerStore((state) => state.mode);
@@ -68,7 +77,7 @@ const PanelLayers: React.FC = () => {
   const removeLayerAction = usePlannerStore((state) => state.removeLayer);
 
   const [layerAddUIVisible, setLayerAddUIVisible] = useState(false);
-  const [editingLayer, setEditingLayer] = useState<Map<string, any> | null>(null);
+  const [editingLayer, setEditingLayer] = useState<EditingLayer | null>(null);
 
   const layers = scene.layers;
   const selectedLayerId = scene.selectedLayer;
@@ -77,13 +86,12 @@ const PanelLayers: React.FC = () => {
   const handleAddLayer = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!layerAddUIVisible) {
-      const newLayer = Map({
+      setEditingLayer({
         name: "",
         opacity: 1,
         altitude: 0,
         order: layerEntries.length,
       });
-      setEditingLayer(newLayer);
       setLayerAddUIVisible(true);
     } else {
       setLayerAddUIVisible(false);
@@ -96,22 +104,20 @@ const PanelLayers: React.FC = () => {
     setEditingLayer(null);
   };
 
-  const updateLayer = (e: React.MouseEvent, layerData: Map<string, any>) => {
+  const updateLayer = (e: React.MouseEvent, layerData: EditingLayer) => {
     e.stopPropagation();
-    const layerId = layerData.get("id");
-    const { name, opacity, altitude, order } = layerData.toJS();
+    const { id: layerId, name, opacity, altitude, order } = layerData;
 
     if (layerId) {
       setLayerPropertiesAction(layerId, {
         name,
         opacity,
-        altitude: parseInt(altitude, 10),
+        altitude,
         order,
       });
     } else {
-      addLayerAction(name, parseInt(altitude, 10));
-      const layerKeys = Object.keys(layers);
-      const newLayerID = layerKeys[layerKeys.length - 1];
+      addLayerAction(name, altitude);
+      const newLayerID = usePlannerStore.getState().scene.selectedLayer;
       if (newLayerID) {
         setLayerPropertiesAction(newLayerID, {
           opacity,
@@ -136,13 +142,19 @@ const PanelLayers: React.FC = () => {
     selectLayerAction(layerID);
   };
 
-  const configureClick = (e: React.MouseEvent, layer: any, layerID: string) => {
+  const configureClick = (e: React.MouseEvent, layer: Layer, layerID: string) => {
     e.stopPropagation();
-    setEditingLayer(Map({ ...layer, id: layerID }));
+    setEditingLayer({
+      id: layerID,
+      name: layer.name,
+      opacity: layer.opacity,
+      altitude: layer.altitude,
+      order: layer.order,
+    });
     setLayerAddUIVisible(true);
   };
 
-  const swapVisibility = (e: React.MouseEvent, layer: any, layerID: string) => {
+  const swapVisibility = (e: React.MouseEvent, layer: Layer, layerID: string) => {
     e.stopPropagation();
     setLayerPropertiesAction(layerID, {
       visible: !layer.visible,
@@ -156,18 +168,18 @@ const PanelLayers: React.FC = () => {
   const isLastLayer = layerEntries.length === 1;
 
   return (
-    <Panel name="Layers">
-      <div className="grid grid-cols-4 gap-2 text-white mb-3 px-2">
+    <Panel name="Layers" value="layers" icon={<Layers className="w-3.5 h-3.5" />}>
+      <div className="grid grid-cols-4 gap-2 text-foreground mb-3 px-2">
         <div className="text-sm">Altitude</div>
         <div className="text-sm col-span-2">Name</div>
         <div className="text-sm text-right">Actions</div>
       </div>
 
-      {layerEntries.map(([layerID, layer]: [string, any]) => (
+      {layerEntries.map(([layerID, layer]: [string, Layer]) => (
         <div
           key={layerID}
-          className={`grid grid-cols-4 gap-3 text-white cursor-pointer hover:bg-[#292929] transition duration-200 ease-in-out py-3 px-3 ${
-            isCurrentLayer(layerID) ? "bg-[#333]" : ""
+          className={`grid grid-cols-4 gap-3 text-foreground cursor-pointer hover:bg-muted/50 transition duration-200 ease-in-out py-3 px-3 ${
+            isCurrentLayer(layerID) ? "bg-primary/10" : ""
           }`}
           onClick={(e) => selectClick(e, layerID)}
         >
@@ -181,9 +193,9 @@ const PanelLayers: React.FC = () => {
                 className="p-1"
               >
                 {layer.visible ? (
-                  <Eye className="w-4 h-4 text-white" />
+                  <Eye className="w-4 h-4 text-foreground" />
                 ) : (
-                  <EyeOff className="w-4 h-4 text-gray-500" />
+                  <EyeOff className="w-4 h-4 text-muted-foreground" />
                 )}
               </Button>
             )}
@@ -217,45 +229,47 @@ const PanelLayers: React.FC = () => {
       </div>
 
       {layerAddUIVisible && editingLayer && (
-        <div className="p-4 bg-[#1e1e1e] rounded-md">
+        <div className="p-4 bg-card rounded-md">
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <Label className="text-white">Name:</Label>
+            <Label className="text-foreground">Name:</Label>
             <Input
-              value={editingLayer.get("name")}
+              value={editingLayer.name}
               onChange={(e) =>
-                setEditingLayer(editingLayer.set("name", e.target.value))
+                setEditingLayer({ ...editingLayer, name: e.target.value })
               }
             />
 
-            <label className="text-white">{translator?.t("Opacity") ?? "Opacity"}:</label>
+            <label className="text-foreground">{translator?.t("Opacity") ?? "Opacity"}:</label>
             <Slider
-              value={[editingLayer.get("opacity") * 100]}
+              value={[editingLayer.opacity * 100]}
               onValueChange={(value) =>
-                setEditingLayer(editingLayer.set("opacity", value[0] / 100))
+                setEditingLayer({ ...editingLayer, opacity: value[0] / 100 })
               }
               min={0}
               max={100}
             />
 
-            <label className="text-white">{translator?.t("Altitude") ?? "Altitude"}:</label>
+            <label className="text-foreground">{translator?.t("Altitude") ?? "Altitude"}:</label>
             <Input
               type="number"
-              value={editingLayer.get("altitude") || 0}
+              value={editingLayer.altitude || 0}
               onChange={(e) =>
-                setEditingLayer(
-                  editingLayer.set("altitude", parseInt(e.target.value, 10))
-                )
+                setEditingLayer({
+                  ...editingLayer,
+                  altitude: parseInt(e.target.value, 10),
+                })
               }
             />
 
-            <label className="text-white">{translator?.t("Order") ?? "Order"}:</label>
+            <label className="text-foreground">{translator?.t("Order") ?? "Order"}:</label>
             <Input
               type="number"
-              value={editingLayer.get("order")}
+              value={editingLayer.order}
               onChange={(e) =>
-                setEditingLayer(
-                  editingLayer.set("order", parseInt(e.target.value, 10))
-                )
+                setEditingLayer({
+                  ...editingLayer,
+                  order: parseInt(e.target.value, 10),
+                })
               }
             />
           </div>
