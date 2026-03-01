@@ -1,7 +1,8 @@
 import * as Three from "three";
 import createGrid from "./grid-creator";
-import { disposeObject } from "./three-memory-cleaner";
 import type { Scene, Layer, RuntimeCatalog } from "../../store/types";
+
+const MAX_BUSY_RETRIES = 50;
 
 interface SceneGraph {
   unit: string;
@@ -224,11 +225,16 @@ function addLine(
   layer: Layer,
   lineID: string,
   catalog: RuntimeCatalog,
-  actions: Actions
+  actions: Actions,
+  retryCount: number = 0
 ): Promise<void> | undefined {
   if (planData.sceneGraph.busyResources.layers[layer.id].lines[lineID]) {
+    if (retryCount >= MAX_BUSY_RETRIES) {
+      console.warn(`addLine: max retries (${MAX_BUSY_RETRIES}) exceeded for line ${lineID} on layer ${layer.id}`);
+      return;
+    }
     setTimeout(
-      () => addLine(sceneData, planData, layer, lineID, catalog, actions),
+      () => addLine(sceneData, planData, layer, lineID, catalog, actions, retryCount + 1),
       100
     );
     return;
@@ -286,11 +292,16 @@ function addArea(
   layer: Layer,
   areaID: string,
   catalog: RuntimeCatalog,
-  actions: Actions
+  actions: Actions,
+  retryCount: number = 0
 ): Promise<void> | undefined {
   if (planData.sceneGraph.busyResources.layers[layer.id].areas[areaID]) {
+    if (retryCount >= MAX_BUSY_RETRIES) {
+      console.warn(`addArea: max retries (${MAX_BUSY_RETRIES}) exceeded for area ${areaID} on layer ${layer.id}`);
+      return;
+    }
     setTimeout(
-      () => addArea(sceneData, planData, layer, areaID, catalog, actions),
+      () => addArea(sceneData, planData, layer, areaID, catalog, actions, retryCount + 1),
       100
     );
     return;
@@ -393,18 +404,13 @@ function updateMaterialOpacity(material: Three.Material & { maxOpacity?: number 
 // Apply opacity to children of an Object3D
 function applyOpacity(object: Three.Object3D, opacity: number): void {
   object.traverse((child) => {
-    // Iterate through the child objects of your scene or object
-    child.traverse((innerChild) => {
-      if (Array.isArray((innerChild as any).material)) {
-        // Handle objects with multiple materials (array of materials)
-        ((innerChild as any).material as Three.Material[]).forEach((material) => {
-          updateMaterialOpacity(material, opacity);
-        });
-      } else if ((innerChild as any).material) {
-        // Handle objects with a single material
-        updateMaterialOpacity((innerChild as any).material, opacity);
-      }
-    });
+    if (Array.isArray((child as any).material)) {
+      ((child as any).material as Three.Material[]).forEach((material) => {
+        updateMaterialOpacity(material, opacity);
+      });
+    } else if ((child as any).material) {
+      updateMaterialOpacity((child as any).material, opacity);
+    }
   });
 }
 
