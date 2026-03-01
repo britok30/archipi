@@ -9,7 +9,7 @@ export interface FormTextInputProps extends React.InputHTMLAttributes<HTMLInputE
 const FormTextInput: React.FC<FormTextInputProps> = ({ className = "", ...rest }) => {
   return (
     <input
-      className={`bg-[#292929] w-full text-white border-none rounded-md h-[40px] px-3 outline-none ${className}`}
+      className={`bg-secondary w-full text-foreground border border-border rounded-md h-[40px] px-3 outline-none focus:ring-1 focus:ring-ring ${className}`}
       type="text"
       {...rest}
     />

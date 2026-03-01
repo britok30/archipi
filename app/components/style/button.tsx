@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import * as SharedStyle from '../../styles/shared-style';
 
 type ButtonSize = 'large' | 'normal' | 'small';
 
@@ -26,10 +25,10 @@ const BASE_STYLE: React.CSSProperties = {
   userSelect: "none",
   padding: "5px 14px",
   fontSize: "14px",
-  color: SharedStyle.COLORS.black,
+  color: "hsl(210 20% 95%)",
   transition: "background-color 175ms ease, border 175ms ease",
   outline: "none",
-  borderRadius: "2px",
+  borderRadius: "6px",
   borderWidth: "1px",
   width: '100%'
 };
@@ -48,12 +47,12 @@ const BASE_STYLE_SIZE: Record<ButtonSize, React.CSSProperties> = {
 export default function Button({
   type = "button",
   style: customStyle = {
-    backgroundColor: "#e6e6e6",
-    borderColor: "#adadad",
+    backgroundColor: "hsl(220 13% 16%)",
+    borderColor: "hsl(220 13% 18%)",
   },
   styleHover: customStyleHover = {
-    backgroundColor: "#d4d4d4",
-    borderColor: "#8c8c8c",
+    backgroundColor: "hsl(220 13% 20%)",
+    borderColor: "hsl(220 13% 22%)",
   },
   size = "normal",
   children,

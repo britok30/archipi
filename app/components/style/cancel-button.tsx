@@ -4,13 +4,13 @@ import React from 'react';
 import Button, { ButtonProps } from './button';
 
 const STYLE: React.CSSProperties = {
-  borderColor: "#adadad",
-  backgroundColor: "#e6e6e6"
+  borderColor: "hsl(220 13% 22%)",
+  backgroundColor: "hsl(220 13% 14%)",
 };
 
 const STYLE_HOVER: React.CSSProperties = {
-  backgroundColor: "#d4d4d4",
-  borderColor: "#8c8c8c"
+  backgroundColor: "hsl(220 13% 18%)",
+  borderColor: "hsl(220 13% 24%)",
 };
 
 export default function CancelButton({ children, ...rest }: ButtonProps) {

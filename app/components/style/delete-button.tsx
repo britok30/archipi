@@ -2,18 +2,17 @@
 
 import React from 'react';
 import Button, { ButtonProps } from './button';
-import * as SharedStyle from '../../styles/shared-style';
 
 const STYLE: React.CSSProperties = {
-  borderColor: "#c12e2a",
-  backgroundColor: "#c9302c",
-  color: SharedStyle.COLORS.white
+  borderColor: "hsl(0 84% 40%)",
+  backgroundColor: "hsl(0 84% 45%)",
+  color: "hsl(0 0% 100%)",
 };
 
 const STYLE_HOVER: React.CSSProperties = {
-  backgroundColor: "#972726",
-  borderColor: "#c12e2a",
-  color: SharedStyle.COLORS.white
+  backgroundColor: "hsl(0 84% 35%)",
+  borderColor: "hsl(0 84% 40%)",
+  color: "hsl(0 0% 100%)",
 };
 
 export default function FormDeleteButton({ children, ...rest }: ButtonProps) {

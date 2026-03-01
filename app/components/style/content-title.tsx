@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import * as SharedStyle from '../../styles/shared-style';
 
 interface ContentTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   children?: React.ReactNode;
@@ -9,7 +8,7 @@ interface ContentTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 }
 
 const STYLE: React.CSSProperties = {
-  color: SharedStyle.PRIMARY_COLOR.alt,
+  color: "hsl(217 91% 60%)",
   fontWeight: 300,
 };
 

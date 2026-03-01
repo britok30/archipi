@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Range, getTrackBackground } from "react-range";
+import { Range } from "react-range";
 
 interface FormSliderProps {
   value: number;
@@ -18,7 +18,6 @@ const textContainerStyle: React.CSSProperties = {
   float: "right",
 };
 
-// TODO(pg): port this component
 export default function FormSlider({ value, onChange, min = 0, max = 100, step = 1 }: FormSliderProps) {
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
@@ -30,12 +29,12 @@ export default function FormSlider({ value, onChange, min = 0, max = 100, step =
           max={max}
           onChange={onChange}
           renderTrack={({ props, children }) => (
-            <div {...props} style={{ ...props.style, height: "6px", width: "100%", background: "#ccc", borderRadius: "3px" }}>
+            <div {...props} style={{ ...props.style, height: "6px", width: "100%", background: "hsl(220 13% 18%)", borderRadius: "3px" }}>
               {children}
             </div>
           )}
           renderThumb={({ props }) => (
-            <div {...props} key={props.key} style={{ ...props.style, height: "16px", width: "16px", borderRadius: "50%", backgroundColor: "#1FBCD2" }} />
+            <div {...props} key={props.key} style={{ ...props.style, height: "16px", width: "16px", borderRadius: "50%", backgroundColor: "hsl(217 91% 60%)" }} />
           )}
         />
       </div>
@@ -44,7 +43,7 @@ export default function FormSlider({ value, onChange, min = 0, max = 100, step =
           type="number"
           value={value}
           onChange={(e) => onChange([Number(e.target.value)])}
-          style={{ height: "34px", textAlign: "center", width: "100%" }}
+          className="h-[34px] text-center w-full bg-secondary text-foreground border border-border rounded-md outline-none"
         />
       </div>
     </div>

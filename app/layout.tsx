@@ -95,10 +95,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className="scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black"
+      className="scrollbar scrollbar-thumb-zinc-700 scrollbar-track-transparent"
     >
       <body
-        className={`bg-black text-white ${eudoxusSans.className} antialiased`}
+        className={`bg-background text-foreground ${eudoxusSans.className} antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

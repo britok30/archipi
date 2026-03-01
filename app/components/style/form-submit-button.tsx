@@ -2,18 +2,17 @@
 
 import React from 'react';
 import Button, { ButtonProps } from './button';
-import * as SharedStyle from '../../styles/shared-style';
 
 const STYLE: React.CSSProperties = {
-  borderColor: "#415375",
-  backgroundColor: "#415375",
-  color: SharedStyle.COLORS.white
+  borderColor: "hsl(217 91% 50%)",
+  backgroundColor: "hsl(217 91% 60%)",
+  color: "hsl(0 0% 100%)",
 };
 
 const STYLE_HOVER: React.CSSProperties = {
-  borderColor: "#1f3149",
-  backgroundColor: "#1f3149",
-  color: SharedStyle.COLORS.white
+  borderColor: "hsl(217 91% 40%)",
+  backgroundColor: "hsl(217 91% 50%)",
+  color: "hsl(0 0% 100%)",
 };
 
 export default function FormSubmitButton({ children, ...rest }: ButtonProps) {
