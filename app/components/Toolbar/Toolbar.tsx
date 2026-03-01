@@ -1,32 +1,24 @@
 "use client";
 
-import React, { useContext } from "react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import React from "react";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
 import ToolbarButton from "./ToolbarButton";
 import ToolbarSaveButton from "./ToolbarSaveButton";
 import ToolbarLoadButton from "./ToolbarLoadButton";
 import ScreenshotToolbarButton from "./ScreenshotToolbarButton";
-import { IoIosDocument, IoIosUndo, IoIosRedo } from "react-icons/io";
-import { FaBookOpen, FaMousePointer, FaCube } from "react-icons/fa";
-import { IoSquare, IoSettingsSharp } from "react-icons/io5";
 import {
   MODE_IDLE,
   MODE_3D_VIEW,
   MODE_3D_FIRST_PERSON,
-  MODE_VIEWING_CATALOG,
-  MODE_CONFIGURING_PROJECT,
-} from "../../utils/constants";
+} from "../../store/types";
 import {
-  Book,
-  Box,
   File,
   MousePointer,
   Redo,
   Rotate3D,
-  Settings,
   Square,
   Undo,
-  User,
 } from "lucide-react";
 import TipsButton from "./TipsButton";
 import SettingsButton from "./SettingsButton";
@@ -37,126 +29,113 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 interface ToolbarProps {
-  state: any;
-  allowProjectFileSupport: boolean;
+  toolbarButtons?: React.ReactNode[];
+  allowProjectFileSupport?: boolean;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
-  state,
-  allowProjectFileSupport,
+  toolbarButtons = [],
+  allowProjectFileSupport = true,
 }) => {
-  const { projectActions, viewer3DActions, translator } =
-    useContext(ReactPlannerContext);
-  const mode = state.get("mode");
+  const { translator } = useCatalogContext();
+
+  const mode = usePlannerStore((state) => state.mode);
+  const newProject = usePlannerStore((state) => state.newProject);
+  const setMode = usePlannerStore((state) => state.setMode);
+  const selectTool3DView = usePlannerStore((state) => state.selectTool3DView);
+  const undo = usePlannerStore((state) => state.undo);
+  const redo = usePlannerStore((state) => state.redo);
+
   const { open } = useSidebar();
+  const t = (text: string) => translator?.t(text) ?? text;
 
   return (
-    <div className="fixed flex flex-col space-y-2 h-fit top-4 left-4 z-50  bg-black p-2 rounded-lg">
+    <div className="fixed flex flex-col h-fit top-4 left-4 z-50 toolbar-glass rounded-xl p-1.5 space-y-1">
+      {/* Navigation */}
       <Tooltip delayDuration={0} defaultOpen={false}>
         <TooltipTrigger asChild>
-          <SidebarTrigger className="mr-2 w-full" />
+          <SidebarTrigger className="w-10 h-10 rounded-lg text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground transition-all duration-200" />
         </TooltipTrigger>
-
         <TooltipContent side="right">
           <p className="text-xs">{open ? "Close Sidebar" : "Open Sidebar"}</p>
         </TooltipContent>
       </Tooltip>
 
+      <Separator className="bg-border/40" />
+
+      {/* Project */}
       {allowProjectFileSupport && (
-        <ToolbarButton
-          active={false}
-          tooltip={translator.t("New project")}
-          onClick={() =>
-            window.confirm(
-              translator.t("Would you want to start a new Project?")
-            )
-              ? projectActions.newProject()
-              : null
-          }
-        >
-          <File size={25} />
-          New
-        </ToolbarButton>
+        <>
+          <ToolbarButton
+            active={false}
+            tooltip={t("New project")}
+            onClick={() =>
+              window.confirm(t("Would you want to start a new Project?"))
+                ? newProject()
+                : null
+            }
+          >
+            <File size={20} />
+          </ToolbarButton>
+
+          <ToolbarSaveButton />
+          <ToolbarLoadButton />
+        </>
       )}
 
-      {allowProjectFileSupport && <ToolbarSaveButton state={state} />}
-      {allowProjectFileSupport && <ToolbarLoadButton state={state} />}
+      <Separator className="bg-border/40" />
 
-      <CatalogButton state={state} mode={mode} />
-
-      {/* <ToolbarButton
-        active={mode === MODE_VIEWING_CATALOG}
-        tooltip="Open Catalog"
-        onClick={() => projectActions.openCatalog()}
-      >
-        <Book size={23} />
-        Catalog
-      </ToolbarButton> */}
+      {/* Design */}
+      <CatalogButton />
 
       <ToolbarButton
         active={mode === MODE_IDLE}
         tooltip="2D View"
-        onClick={() => projectActions.setMode(MODE_IDLE)}
+        onClick={() => setMode(MODE_IDLE)}
       >
         {[MODE_3D_FIRST_PERSON, MODE_3D_VIEW].includes(mode) ? (
-          <Square size={23} />
+          <Square size={20} />
         ) : (
-          <MousePointer size={23} />
+          <MousePointer size={20} />
         )}
-        2D
       </ToolbarButton>
 
       <ToolbarButton
         active={mode === MODE_3D_VIEW}
         tooltip="3D View"
-        onClick={() => viewer3DActions.selectTool3DView()}
+        onClick={() => selectTool3DView()}
       >
-        <Rotate3D size={23} />
-        3D
+        <Rotate3D size={20} />
       </ToolbarButton>
 
-      {/* <ToolbarButton
-        active={mode === MODE_3D_FIRST_PERSON}
-        tooltip="3D First Person"
-        onClick={() => viewer3DActions.selectTool3DFirstPerson()}
-      >
-        <User className="mb-0.5" size={23} />
-        3D First
-      </ToolbarButton> */}
+      <Separator className="bg-border/40" />
 
+      {/* History */}
       <ToolbarButton
         active={false}
         tooltip="Undo (CTRL-Z)"
-        onClick={() => projectActions.undo()}
+        onClick={() => undo()}
       >
-        <Undo size={23} />
-        Undo
+        <Undo size={20} />
       </ToolbarButton>
 
       <ToolbarButton
         active={false}
         tooltip="Redo (CTRL-Y)"
-        onClick={() => projectActions.redo()}
+        onClick={() => redo()}
       >
-        <Redo size={23} />
-        Redo
+        <Redo size={20} />
       </ToolbarButton>
 
-      {/* <ToolbarButton
-        active={mode === MODE_CONFIGURING_PROJECT}
-        tooltip="Configure project"
-        onClick={() => projectActions.openProjectConfigurator()}
-      >
-        <Settings size={23} />
-        Settings
-      </ToolbarButton> */}
+      <Separator className="bg-border/40" />
 
-      <SettingsButton state={state} />
+      {/* Utility */}
+      <SettingsButton />
       <TipsButton />
-
-      <ScreenshotToolbarButton mode={mode} />
+      <ScreenshotToolbarButton />
     </div>
   );
 };

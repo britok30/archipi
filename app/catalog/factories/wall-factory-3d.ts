@@ -38,19 +38,20 @@ const applyTexture = (
     });
 
     if (texture.normal) {
-      loader.load(texture.normal.uri, (loadedNormalMap: Texture) => {
+      const normal = texture.normal;
+      loader.load(normal.uri, (loadedNormalMap: Texture) => {
         if (!loadedNormalMap) return;
 
         material.normalMap = loadedNormalMap;
         material.normalScale = new Vector2(
-          texture.normal.normalScaleX,
-          texture.normal.normalScaleY
+          normal.normalScaleX,
+          normal.normalScaleY
         );
         material.normalMap.wrapS = RepeatWrapping;
         material.normalMap.wrapT = RepeatWrapping;
         material.normalMap.repeat.set(
-          length * texture.normal.lengthRepeatScale,
-          height * texture.normal.heightRepeatScale
+          length * normal.lengthRepeatScale,
+          height * normal.heightRepeatScale
         );
       });
     }
@@ -63,8 +64,8 @@ export function buildWall(
   scene: Scene,
   textures: Record<string, TextureData>
 ): Promise<Group> {
-  let vertex0 = layer.vertices.get(element.vertices.get(0));
-  let vertex1 = layer.vertices.get(element.vertices.get(1));
+  let vertex0 = layer.vertices[element.vertices[0]];
+  let vertex1 = layer.vertices[element.vertices[1]];
   let inverted = false;
 
   if (!vertex0 || !vertex1) {
@@ -76,8 +77,8 @@ export function buildWall(
     inverted = true;
   }
 
-  const height = element.properties.getIn(["height", "length"]);
-  const thickness = element.properties.getIn(["thickness", "length"]);
+  const height = (element.properties.height as { length: number })?.length || 300;
+  const thickness = (element.properties.thickness as { length: number })?.length || 20;
   const halfThickness = thickness / 2;
   const faceThickness = 0.2;
   const faceDistance = 1;
@@ -103,12 +104,12 @@ export function buildWall(
   soul.rotation.y = alpha;
 
   element.holes.forEach((holeID) => {
-    const holeData = layer.holes.get(holeID);
+    const holeData = layer.holes[holeID];
     if (!holeData) return;
 
-    const holeWidth = holeData.properties.getIn(["width", "length"]);
-    const holeHeight = holeData.properties.getIn(["height", "length"]);
-    const holeAltitude = holeData.properties.getIn(["altitude", "length"]);
+    const holeWidth = (holeData.properties.width as { length: number })?.length || 80;
+    const holeHeight = (holeData.properties.height as { length: number })?.length || 200;
+    const holeAltitude = (holeData.properties.altitude as { length: number })?.length || 0;
     const offset = inverted ? 1 - holeData.offset : holeData.offset;
     const holeDistance = offset * distance;
 
@@ -139,13 +140,13 @@ export function buildWall(
 
   applyTexture(
     frontMaterial,
-    textures[element.properties.get("textureB")],
+    textures[(element.properties.textureB as string) || "none"],
     distance,
     height
   );
   applyTexture(
     backMaterial,
-    textures[element.properties.get("textureA")],
+    textures[(element.properties.textureA as string) || "none"],
     distance,
     height
   );
@@ -205,16 +206,8 @@ export function updatedWall(
     differences[0] === "properties" &&
     differences[1] === "thickness"
   ) {
-    const newThickness = element.properties.getIn([
-      "properties",
-      "thickness",
-      "length",
-    ]);
-    const oldThickness = oldElement.properties.getIn([
-      "properties",
-      "thickness",
-      "length",
-    ]);
+    const newThickness = (element.properties.thickness as { length: number })?.length || 20;
+    const oldThickness = (oldElement.properties.thickness as { length: number })?.length || 20;
     const halfNewThickness = newThickness / 2;
     const texturedFaceDistance = halfNewThickness + 1;
     const originalThickness = oldThickness / soul.scale.z;

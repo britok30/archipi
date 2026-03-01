@@ -3,10 +3,9 @@
 import React, { useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { Eye, EyeOff, Link, Unlink, Trash, Plus } from "lucide-react";
+import { Eye, EyeOff, Link, Unlink, Trash, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Map } from "immutable";
-
+import { usePlannerStore } from "../../store";
 import {
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
@@ -25,9 +24,10 @@ import {
   MODE_FITTING_IMAGE,
   MODE_UPLOADING_IMAGE,
   MODE_ROTATING_ITEM,
-} from "../../utils/constants";
+} from "../../store/types";
+import type { Group, Layer } from "../../store/types";
 
-const VISIBILITY_MODE = {
+const VISIBILITY_MODES = [
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
   MODE_2D_ZOOM_OUT,
@@ -45,73 +45,80 @@ const VISIBILITY_MODE = {
   MODE_ROTATING_ITEM,
   MODE_UPLOADING_IMAGE,
   MODE_FITTING_IMAGE,
-};
+];
 
-interface PanelGroupsProps {
-  mode: string;
-  groups: Map<string, any>;
-  layers: Map<string, any>;
-}
+const PanelGroups: React.FC = () => {
+  const { translator } = useContext(ReactPlannerContext);
+  const mode = usePlannerStore((state) => state.mode);
+  const scene = usePlannerStore((state) => state.scene);
+  const selectGroup = usePlannerStore((state) => state.selectGroup);
+  const setGroupProperties = usePlannerStore((state) => state.setGroupProperties);
+  const addToGroup = usePlannerStore((state) => state.addToGroup);
+  const removeGroup = usePlannerStore((state) => state.removeGroup);
+  const removeGroupAndDeleteElements = usePlannerStore((state) => state.removeGroupAndDeleteElements);
+  const addGroup = usePlannerStore((state) => state.addGroup);
+  const addGroupFromSelected = usePlannerStore((state) => state.addGroupFromSelected);
 
-const PanelGroups: React.FC<PanelGroupsProps> = ({ mode, groups, layers }) => {
-  const { translator, groupsActions } = useContext(ReactPlannerContext);
+  const groups = scene.groups || {};
+  const layers = scene.layers || {};
 
-  if (!VISIBILITY_MODE[mode]) return null;
+  if (!VISIBILITY_MODES.includes(mode)) return null;
 
-  const selectClick = (groupID: string) => groupsActions.selectGroup(groupID);
+  const selectClick = (groupID: string) => selectGroup(groupID);
 
-  const swapVisibility = (e: React.MouseEvent, groupID: string, group: any) => {
+  const swapVisibility = (e: React.MouseEvent, groupID: string, group: Group) => {
     e.stopPropagation();
-    const currentVisibility = group.get("visible");
-    groupsActions.setGroupProperties(
-      groupID,
-      Map({ visible: !currentVisibility })
-    );
+    setGroupProperties(groupID, { visible: !group.visible });
   };
 
   const chainToGroup = (groupID: string) => {
-    layers.forEach((layer) => {
-      const layerID = layer.get("id");
-      const layerElements = {
-        lines: layer.get("lines"),
-        items: layer.get("items"),
-        holes: layer.get("holes"),
-        areas: layer.get("areas"),
+    Object.values(layers).forEach((layer: Layer) => {
+      const layerID = layer.id;
+      const layerElements: Record<string, Record<string, { id: string; selected: boolean }>> = {
+        lines: layer.lines || {},
+        items: layer.items || {},
+        holes: layer.holes || {},
+        areas: layer.areas || {},
       };
 
       for (let elementPrototype in layerElements) {
-        const ElementList = layerElements[elementPrototype];
-        ElementList.filter((el) => el.get("selected")).forEach((element) => {
-          groupsActions.addToGroup(
-            groupID,
-            layerID,
-            elementPrototype,
-            element.get("id")
-          );
-        });
+        const elements = layerElements[elementPrototype];
+        Object.values(elements)
+          .filter((el) => el.selected)
+          .forEach((element) => {
+            addToGroup(groupID, layerID, elementPrototype, element.id);
+          });
       }
     });
 
     selectClick(groupID);
   };
 
+  const groupEntries = Object.entries(groups);
+
   return (
-    <Panel name={translator?.t("Groups")} opened={groups.size > 0}>
-      <div className="grid grid-cols-6 text-sm text-gray-300">
+    <Panel
+      name={translator?.t("Groups") ?? "Groups"}
+      value="groups"
+      icon={<FolderOpen className="w-3.5 h-3.5" />}
+    >
+      <div className="grid grid-cols-6 text-sm text-muted-foreground">
         <div className="col-span-2">Actions</div>
         <div className="col-span-2">Elements</div>
         <div className="col-span-2">Name</div>
       </div>
 
       <div className="mb-2">
-        {groups
-          .entrySeq()
-          .map(([groupID, group]) => {
-            const isCurrentGroup = group.get("selected");
-            const dimension = group.get("elements").reduce((sum, layer) => {
-              return (
-                sum + layer.reduce((lSum, elProt) => lSum + elProt.size, 0)
-              );
+        {groupEntries
+          .map(([groupID, group]: [string, Group]) => {
+            const isCurrentGroup = group.selected;
+            const elements = group.elements || {};
+            const dimension = Object.values(elements).reduce<number>((sum, layerEls) => {
+              return sum + Object.values(layerEls || {}).reduce<number>((lSum, elProt) => {
+                if (Array.isArray(elProt)) return lSum + elProt.length;
+                if (typeof elProt === 'object' && elProt !== null) return lSum + Object.keys(elProt).length;
+                return lSum;
+              }, 0);
             }, 0);
 
             return (
@@ -123,10 +130,10 @@ const PanelGroups: React.FC<PanelGroupsProps> = ({ mode, groups, layers }) => {
                     className="p-1"
                     onClick={(e) => swapVisibility(e, groupID, group)}
                   >
-                    {group.get("visible") ? (
-                      <Eye className="w-4 h-4 text-white" />
+                    {group.visible ? (
+                      <Eye className="w-4 h-4 text-foreground" />
                     ) : (
-                      <EyeOff className="w-4 h-4 text-gray-500" />
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
                     )}
                   </Button>
 
@@ -134,7 +141,7 @@ const PanelGroups: React.FC<PanelGroupsProps> = ({ mode, groups, layers }) => {
                     variant="ghost"
                     size="sm"
                     className={`p-1 ${
-                      isCurrentGroup ? "text-blue-500" : "text-white"
+                      isCurrentGroup ? "text-primary" : "text-foreground"
                     }`}
                     onClick={() => chainToGroup(groupID)}
                   >
@@ -145,9 +152,9 @@ const PanelGroups: React.FC<PanelGroupsProps> = ({ mode, groups, layers }) => {
                     variant="ghost"
                     size="sm"
                     className={`p-1 ${
-                      isCurrentGroup ? "text-blue-500" : "text-white"
+                      isCurrentGroup ? "text-primary" : "text-foreground"
                     }`}
-                    onClick={() => groupsActions.removeGroup(groupID)}
+                    onClick={() => removeGroup(groupID)}
                   >
                     <Unlink className="w-4 h-4" />
                   </Button>
@@ -156,23 +163,25 @@ const PanelGroups: React.FC<PanelGroupsProps> = ({ mode, groups, layers }) => {
                     variant="ghost"
                     size="sm"
                     className={`p-1 ${
-                      isCurrentGroup ? "text-blue-500" : "text-white"
+                      isCurrentGroup ? "text-primary" : "text-foreground"
                     }`}
-                    onClick={() =>
-                      groupsActions.removeGroupAndDeleteElements(groupID)
-                    }
+                    onClick={() => removeGroupAndDeleteElements(groupID)}
                   >
                     <Trash className="w-4 h-4" />
                   </Button>
                 </div>
 
-                <div className="col-span-2 flex items-center text-white">
-                  {group
-                    .get("elements")
-                    .reduce((acc: string[], layer) => {
-                      layer.forEach((elProt: any) => {
-                        if (elProt.size > 0) {
-                          acc.push(elProt.size.toString());
+                <div className="col-span-2 flex items-center text-foreground">
+                  {Object.values(elements)
+                    .reduce<string[]>((acc, layerEls) => {
+                      Object.values(layerEls || {}).forEach((elProt) => {
+                        const size = Array.isArray(elProt)
+                          ? elProt.length
+                          : (typeof elProt === 'object' && elProt !== null)
+                            ? Object.keys(elProt).length
+                            : 0;
+                        if (size > 0) {
+                          acc.push(size.toString());
                         }
                       });
                       return acc;
@@ -180,21 +189,20 @@ const PanelGroups: React.FC<PanelGroupsProps> = ({ mode, groups, layers }) => {
                     .join(", ")}
                 </div>
 
-                <div className="col-span-2 flex items-center text-white">
-                  {dimension} {group.get("name")}
+                <div className="col-span-2 flex items-center text-foreground">
+                  {dimension} {group.name}
                 </div>
               </div>
             );
-          })
-          .toArray()}
+          })}
       </div>
 
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={() => groupsActions.addGroup()}>
+        <Button size="sm" onClick={() => addGroup()}>
           <span>New Empty Group</span>
         </Button>
 
-        <Button size="sm" onClick={() => groupsActions.addGroupFromSelected()}>
+        <Button size="sm" onClick={() => addGroupFromSelected()}>
           <span>New Group From Selected</span>
         </Button>
       </div>

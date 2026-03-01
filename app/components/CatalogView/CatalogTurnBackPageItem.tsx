@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useContext } from "react";
-import { MdNavigateBefore } from "react-icons/md";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
 import { ArrowLeft } from "lucide-react";
 
 interface Page {
@@ -18,14 +17,10 @@ interface CatalogTurnBackPageItemProps {
 const CatalogTurnBackPageItem: React.FC<CatalogTurnBackPageItemProps> = ({
   page,
 }) => {
-  const { projectActions } = useContext(ReactPlannerContext);
-
-  const changePage = (newPage: string) => {
-    projectActions.goBackToCatalogPage(newPage);
-  };
+  const goBackToCatalogPage = usePlannerStore((state) => state.goBackToCatalogPage);
 
   return (
-    <Card className="cursor-pointer" onClick={() => changePage(page.name)}>
+    <Card className="cursor-pointer" onClick={() => goBackToCatalogPage()}>
       <CardContent className="flex items-center justify-center h-full">
         <ArrowLeft size={50} />
       </CardContent>

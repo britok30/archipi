@@ -1,105 +1,89 @@
 "use client";
 
 import React from "react";
-import { Map as ImmutableMap, List as ImmutableList } from "immutable";
 import { Line } from "./line";
-import { Area, CatalogType } from "./area";
+import { Area } from "./area";
 import { Vertex } from "./vertex";
 import { Item } from "./item";
 import { Group } from "./group";
+import type {
+  Layer as LayerType,
+  Scene as SceneType,
+  RuntimeCatalog,
+} from "../../store/types";
 
 interface LayerProps {
   layer: LayerType;
   scene: SceneType;
-  catalog: CatalogType;
-}
-
-interface LayerType {
-  id: string;
-  name: string;
-  lines: ImmutableMap<string, any>;
-  areas: ImmutableMap<string, any>;
-  vertices: ImmutableMap<string, any>;
-  items: ImmutableMap<string, any>;
-  holes: ImmutableMap<string, any>; // Include holes if applicable
-  opacity: number;
-}
-
-interface SceneType {
-  unit: string;
-  groups: ImmutableMap<string, any>;
-  // Add other properties of scene if necessary
+  catalog: RuntimeCatalog | null;
 }
 
 export const Layer: React.FC<LayerProps> = ({ layer, scene, catalog }) => {
   const { unit, groups } = scene;
   const {
-    lines = ImmutableMap(),
-    areas = ImmutableMap(),
-    vertices = ImmutableMap(),
-    items = ImmutableMap(),
-    holes = ImmutableMap(),
+    lines = {},
+    areas = {},
+    vertices = {},
+    items = {},
+    holes = {},
     id: layerID,
     opacity,
   } = layer;
 
   return (
     <g opacity={opacity} data-layer-id={layerID}>
-      {areas
-        .valueSeq()
-        .map((area: any) => (
-          <Area
-            key={area.get("id")}
-            layer={layer}
-            area={area}
-            catalog={catalog}
-          />
-        ))
-        .toArray()}
-      {lines
-        .valueSeq()
-        .map((line: any) => (
-          <Line
-            key={line.get("id")}
-            layer={layer}
-            line={line}
-            scene={scene}
-            catalog={catalog}
-          />
-        ))
-        .toArray()}
-      {items
-        .valueSeq()
-        .map((item: any) => (
-          <Item
-            key={item.get("id")}
-            layer={layer}
-            item={item}
-            scene={scene}
-            catalog={catalog}
-          />
-        ))
-        .toArray()}
-      {vertices
-        .valueSeq()
-        .filter((v: any) => v.get("selected"))
-        .map((vertex: any) => (
-          <Vertex key={vertex.get("id")} layer={layer} vertex={vertex} />
-        ))
-        .toArray()}
-      {groups
-        .valueSeq()
-        .filter((g: any) => g.hasIn(["elements", layerID]) && g.get("selected"))
-        .map((group: any) => (
+      {/* Render areas */}
+      {Object.values(areas).map((area) => (
+        <Area
+          key={area.id}
+          layer={layer}
+          area={area}
+          scene={scene}
+          catalog={catalog}
+        />
+      ))}
+
+      {/* Render lines */}
+      {Object.values(lines).map((line) => (
+        <Line
+          key={line.id}
+          layer={layer}
+          line={line}
+          scene={scene}
+          catalog={catalog}
+        />
+      ))}
+
+      {/* Render items */}
+      {Object.values(items).map((item) => (
+        <Item
+          key={item.id}
+          layer={layer}
+          item={item}
+          scene={scene}
+          catalog={catalog}
+        />
+      ))}
+
+      {/* Render selected vertices */}
+      {Object.values(vertices)
+        .filter((v) => v.selected)
+        .map((vertex) => (
+          <Vertex key={vertex.id} layer={layer} vertex={vertex} />
+        ))}
+
+      {/* Render selected groups */}
+      {Object.values(groups)
+        .filter((g) => g.elements[layerID] && g.selected)
+        .map((group) => (
           <Group
-            key={group.get("id")}
+            key={group.id}
             layer={layer}
             group={group}
             scene={scene}
             catalog={catalog}
           />
-        ))
-        .toArray()}
+        ))}
     </g>
   );
 };

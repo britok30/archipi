@@ -3,39 +3,61 @@
 import React, { useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { Seq, Map } from "immutable";
 import ElementEditor from "./ElementEditor";
+import { usePlannerStore } from "../../store";
+import type { Line, Hole, Item, Area, Layer } from "../../store/types";
+import { SlidersHorizontal } from "lucide-react";
+import { Accordion } from "@/components/ui/accordion";
 
-const PanelElementEditor: React.FC<{ state: any }> = ({ state }) => {
+type SceneElement = Line | Hole | Item | Area;
+
+const PanelElementEditor: React.FC = () => {
   const { translator } = useContext(ReactPlannerContext);
+  const scene = usePlannerStore((state) => state.scene);
 
-  const { scene, mode } = state;
+  const selectedElements: { element: SceneElement; layer: Layer }[] = [];
 
-  const componentRenderer = (element: any, layer: any) => (
+  if (scene.layers) {
+    for (const layer of Object.values(scene.layers)) {
+      const allElements: Record<string, SceneElement> = {
+        ...(layer.lines || {}),
+        ...(layer.holes || {}),
+        ...(layer.areas || {}),
+        ...(layer.items || {}),
+      };
+      for (const element of Object.values(allElements)) {
+        if (element.selected) {
+          selectedElements.push({ element, layer });
+        }
+      }
+    }
+  }
+
+  if (selectedElements.length === 0) return null;
+
+  const allElementIds = selectedElements.map(({ element }) => `element-${element.id}`);
+
+  const panels = selectedElements.map(({ element, layer }) => (
     <Panel
       key={element.id}
-      name={translator.t("Properties: [{0}] {1}", element.type, element.id)}
-      opened={true}
+      name={translator?.t("Properties: [{0}] {1}",
+        element.type,
+        element.id
+      ) ?? `Properties: [${element.type}] ${element.id}`}
+      value={`element-${element.id}`}
+      icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
     >
-      <div style={{ padding: "5px 15px" }}>
-        <ElementEditor element={element} layer={layer} state={state} />
+      <div className="py-1 px-2">
+        <ElementEditor element={element} layer={layer} />
       </div>
     </Panel>
+  ));
+
+  return (
+    <Accordion type="multiple" defaultValue={allElementIds}>
+      {panels}
+    </Accordion>
   );
-
-  const layerRenderer = (layer: any) =>
-    Seq()
-      .concat(
-        layer.get("lines") || Map(),
-        layer.get("holes") || Map(),
-        layer.get("areas") || Map(),
-        layer.get("items") || Map()
-      )
-      .filter((element: any) => element.get("selected"))
-      .map((element: any) => componentRenderer(element, layer))
-      .valueSeq();
-
-  return <div>{scene.get("layers").valueSeq().map(layerRenderer)}</div>;
 };
 
 export default PanelElementEditor;

@@ -45,7 +45,7 @@ interface PropertyLengthMeasureProps {
   };
   sourceElement?: object;
   internalState?: object;
-  state: object;
+  state?: object;
 }
 
 const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({

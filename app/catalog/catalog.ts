@@ -14,15 +14,47 @@ import { UNIT_CENTIMETER } from "../utils/constants";
 
 interface PropertyConfig {
   type: string;
-  defaultValue: any;
-  [key: string]: any;
+  defaultValue: unknown;
+  [key: string]: unknown;
 }
 
 interface ElementInfo {
-  tag: string;
+  tag: string[];
   description: string;
   image: string;
-  [key: string]: any;
+  title?: string;
+  visibility?: { catalog: boolean };
+  [key: string]: unknown;
+}
+
+/** Represents a renderable element within a Layer (line, hole, item, area). */
+interface RenderableElement {
+  id: string;
+  type: string;
+  name: string;
+  selected: boolean;
+  properties: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+/** Represents a layer passed to render callbacks. */
+interface RenderLayer {
+  id: string;
+  vertices: Record<string, unknown>;
+  lines: Record<string, unknown>;
+  holes: Record<string, unknown>;
+  areas: Record<string, unknown>;
+  items: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+/** Represents a scene passed to render callbacks. */
+interface RenderScene {
+  unit: string;
+  width: number;
+  height: number;
+  layers: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 interface Element {
@@ -30,9 +62,9 @@ interface Element {
   prototype: string;
   info: ElementInfo;
   properties: { [key: string]: PropertyConfig };
-  render2D: (element: any, layer: any, scene: any) => React.ReactElement;
-  render3D: (element: any, layer: any, scene: any) => Promise<any>;
-  [key: string]: any;
+  render2D: (element: RenderableElement, layer: RenderLayer, scene: RenderScene) => React.ReactElement;
+  render3D: (element: RenderableElement, layer: RenderLayer, scene: RenderScene) => Promise<unknown>;
+  [key: string]: unknown;
 }
 
 interface Category {

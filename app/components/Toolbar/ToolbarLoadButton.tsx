@@ -1,21 +1,20 @@
 "use client";
 
-import React, { useContext } from "react";
-import PropTypes from "prop-types";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import React from "react";
+import { usePlannerStore } from "../../store";
 import { browserUpload } from "../../utils/browser";
 import { Upload } from "lucide-react";
 import ToolbarButton from "./ToolbarButton";
 
-export default function ToolbarLoadButton({ state }) {
-  const { projectActions, translator } = useContext(ReactPlannerContext);
+export default function ToolbarLoadButton() {
+  const loadProject = usePlannerStore((state) => state.loadProject);
 
-  let loadProjectFromFile = (
+  const loadProjectFromFile = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
     browserUpload().then((data) => {
-      projectActions.loadProject(JSON.parse(data));
+      loadProject(data as any);
     });
   };
 
@@ -25,12 +24,7 @@ export default function ToolbarLoadButton({ state }) {
       tooltip="Load Project"
       onClick={(e) => loadProjectFromFile(e)}
     >
-      <Upload size={18} />
-      Upload JSON
+      <Upload size={20} />
     </ToolbarButton>
   );
 }
-
-ToolbarLoadButton.propTypes = {
-  state: PropTypes.object.isRequired,
-};

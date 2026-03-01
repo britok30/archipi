@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useContext } from "react";
-import PropTypes from "prop-types";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import React from "react";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
 import { browserDownload } from "../../utils/browser";
-import { Project } from "../../class";
 import { OBJExporter } from "./OBJExporter";
 import { parseData } from "../viewer3d/scene-creator";
-
 import * as Three from "three";
 import { Save } from "lucide-react";
 import {
@@ -17,28 +15,39 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
-export default function ToolbarSaveButton({ state }) {
-  const context = useContext(ReactPlannerContext);
-  const { translator, catalog } = context;
+export default function ToolbarSaveButton() {
+  const { catalog } = useCatalogContext();
+  const scene = usePlannerStore((state) => state.scene);
+  const unselectAll = usePlannerStore((state) => state.unselectAll);
 
   const saveProjectToJSONFile = () => {
-    state = Project.unselectAll(state).updatedState;
-    browserDownload(JSON.stringify(state.get("scene").toJS()), "json");
+    unselectAll();
+    const currentScene = usePlannerStore.getState().scene;
+    browserDownload(JSON.stringify(currentScene), "json");
   };
 
   const saveProjectToObjFile = () => {
+    if (!catalog) return;
+
     const objExporter = new OBJExporter();
-    state = Project.unselectAll(state).updatedState;
+    unselectAll();
+
+    const currentScene = usePlannerStore.getState().scene;
     const actions = {
-      areaActions: context.areaActions,
-      holesActions: context.holesActions,
-      itemsActions: context.itemsActions,
-      linesActions: context.linesActions,
-      projectActions: context.projectActions,
+      selectLine: usePlannerStore.getState().selectLine,
+      selectHole: usePlannerStore.getState().selectHole,
+      selectItem: usePlannerStore.getState().selectItem,
+      selectArea: usePlannerStore.getState().selectArea,
     };
-    const scene = state.get("scene");
-    let planData = parseData(scene, actions, catalog);
+
+    const planData = parseData(currentScene, actions, catalog);
     setTimeout(() => {
       const plan = planData.plan;
       plan.position.set(plan.position.x, 0.1, plan.position.z);
@@ -50,14 +59,24 @@ export default function ToolbarSaveButton({ state }) {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button>
-          <Save size={18} />
-          Save
-        </Button>
-      </PopoverTrigger>
+      <TooltipProvider>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                className="relative flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground transition-all duration-200 ease-out"
+              >
+                <Save size={20} />
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p>Save</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
-      <PopoverContent side="right" className="w-80 bg-white">
+      <PopoverContent side="right" className="w-80 bg-card border-border text-foreground">
         <Label>Save as</Label>
         <div>
           <Button className="w-full mb-2" onClick={saveProjectToJSONFile}>
@@ -71,7 +90,3 @@ export default function ToolbarSaveButton({ state }) {
     </Popover>
   );
 }
-
-ToolbarSaveButton.propTypes = {
-  state: PropTypes.object.isRequired,
-};

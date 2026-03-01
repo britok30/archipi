@@ -1,71 +1,43 @@
 "use client";
-import React, { useState, useEffect, useContext } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect } from "react";
 import { Map, fromJS } from "immutable";
 import AttributesEditor from "./AttributesEditor";
 import { GeometryUtils, MathUtils } from "../../utils/export";
 import convert, { Unit } from "convert-units";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
 import { Clipboard, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Catalog } from "@/app/catalog";
-interface Vertex {
-  x: number;
-  y: number;
-  merge: (value: Partial<Vertex>) => Vertex;
-}
+import type { Line, Hole, Item, Area, Layer } from "../../store/types";
 
-interface Line {
-  vertices: Map<number, string>;
-}
-
-interface Layer {
-  vertices: Map<string, Vertex>;
-  lines: Map<string, Line>;
-}
-
-interface Element {
-  prototype: "items" | "lines" | "holes";
-  line?: string;
-  properties: Map<string, any>;
-}
-
-interface SaveParams {
-  attributesFormData: Map<string, any>;
-}
+type SceneElement = Line | Hole | Item | Area;
 
 interface AttributeValue extends Map<string, any> {
   merge: (value: any) => AttributeValue;
 }
 
-interface UpdateAttributeParams {
-  element: Element;
-  layer: Layer;
-  catalog: Catalog;
-  attributesFormData: Map<string, any>;
-  setAttributesFormData: (data: Map<string, any>) => void;
-  save: (params: SaveParams) => void;
-}
-
 const PRECISION = 2;
 
-const ElementEditor = ({ state: appState, element, layer }) => {
-  const { projectActions, catalog } = useContext(ReactPlannerContext);
-  const initAttrData = (element, layer, state) => {
-    element =
-      typeof element.misc === "object"
-        ? element.set("misc", Map(element.misc))
-        : element;
+const ElementEditor = ({ element, layer }: { element: SceneElement; layer: Layer }) => {
+  const { catalog } = useCatalogContext();
+  const clipboardProperties = usePlannerStore((state) => state.clipboardProperties);
+  const setProperties = usePlannerStore((state) => state.setProperties);
+  const setItemsAttributes = usePlannerStore((state) => state.setItemsAttributes);
+  const setLinesAttributes = usePlannerStore((state) => state.setLinesAttributes);
+  const setHolesAttributes = usePlannerStore((state) => state.setHolesAttributes);
+  const copyProperties = usePlannerStore((state) => state.copyProperties);
+  const pasteProperties = usePlannerStore((state) => state.pasteProperties);
+  const initAttrData = (element: SceneElement, layer: Layer) => {
     switch (element.prototype) {
       case "items": {
         return Map(element);
       }
       case "lines": {
-        let v_a = layer.vertices.get(element.vertices.get(0));
-        let v_b = layer.vertices.get(element.vertices.get(1));
+        let v_a = layer.vertices[element.vertices[0]];
+        let v_b = layer.vertices[element.vertices[1]];
         let distance = GeometryUtils.pointsDistance(v_a.x, v_a.y, v_b.x, v_b.y);
-        let _unit = element.misc.get("_unitLength") || catalog?.unit;
-        let _length = convert(distance).from(catalog?.unit).to(_unit);
+        let _unit = (element.misc as Record<string, any>)?._unitLength || catalog?.unit;
+        let _length = convert(distance).from(catalog?.unit as Unit).to(_unit as Unit);
         return Map({
           vertexOne: v_a,
           vertexTwo: v_b,
@@ -73,21 +45,21 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         });
       }
       case "holes": {
-        let line = layer.lines.get(element.line);
-        let { x: x0, y: y0 } = layer.vertices.get(line.vertices.get(0));
-        let { x: x1, y: y1 } = layer.vertices.get(line.vertices.get(1));
+        let line = layer.lines[element.line];
+        let { x: x0, y: y0 } = layer.vertices[line.vertices[0]];
+        let { x: x1, y: y1 } = layer.vertices[line.vertices[1]];
         let lineLength = GeometryUtils.pointsDistance(x0, y0, x1, y1);
+        let widthLength = (element.properties as Record<string, any>)?.width?.length || 0;
         let startAt =
-          lineLength * element.offset -
-          element.properties.get("width").get("length") / 2;
-        let _unitA = element.misc.get("_unitA") || catalog?.unit;
-        let _lengthA = convert(startAt).from(catalog?.unit).to(_unitA);
+          lineLength * element.offset - widthLength / 2;
+        let _unitA = (element.misc as Record<string, any>)?._unitA || catalog?.unit;
+        let _lengthA = convert(startAt).from(catalog?.unit as Unit).to(_unitA as Unit);
         let endAt =
           lineLength -
           lineLength * element.offset -
-          element.properties.get("width").get("length") / 2;
-        let _unitB = element.misc.get("_unitB") || catalog?.unit;
-        let _lengthB = convert(endAt).from(catalog?.unit).to(_unitB);
+          widthLength / 2;
+        let _unitB = (element.misc as Record<string, any>)?._unitB || catalog?.unit;
+        let _lengthB = convert(endAt).from(catalog?.unit as Unit).to(_unitB as Unit);
         return Map({
           offset: element.offset,
           offsetA: Map({
@@ -109,32 +81,32 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         return null;
     }
   };
-  const initPropData = (element, layer, state) => {
+  const initPropData = (element: SceneElement) => {
     let catalogElement = catalog?.getElement(element.type);
-    let mapped = {};
-    for (let name in catalogElement.properties) {
+    let mapped: Record<string, Map<string, any>> = {};
+    for (let name in (catalogElement?.properties || {})) {
       mapped[name] = Map({
-        currentValue: element.properties.has(name)
-          ? element.properties.get(name)
-          : fromJS(catalogElement.properties[name].defaultValue),
-        configs: catalogElement.properties[name],
+        currentValue: (name in (element.properties || {}))
+          ? fromJS(element.properties[name])
+          : fromJS(catalogElement!.properties[name].defaultValue),
+        configs: catalogElement!.properties[name],
       });
     }
     return Map(mapped);
   };
   const [attributesFormData, setAttributesFormData] = useState(
-    initAttrData(element, layer, appState)
+    initAttrData(element, layer)
   );
   const [propertiesFormData, setPropertiesFormData] = useState(
-    initPropData(element, layer, appState)
+    initPropData(element)
   );
   useEffect(() => {
-    setAttributesFormData(initAttrData(element, layer, appState));
-    setPropertiesFormData(initPropData(element, layer, appState));
-  }, [element, layer, appState]);
+    setAttributesFormData(initAttrData(element, layer));
+    setPropertiesFormData(initPropData(element));
+  }, [element, layer, catalog]);
 
   const updateAttribute = (attributeName: string, value: Map<string, any>) => {
-    let _attributesFormData = attributesFormData;
+    let _attributesFormData: any = attributesFormData;
 
     switch (element.prototype) {
       case "items": {
@@ -145,8 +117,8 @@ const ElementEditor = ({ state: appState, element, layer }) => {
       case "lines": {
         switch (attributeName) {
           case "lineLength": {
-            const v_0 = _attributesFormData?.get("vertexOne");
-            const v_1 = _attributesFormData?.get("vertexTwo");
+            const v_0 = _attributesFormData?.get("vertexOne") as any;
+            const v_1 = _attributesFormData?.get("vertexTwo") as any;
             const [v_a, v_b] = GeometryUtils.orderVertices([v_0, v_1]);
 
             const v_b_new = GeometryUtils.extendLine(
@@ -158,7 +130,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
               PRECISION
             );
 
-            _attributesFormData = _attributesFormData?.withMutations((attr) => {
+            _attributesFormData = _attributesFormData?.withMutations((attr: any) => {
               attr.set(
                 v_0 === v_a ? "vertexTwo" : "vertexOne",
                 v_b.merge(v_b_new)
@@ -170,22 +142,22 @@ const ElementEditor = ({ state: appState, element, layer }) => {
 
           case "vertexOne":
           case "vertexTwo": {
-            _attributesFormData = _attributesFormData?.withMutations((attr) => {
+            _attributesFormData = _attributesFormData?.withMutations((attr: any) => {
               const currentAttr = attr.get(attributeName) as AttributeValue;
               attr.set(attributeName, currentAttr.merge(value));
 
               const newDistance = GeometryUtils.verticesDistance(
-                attr.get("vertexOne"),
-                attr.get("vertexTwo")
+                attr.get("vertexOne") as any,
+                attr.get("vertexTwo") as any
               );
 
               attr.mergeIn(
                 ["lineLength"],
-                attr.get("lineLength").merge({
+                (attr.get("lineLength") as any).merge({
                   length: newDistance,
                   _length: convert(newDistance)
                     .from(catalog?.unit as Unit)
-                    .to(attr.get("lineLength").get("_unit")),
+                    .to((attr.get("lineLength") as any).get("_unit") as Unit),
                 })
               );
             });
@@ -207,18 +179,18 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         switch (attributeName) {
           case "offsetA":
           case "offsetB": {
-            const line = layer.lines.get(element.line || "");
+            const line = layer.lines[element.line || ""];
             if (!line) break;
 
             const orderedVertices = GeometryUtils.orderVertices([
-              layer.vertices.get(line.vertices.get(0)),
-              layer.vertices.get(line.vertices.get(1)),
+              layer.vertices[line.vertices[0]],
+              layer.vertices[line.vertices[1]],
             ]);
 
             const [{ x: x0, y: y0 }, { x: x1, y: y1 }] = orderedVertices;
             const alpha = GeometryUtils.angleBetweenTwoPoints(x0, y0, x1, y1);
             const lineLength = GeometryUtils.pointsDistance(x0, y0, x1, y1);
-            const widthLength = element.properties.get("width").get("length");
+            const widthLength = (element.properties as Record<string, any>)?.width?.length || 0;
             const halfWidthLength = widthLength / 2;
             let lengthValue = value.get("length");
 
@@ -265,8 +237,8 @@ const ElementEditor = ({ state: appState, element, layer }) => {
             const otherOffsetMap = Map({
               length: otherOffset,
               _length: convert(otherOffset)
-                .from(catalog.unit as Unit)
-                .to(otherOffsetUnit),
+                .from(catalog?.unit as Unit)
+                .to(otherOffsetUnit as Unit),
               _unit: otherOffsetUnit,
             });
 
@@ -276,7 +248,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
               _length: MathUtils.toFixedFloat(
                 convert(lengthValue)
                   .from(catalog?.unit as Unit)
-                  .to(value.get("_unit")),
+                  .to(value.get("_unit") as Unit),
                 PRECISION
               ),
             });
@@ -304,7 +276,7 @@ const ElementEditor = ({ state: appState, element, layer }) => {
     save({ attributesFormData: _attributesFormData });
   };
 
-  const updateProperty = (propertyName, value) => {
+  const updateProperty = (propertyName: string, value: any) => {
     let _propertiesFormData = propertiesFormData;
     _propertiesFormData = _propertiesFormData.setIn(
       [propertyName, "currentValue"],
@@ -313,44 +285,42 @@ const ElementEditor = ({ state: appState, element, layer }) => {
     setPropertiesFormData(_propertiesFormData);
     save({ propertiesFormData: _propertiesFormData });
   };
-  // const reset = () => {
-  //   setPropertiesFormData(initPropData(element, layer, state));
-  // };
   const save = ({
-    propertiesFormData,
-    attributesFormData,
+    propertiesFormData: propsData,
+    attributesFormData: attrsData,
   }: {
     propertiesFormData?: Map<string, any> | Map<unknown, unknown>;
     attributesFormData?: Map<string, any> | Map<unknown, unknown>;
   }) => {
-    if (propertiesFormData) {
-      let properties = propertiesFormData.map((data) => {
+    if (propsData) {
+      let properties = propsData.map((data: any) => {
         return data.get("currentValue");
       });
-      projectActions.setProperties(properties);
+      setProperties(properties.toJS());
     }
-    if (attributesFormData) {
+    if (attrsData) {
       switch (element.prototype) {
         case "items": {
-          projectActions.setItemsAttributes(attributesFormData);
+          setItemsAttributes(attrsData.toJS());
           break;
         }
         case "lines": {
-          projectActions.setLinesAttributes(attributesFormData);
+          setLinesAttributes(attrsData.toJS());
           break;
         }
         case "holes": {
-          projectActions.setHolesAttributes(attributesFormData);
+          setHolesAttributes(attrsData.toJS());
           break;
         }
       }
     }
   };
-  const copyProperties = (properties) => {
-    projectActions.copyProperties(properties);
+  const handleCopyProperties = (properties: Record<string, unknown>) => {
+    const props = properties as Record<string, unknown> & { toJS?: () => Record<string, unknown> };
+    copyProperties(props.toJS ? props.toJS() : properties);
   };
-  const pasteProperties = () => {
-    projectActions.pasteProperties();
+  const handlePasteProperties = () => {
+    pasteProperties();
   };
   return (
     <div>
@@ -358,36 +328,35 @@ const ElementEditor = ({ state: appState, element, layer }) => {
         element={element}
         onUpdate={updateAttribute}
         attributeFormData={attributesFormData}
-        state={appState}
       />
 
       <div className="flex items-center justify-end space-x-3 py-2 mt-3">
-        <Button onClick={(e) => copyProperties(element.properties)}>
-          <Copy />
+        <Button variant="secondary" size="sm" onClick={() => handleCopyProperties(element.properties)}>
+          <Copy className="w-4 h-4" />
         </Button>
 
-        {appState.get("clipboardProperties") &&
-        appState.get("clipboardProperties").size ? (
-          <Button variant="ghost" onClick={(e) => pasteProperties()}>
-            <Clipboard />
+        {clipboardProperties && Object.keys(clipboardProperties).length > 0 ? (
+          <Button variant="ghost" size="sm" onClick={handlePasteProperties}>
+            <Clipboard className="w-4 h-4" />
           </Button>
         ) : null}
       </div>
 
-      {propertiesFormData
+      {(propertiesFormData as any)
         ?.entrySeq()
-        .map(([propertyName, data]) => {
+        .map(([propertyName, data]: [any, any]) => {
           let currentValue = data.get("currentValue"),
             configs = data.get("configs");
-          let { Editor } = catalog.getPropertyType(configs.type);
+          let { Editor } = catalog?.getPropertyType(configs.type) ?? {};
+          if (!Editor) return null;
+          const EditorComponent = Editor as React.ComponentType<any>;
           return (
-            <Editor
+            <EditorComponent
               key={propertyName}
               propertyName={propertyName}
               value={currentValue}
               configs={configs}
-              onUpdate={(value) => updateProperty(propertyName, value)}
-              state={appState}
+              onUpdate={(value: any) => updateProperty(propertyName, value)}
               sourceElement={element}
               internalState={{ attributesFormData, propertiesFormData }}
             />
@@ -398,9 +367,4 @@ const ElementEditor = ({ state: appState, element, layer }) => {
   );
 };
 
-ElementEditor.propTypes = {
-  state: PropTypes.object.isRequired,
-  element: PropTypes.object.isRequired,
-  layer: PropTypes.object.isRequired,
-};
 export default ElementEditor;

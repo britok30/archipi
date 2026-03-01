@@ -5,18 +5,11 @@ import ItemAttributesEditor from "./ItemsAttributeEditor";
 import LineAttributesEditor from "./LineAttributesEditor";
 import HoleAttributesEditor from "./HoleAttributesEditor";
 
-interface Element {
-  prototype: "items" | "lines" | "holes" | "areas" | string;
-  // Add other properties of `element` as needed
-}
-
 interface AttributesEditorProps {
-  element: Element;
-  onUpdate: any;
+  element: { prototype: "items" | "lines" | "holes" | "areas" | string; [key: string]: any };
+  onUpdate: (attributeName: string, value: any) => void;
   onValid?: (valid: boolean) => void;
   attributeFormData: any;
-  state: any;
-  [key: string]: any;
 }
 
 const AttributesEditor: React.FC<AttributesEditorProps> = ({
@@ -24,8 +17,6 @@ const AttributesEditor: React.FC<AttributesEditorProps> = ({
   onUpdate,
   onValid,
   attributeFormData,
-  state,
-  ...rest
 }) => {
   switch (element.prototype) {
     case "items":
@@ -35,20 +26,15 @@ const AttributesEditor: React.FC<AttributesEditorProps> = ({
           onUpdate={onUpdate}
           onValid={onValid}
           attributeFormData={attributeFormData}
-          state={state}
-          {...rest}
         />
       );
     case "lines":
       return (
         <LineAttributesEditor
-          // @ts-ignore
           element={element}
           onUpdate={onUpdate}
           onValid={onValid}
           attributeFormData={attributeFormData}
-          state={state}
-          {...rest}
         />
       );
     case "holes":
@@ -58,8 +44,6 @@ const AttributesEditor: React.FC<AttributesEditorProps> = ({
           onUpdate={onUpdate}
           onValid={onValid}
           attributeFormData={attributeFormData}
-          state={state}
-          {...rest}
         />
       );
     case "areas":

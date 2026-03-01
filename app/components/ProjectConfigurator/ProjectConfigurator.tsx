@@ -1,28 +1,28 @@
 "use client";
 
-import React, { useState, useContext } from "react";
-import PropTypes from "prop-types";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import React, { useState } from "react";
+import { usePlannerStore } from "../../store";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const ProjectConfigurator = ({ state }) => {
-  const { projectActions, translator } = useContext(ReactPlannerContext);
-  const scene = state.scene;
+const ProjectConfigurator: React.FC = () => {
+  const scene = usePlannerStore((state) => state.scene);
+  const setProjectProperties = usePlannerStore((state) => state.setProjectProperties);
+  const rollback = usePlannerStore((state) => state.rollback);
 
-  const [dataWidth, setDataWidth] = useState(scene.width);
-  const [dataHeight, setDataHeight] = useState(scene.height);
+  const [dataWidth, setDataWidth] = useState(scene.width.toString());
+  const [dataHeight, setDataHeight] = useState(scene.height.toString());
 
-  const onSubmit = (event) => {
+  const onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    let width = parseInt(dataWidth);
-    let height = parseInt(dataHeight);
+    const width = parseInt(dataWidth);
+    const height = parseInt(dataHeight);
     if (width <= 100 || height <= 100) {
       alert("Scene size too small");
     } else {
-      projectActions.setProjectProperties({ width, height });
+      setProjectProperties({ width, height });
     }
   };
 
@@ -61,7 +61,7 @@ const ProjectConfigurator = ({ state }) => {
         <div className="flex space-x-3 items-center">
           <Button
             variant="destructive"
-            onClick={(e) => projectActions.rollback()}
+            onClick={() => rollback()}
           >
             Cancel
           </Button>
@@ -72,12 +72,6 @@ const ProjectConfigurator = ({ state }) => {
       </form>
     </div>
   );
-};
-
-ProjectConfigurator.propTypes = {
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  state: PropTypes.object.isRequired,
 };
 
 export default ProjectConfigurator;

@@ -1,80 +1,76 @@
 "use client";
 
 import React, { Suspense } from "react";
+import { usePlannerStore } from "../store";
+import {
+  MODE_IDLE,
+  MODE_2D_ZOOM_IN,
+  MODE_2D_ZOOM_OUT,
+  MODE_2D_PAN,
+  MODE_3D_VIEW,
+  MODE_3D_FIRST_PERSON,
+  MODE_WAITING_DRAWING_LINE,
+  MODE_DRAGGING_LINE,
+  MODE_DRAGGING_VERTEX,
+  MODE_DRAGGING_ITEM,
+  MODE_DRAWING_LINE,
+  MODE_DRAWING_HOLE,
+  MODE_DRAWING_ITEM,
+  MODE_DRAGGING_HOLE,
+  MODE_ROTATING_ITEM,
+  MODE_VIEWING_CATALOG,
+  MODE_CONFIGURING_PROJECT,
+} from "../store/types";
 import { Viewer2D } from "./viewer2d/Viewer2d";
 import CatalogList from "./CatalogView/CatalogList";
 import ProjectConfigurator from "./ProjectConfigurator/ProjectConfigurator";
-import * as constants from "../utils/constants";
-import Scene3DViewer from "./viewer3d/Viewer3d";
 import Viewer3D from "./viewer3d/Viewer3d";
-// import Viewer3DFirstPerson from "./viewer3d/Viewer3DFirstPerson";
 
 interface ContentProps {
   width: number;
   height: number;
-  state: any; // Replace `any` with the actual type of `state` if available
-  customContents: {
-    [key: string]: React.ComponentType<{
-      width: number;
-      height: number;
-      state: any;
-    }>;
-  };
 }
 
-const Content: React.FC<ContentProps> = ({
-  width,
-  height,
-  state,
-  customContents,
-}) => {
-  const mode = state.get("mode");
+const VIEWER_2D_MODES = new Set([
+  MODE_IDLE,
+  MODE_2D_ZOOM_IN,
+  MODE_2D_ZOOM_OUT,
+  MODE_2D_PAN,
+  MODE_WAITING_DRAWING_LINE,
+  MODE_DRAGGING_LINE,
+  MODE_DRAGGING_VERTEX,
+  MODE_DRAGGING_ITEM,
+  MODE_DRAWING_LINE,
+  MODE_DRAWING_HOLE,
+  MODE_DRAWING_ITEM,
+  MODE_DRAGGING_HOLE,
+  MODE_ROTATING_ITEM,
+]);
 
-  // Set of modes that should render the 2D viewer
-  const viewer2DModes = new Set([
-    constants.MODE_IDLE,
-    constants.MODE_2D_ZOOM_IN,
-    constants.MODE_2D_ZOOM_OUT,
-    constants.MODE_2D_PAN,
-    constants.MODE_WAITING_DRAWING_LINE,
-    constants.MODE_DRAGGING_LINE,
-    constants.MODE_DRAGGING_VERTEX,
-    constants.MODE_DRAGGING_ITEM,
-    constants.MODE_DRAWING_LINE,
-    constants.MODE_DRAWING_HOLE,
-    constants.MODE_DRAWING_ITEM,
-    constants.MODE_DRAGGING_HOLE,
-    constants.MODE_ROTATING_ITEM,
-  ]);
+const Content: React.FC<ContentProps> = ({ width, height }) => {
+  const mode = usePlannerStore((state) => state.mode);
 
   switch (mode) {
-    case constants.MODE_3D_VIEW:
+    case MODE_3D_VIEW:
+    case MODE_3D_FIRST_PERSON:
       return (
-        <Suspense>
-          <Viewer3D state={state} width={width} height={height} />
+        <Suspense fallback={<div className="flex items-center justify-center w-full h-full">Loading 3D...</div>}>
+          <Viewer3D width={width} height={height} />
         </Suspense>
       );
 
-    // case constants.MODE_3D_FIRST_PERSON:
-    //   return (
-    //     <Viewer3DFirstPerson state={state} width={width} height={height} />
-    //   );
+    case MODE_VIEWING_CATALOG:
+      return <CatalogList />;
 
-    case constants.MODE_VIEWING_CATALOG:
-      return <CatalogList state={state} />;
-
-    case constants.MODE_CONFIGURING_PROJECT:
-      return <ProjectConfigurator state={state} />;
+    case MODE_CONFIGURING_PROJECT:
+      return <ProjectConfigurator />;
 
     default:
-      if (viewer2DModes.has(mode)) {
-        return <Viewer2D state={state} width={width} height={height} />;
+      if (VIEWER_2D_MODES.has(mode)) {
+        return <Viewer2D width={width} height={height} />;
       }
-      if (customContents.hasOwnProperty(mode)) {
-        const CustomContent = customContents[mode];
-        return <CustomContent width={width} height={height} state={state} />;
-      }
-      throw new Error(`Mode ${mode} doesn't have a mapped content`);
+      // Fallback to 2D viewer for unknown modes
+      return <Viewer2D width={width} height={height} />;
   }
 };
 

@@ -42,25 +42,19 @@ interface Vertex {
 }
 
 export interface Layer {
-  vertices: Map<string, Vertex>;
-  holes: Map<string, HoleData>;
+  vertices: Record<string, Vertex>;
+  holes: Record<string, HoleData>;
 }
 
 export interface HoleData {
-  properties: {
-    getIn: (path: string[]) => number;
-  };
+  properties: Record<string, unknown>;
   offset: number;
 }
 
 export interface Element {
-  getIn: (path: string[]) => number;
-  vertices: Map<number, string>;
+  vertices: string[];
   holes: string[];
-  properties: {
-    get: (key: string) => string;
-    getIn: (path: string[]) => number;
-  };
+  properties: Record<string, unknown>;
   selected: boolean;
 }
 
@@ -145,8 +139,8 @@ export default function WallFactory(
     },
 
     render2D: (element, layer, scene) => {
-      const vertex1 = layer.vertices.get(element.vertices.get(0)!);
-      const vertex2 = layer.vertices.get(element.vertices.get(1)!);
+      const vertex1 = layer.vertices[element.vertices[0]];
+      const vertex2 = layer.vertices[element.vertices[1]];
 
       if (!vertex1 || !vertex2) return <></>;
 
@@ -158,7 +152,7 @@ export default function WallFactory(
       );
       const length_5 = length / 5;
 
-      const thickness = element.getIn(["properties", "thickness", "length"]);
+      const thickness = (element.properties.thickness as { length: number })?.length || 20;
       const half_thickness = thickness / 2;
       const half_thickness_eps = half_thickness + epsilon;
       const char_height = 11;
@@ -200,7 +194,7 @@ export default function WallFactory(
     },
 
     render3D: (element, layer, scene) =>
-      buildWall(element, layer, scene, textures),
+      buildWall(element, layer, scene, textures || {}),
 
     updateRender3D: (
       element,
@@ -216,7 +210,7 @@ export default function WallFactory(
         element,
         layer,
         scene,
-        textures,
+        textures || {},
         mesh,
         oldElement,
         differences,
