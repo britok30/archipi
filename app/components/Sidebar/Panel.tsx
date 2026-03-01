@@ -1,59 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaAngleDown, FaAngleUp } from "react-icons/fa";
-import classNames from "classnames";
+import React from "react";
+import {
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 interface PanelProps {
   name: string;
-  headComponents?: React.ReactNode[];
+  value: string;
+  icon?: React.ReactNode;
+  headComponents?: React.ReactNode;
   children?: React.ReactNode;
-  opened?: boolean;
 }
 
 const Panel: React.FC<PanelProps> = ({
   name,
+  value,
+  icon,
   headComponents,
   children,
-  opened: initialOpened = false,
 }) => {
-  const [opened, setOpened] = useState(initialOpened);
-
-  const toggleOpen = () => setOpened(!opened);
-
   return (
-    <div className=" border-white border-b select-none bg-black">
-      <h3
-        className={classNames(
-          "text-sm text-white p-3 appearance-none hover:text-gray-500 transition duration-200 ease-in-out",
-          {
-            "cursor-default": opened,
-            "cursor-pointer": !opened,
-          }
-        )}
-        onClick={toggleOpen}
-      >
-        {name}
+    <AccordionItem value={value} className="border-b border-border/40">
+      <AccordionTrigger className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:no-underline hover:text-foreground [&[data-state=open]]:text-primary">
+        <span className="flex items-center gap-2">
+          {icon}
+          {name}
+        </span>
         {headComponents}
-        {opened ? (
-          <FaAngleUp className="float-right" />
-        ) : (
-          <FaAngleDown className="float-right" />
-        )}
-      </h3>
-
-      <div
-        className={classNames(
-          "text-xs border py-3 px-3 border-gray-800 p-0 bg-primary-alt text-shadow transition duration-200 ease-in-out",
-          {
-            block: opened,
-            hidden: !opened,
-          }
-        )}
-      >
+      </AccordionTrigger>
+      <AccordionContent className="px-3 pb-3 text-xs">
         {children}
-      </div>
-    </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 };
 

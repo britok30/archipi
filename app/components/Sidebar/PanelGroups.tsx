@@ -3,7 +3,7 @@
 import React, { useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { Eye, EyeOff, Link, Unlink, Trash } from "lucide-react";
+import { Eye, EyeOff, Link, Unlink, Trash, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlannerStore } from "../../store";
 import {
@@ -97,8 +97,12 @@ const PanelGroups: React.FC = () => {
   const groupEntries = Object.entries(groups);
 
   return (
-    <Panel name={translator?.t("Groups") ?? "Groups"} opened={groupEntries.length > 0}>
-      <div className="grid grid-cols-6 text-sm text-gray-300">
+    <Panel
+      name={translator?.t("Groups") ?? "Groups"}
+      value="groups"
+      icon={<FolderOpen className="w-3.5 h-3.5" />}
+    >
+      <div className="grid grid-cols-6 text-sm text-muted-foreground">
         <div className="col-span-2">Actions</div>
         <div className="col-span-2">Elements</div>
         <div className="col-span-2">Name</div>
@@ -127,9 +131,9 @@ const PanelGroups: React.FC = () => {
                     onClick={(e) => swapVisibility(e, groupID, group)}
                   >
                     {group.visible ? (
-                      <Eye className="w-4 h-4 text-white" />
+                      <Eye className="w-4 h-4 text-foreground" />
                     ) : (
-                      <EyeOff className="w-4 h-4 text-gray-500" />
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
                     )}
                   </Button>
 
@@ -137,7 +141,7 @@ const PanelGroups: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className={`p-1 ${
-                      isCurrentGroup ? "text-blue-500" : "text-white"
+                      isCurrentGroup ? "text-primary" : "text-foreground"
                     }`}
                     onClick={() => chainToGroup(groupID)}
                   >
@@ -148,7 +152,7 @@ const PanelGroups: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className={`p-1 ${
-                      isCurrentGroup ? "text-blue-500" : "text-white"
+                      isCurrentGroup ? "text-primary" : "text-foreground"
                     }`}
                     onClick={() => removeGroup(groupID)}
                   >
@@ -159,7 +163,7 @@ const PanelGroups: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className={`p-1 ${
-                      isCurrentGroup ? "text-blue-500" : "text-white"
+                      isCurrentGroup ? "text-primary" : "text-foreground"
                     }`}
                     onClick={() => removeGroupAndDeleteElements(groupID)}
                   >
@@ -167,7 +171,7 @@ const PanelGroups: React.FC = () => {
                   </Button>
                 </div>
 
-                <div className="col-span-2 flex items-center text-white">
+                <div className="col-span-2 flex items-center text-foreground">
                   {Object.values(elements)
                     .reduce<string[]>((acc, layerEls) => {
                       Object.values(layerEls || {}).forEach((elProt) => {
@@ -185,7 +189,7 @@ const PanelGroups: React.FC = () => {
                     .join(", ")}
                 </div>
 
-                <div className="col-span-2 flex items-center text-white">
+                <div className="col-span-2 flex items-center text-foreground">
                   {dimension} {group.name}
                 </div>
               </div>

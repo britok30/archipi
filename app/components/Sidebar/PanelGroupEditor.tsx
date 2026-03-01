@@ -3,10 +3,12 @@
 import React, { useContext } from "react";
 import Panel from "./Panel";
 import { FormNumberInput, FormTextInput } from "../style/export";
-import { FaUnlink } from "react-icons/fa";
+import { FolderOpen, Unlink } from "lucide-react";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { usePlannerStore } from "../../store";
 import type { Layer } from "../../store/types";
+import { Accordion } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 type ElementCollection = 'lines' | 'holes' | 'items' | 'areas';
 
@@ -21,26 +23,6 @@ const getLayerElement = (
   const collection = layer[elementPrototype as ElementCollection];
   if (!collection) return undefined;
   return collection[elementID];
-};
-
-const tableStyle: React.CSSProperties = { width: "100%" };
-const firstTdStyle: React.CSSProperties = { width: "6em" };
-const inputStyle: React.CSSProperties = { textAlign: "left" };
-const tablegroupStyle: React.CSSProperties = {
-  width: "100%",
-  cursor: "pointer",
-  maxHeight: "20em",
-  marginLeft: "1px",
-  marginTop: "1em",
-};
-const iconColStyle: React.CSSProperties = { width: "2em" };
-const styleEditButton: React.CSSProperties = {
-  marginLeft: "5px",
-  border: "0px",
-  background: "none",
-  color: "#fff",
-  fontSize: "14px",
-  outline: "0px",
 };
 
 interface PanelGroupEditorProps {
@@ -64,84 +46,69 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
   const elements = group.elements || {};
 
   return (
-    <Panel name={translator?.t("Group [{0}]", group.name) ?? `Group [${group.name}]`} opened={true}>
-      <div style={{ padding: "5px 15px" }}>
-        <table style={tableStyle}>
-          <tbody>
-            <tr>
-              <td style={firstTdStyle}>{translator?.t("Name") ?? "Name"}</td>
-              <td>
-                <FormTextInput
-                  value={group.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setGroupProperties(groupID, { name: e.target.value })
-                  }
-                  style={inputStyle}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={firstTdStyle}>X</td>
-              <td>
-                <FormNumberInput
-                  value={group.x}
-                  onChange={(value: number) =>
-                    groupTranslate(groupID, value, group.y)
-                  }
-                  style={inputStyle}
-                  precision={2}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={firstTdStyle}>Y</td>
-              <td>
-                <FormNumberInput
-                  value={group.y}
-                  onChange={(value: number) =>
-                    groupTranslate(groupID, group.x, value)
-                  }
-                  style={inputStyle}
-                  precision={2}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={firstTdStyle}>{translator?.t("Rotation") ?? "Rotation"}</td>
-              <td>
-                <FormNumberInput
-                  value={group.rotation}
-                  onChange={(value: number) =>
-                    groupRotate(groupID, value)
-                  }
-                  style={inputStyle}
-                  precision={2}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        {Object.keys(elements).length > 0 ? (
-          <div>
-            <p
-              style={{
-                textAlign: "center",
-                borderBottom: "1px solid #222",
-                paddingBottom: "1em",
-              }}
-            >
-              {translator?.t("Group's Elements") ?? "Group's Elements"}
-            </p>
-            <table style={tablegroupStyle}>
-              <thead>
-                <tr>
-                  <th style={iconColStyle}></th>
-                  <th>{translator?.t("Layer") ?? "Layer"}</th>
-                  <th>{translator?.t("Prototype") ?? "Prototype"}</th>
-                  <th>{translator?.t("Name") ?? "Name"}</th>
-                </tr>
-              </thead>
-              <tbody>
+    <Accordion type="multiple" defaultValue={[`group-${groupID}`]}>
+      <Panel
+        name={translator?.t("Group [{0}]", group.name) ?? `Group [${group.name}]`}
+        value={`group-${groupID}`}
+        icon={<FolderOpen className="w-3.5 h-3.5" />}
+      >
+        <div className="space-y-3 px-2">
+          <div className="flex items-center gap-3">
+            <span className="w-16 text-muted-foreground text-sm shrink-0">{translator?.t("Name") ?? "Name"}</span>
+            <FormTextInput
+              value={group.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setGroupProperties(groupID, { name: e.target.value })
+              }
+              className="flex-1 text-left"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-16 text-muted-foreground text-sm shrink-0">X</span>
+            <FormNumberInput
+              value={group.x}
+              onChange={(value: number) =>
+                groupTranslate(groupID, value, group.y)
+              }
+              className="flex-1 text-left"
+              precision={2}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-16 text-muted-foreground text-sm shrink-0">Y</span>
+            <FormNumberInput
+              value={group.y}
+              onChange={(value: number) =>
+                groupTranslate(groupID, group.x, value)
+              }
+              className="flex-1 text-left"
+              precision={2}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-16 text-muted-foreground text-sm shrink-0">{translator?.t("Rotation") ?? "Rotation"}</span>
+            <FormNumberInput
+              value={group.rotation}
+              onChange={(value: number) =>
+                groupRotate(groupID, value)
+              }
+              className="flex-1 text-left"
+              precision={2}
+            />
+          </div>
+
+          {Object.keys(elements).length > 0 ? (
+            <div>
+              <p className="text-center border-b border-border/40 pb-3 text-muted-foreground">
+                {translator?.t("Group's Elements") ?? "Group's Elements"}
+              </p>
+              <div className="space-y-2 mt-3 max-h-80 overflow-y-auto">
+                <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-muted-foreground">
+                  <div></div>
+                  <div>{translator?.t("Layer") ?? "Layer"}</div>
+                  <div>{translator?.t("Prototype") ?? "Prototype"}</div>
+                  <div>{translator?.t("Name") ?? "Name"}</div>
+                </div>
                 {Object.entries(elements).map(([layerID, layerElements]) => {
                   return Object.entries(layerElements || {}).map(
                     ([elementPrototype, elementList]) => {
@@ -152,12 +119,13 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                         const element =
                           getLayerElement(scene.layers, layerID, elementPrototype, elementID);
                         return (
-                          <tr key={elementID}>
-                            <td
-                              style={iconColStyle}
-                              title={translator?.t("Un-chain Element from Group") ?? "Un-chain Element from Group"}
-                            >
-                              <FaUnlink
+                          <div key={elementID} className="grid grid-cols-4 gap-2 text-xs items-center">
+                            <div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 text-foreground hover:text-destructive"
+                                title={translator?.t("Un-chain Element from Group") ?? "Un-chain Element from Group"}
                                 onClick={() =>
                                   removeFromGroup(
                                     groupID,
@@ -166,33 +134,25 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                                     elementID
                                   )
                                 }
-                                style={styleEditButton}
-                              />
-                            </td>
-                            <td style={{ textAlign: "center" }}>{layerID}</td>
-                            <td
-                              style={{
-                                textAlign: "center",
-                                textTransform: "capitalize",
-                              }}
-                            >
-                              {elementPrototype}
-                            </td>
-                            <td style={{ textAlign: "center" }}>
-                              {element?.name || elementID}
-                            </td>
-                          </tr>
+                              >
+                                <Unlink className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                            <div className="text-center truncate">{layerID}</div>
+                            <div className="text-center capitalize">{elementPrototype}</div>
+                            <div className="text-center truncate">{element?.name || elementID}</div>
+                          </div>
                         );
                       });
                     }
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
-      </div>
-    </Panel>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </Panel>
+    </Accordion>
   );
 };
 

@@ -28,7 +28,9 @@ import {
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
+import { Accordion } from "@/components/ui/accordion";
 
 const VISIBLE_MODES = [
   MODE_IDLE,
@@ -56,7 +58,6 @@ const Sidebar: React.FC = () => {
   const selectedLayerId = scene.selectedLayer;
   const selectedLayer = selectedLayerId ? scene.layers[selectedLayerId] : null;
 
-  // Check for multiselection
   const multiselected = useMemo(() => {
     if (!selectedLayer) return false;
     const selected = selectedLayer.selected;
@@ -74,7 +75,6 @@ const Sidebar: React.FC = () => {
     );
   }, [selectedLayer]);
 
-  // Find selected group
   const selectedGroupId = useMemo(() => {
     const groups = scene.groups;
     for (const [groupId, group] of Object.entries(groups)) {
@@ -97,40 +97,20 @@ const Sidebar: React.FC = () => {
         event.stopPropagation()
       }
     >
-      <SidebarContent className="bg-black text-white scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black">
-        {/* PanelGuides */}
-        <div style={{ position: "relative" }}>
+      <SidebarHeader className="bg-sidebar-background border-b border-sidebar-border px-4 py-3">
+        <h2 className="text-sm font-semibold text-sidebar-foreground">Properties</h2>
+      </SidebarHeader>
+      <SidebarContent className="bg-sidebar-background text-sidebar-foreground scrollbar scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+        <Accordion type="multiple" defaultValue={["layers", "layer-elements"]}>
           <PanelGuides />
-        </div>
-
-        {/* PanelLayers */}
-        <div style={{ position: "relative" }}>
           <PanelLayers />
-        </div>
-
-        {/* PanelLayerElements */}
-        <div style={{ position: "relative" }}>
           <PanelLayerElements />
-        </div>
-
-        {/* PanelGroups */}
-        <div style={{ position: "relative" }}>
           <PanelGroups />
-        </div>
+        </Accordion>
 
-        {/* PanelElementEditor */}
-        {!multiselected && (
-          <div style={{ position: "relative" }}>
-            <PanelElementEditor />
-          </div>
-        )}
+        {!multiselected && <PanelElementEditor />}
 
-        {/* PanelGroupEditor */}
-        {selectedGroupId && (
-          <div style={{ position: "relative" }}>
-            <PanelGroupEditor groupID={selectedGroupId} />
-          </div>
-        )}
+        {selectedGroupId && <PanelGroupEditor groupID={selectedGroupId} />}
       </SidebarContent>
     </ShadcnSidebar>
   );
