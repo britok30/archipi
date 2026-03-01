@@ -7,7 +7,6 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 
 interface ToolbarButtonProps {
   active: boolean;
@@ -26,9 +25,20 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     <TooltipProvider>
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          <Button variant="default" onClick={onClick}>
+          <button
+            onClick={onClick}
+            className={`
+              relative flex items-center justify-center w-10 h-10 rounded-lg
+              transition-all duration-200 ease-out
+              ${
+                active
+                  ? "bg-[hsl(217_91%_60%/0.15)] text-primary after:absolute after:left-0 after:top-1/2 after:-translate-y-1/2 after:w-[3px] after:h-5 after:rounded-full after:bg-primary"
+                  : "text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground"
+              }
+            `}
+          >
             {children}
-          </Button>
+          </button>
         </TooltipTrigger>
         <TooltipContent side="right">
           <p>{tooltip}</p>

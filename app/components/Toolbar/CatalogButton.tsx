@@ -28,13 +28,10 @@ const CatalogButton: React.FC = () => {
           tooltip="Open Catalog"
           onClick={handleOpenCatalog}
         >
-          <div className="flex items-center space-x-2">
-            <Book className="w-6 h-6" />
-            <span>Catalog</span>
-          </div>
+          <Book size={20} />
         </ToolbarButton>
       </DialogTrigger>
-      <DialogContent className="max-w-[80vw] h-[80vh] text-black">
+      <DialogContent className="max-w-[80vw] h-[80vh] text-foreground">
         <DialogHeader>
           <DialogTitle>Catalog</DialogTitle>
         </DialogHeader>

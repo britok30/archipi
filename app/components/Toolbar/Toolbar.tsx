@@ -29,6 +29,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 interface ToolbarProps {
   toolbarButtons?: React.ReactNode[];
@@ -41,7 +42,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
 }) => {
   const { translator } = useCatalogContext();
 
-  // Get state and actions from Zustand
   const mode = usePlannerStore((state) => state.mode);
   const newProject = usePlannerStore((state) => state.newProject);
   const setMode = usePlannerStore((state) => state.setMode);
@@ -53,35 +53,42 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const t = (text: string) => translator?.t(text) ?? text;
 
   return (
-    <div className="fixed flex flex-col space-y-2 h-fit top-4 left-4 z-50  bg-black p-2 rounded-lg">
+    <div className="fixed flex flex-col h-fit top-4 left-4 z-50 toolbar-glass rounded-xl p-1.5 space-y-1">
+      {/* Navigation */}
       <Tooltip delayDuration={0} defaultOpen={false}>
         <TooltipTrigger asChild>
-          <SidebarTrigger className="mr-2 w-full" />
+          <SidebarTrigger className="w-10 h-10 rounded-lg text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground transition-all duration-200" />
         </TooltipTrigger>
-
         <TooltipContent side="right">
           <p className="text-xs">{open ? "Close Sidebar" : "Open Sidebar"}</p>
         </TooltipContent>
       </Tooltip>
 
+      <Separator className="bg-border/40" />
+
+      {/* Project */}
       {allowProjectFileSupport && (
-        <ToolbarButton
-          active={false}
-          tooltip={t("New project")}
-          onClick={() =>
-            window.confirm(t("Would you want to start a new Project?"))
-              ? newProject()
-              : null
-          }
-        >
-          <File size={25} />
-          New
-        </ToolbarButton>
+        <>
+          <ToolbarButton
+            active={false}
+            tooltip={t("New project")}
+            onClick={() =>
+              window.confirm(t("Would you want to start a new Project?"))
+                ? newProject()
+                : null
+            }
+          >
+            <File size={20} />
+          </ToolbarButton>
+
+          <ToolbarSaveButton />
+          <ToolbarLoadButton />
+        </>
       )}
 
-      {allowProjectFileSupport && <ToolbarSaveButton />}
-      {allowProjectFileSupport && <ToolbarLoadButton />}
+      <Separator className="bg-border/40" />
 
+      {/* Design */}
       <CatalogButton />
 
       <ToolbarButton
@@ -90,11 +97,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
         onClick={() => setMode(MODE_IDLE)}
       >
         {[MODE_3D_FIRST_PERSON, MODE_3D_VIEW].includes(mode) ? (
-          <Square size={23} />
+          <Square size={20} />
         ) : (
-          <MousePointer size={23} />
+          <MousePointer size={20} />
         )}
-        2D
       </ToolbarButton>
 
       <ToolbarButton
@@ -102,17 +108,18 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="3D View"
         onClick={() => selectTool3DView()}
       >
-        <Rotate3D size={23} />
-        3D
+        <Rotate3D size={20} />
       </ToolbarButton>
 
+      <Separator className="bg-border/40" />
+
+      {/* History */}
       <ToolbarButton
         active={false}
         tooltip="Undo (CTRL-Z)"
         onClick={() => undo()}
       >
-        <Undo size={23} />
-        Undo
+        <Undo size={20} />
       </ToolbarButton>
 
       <ToolbarButton
@@ -120,13 +127,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
         tooltip="Redo (CTRL-Y)"
         onClick={() => redo()}
       >
-        <Redo size={23} />
-        Redo
+        <Redo size={20} />
       </ToolbarButton>
 
+      <Separator className="bg-border/40" />
+
+      {/* Utility */}
       <SettingsButton />
       <TipsButton />
-
       <ScreenshotToolbarButton />
     </div>
   );

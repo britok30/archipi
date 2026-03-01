@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import { HelpCircle } from "lucide-react";
 import {
   Dialog,
@@ -7,13 +7,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import ToolbarButton from "./ToolbarButton";
 
 const TipsButton = () => {
@@ -54,10 +47,10 @@ const TipsButton = () => {
           active={isOpen}
           onClick={() => setIsOpen(true)}
         >
-          <HelpCircle className="w-4 h-4" /> Tips
+          <HelpCircle size={20} />
         </ToolbarButton>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md text-black">
+      <DialogContent className="sm:max-w-md text-foreground">
         <DialogHeader>
           <DialogTitle>3D Navigation Controls</DialogTitle>
         </DialogHeader>
@@ -65,13 +58,13 @@ const TipsButton = () => {
           {navigationTips.map((section, index) => (
             <div
               key={section.device}
-              className={index !== 0 ? "pt-4 border-t" : ""}
+              className={index !== 0 ? "pt-4 border-t border-border" : ""}
             >
               <h3 className="font-medium mb-2">{section.device}</h3>
               <ul className="space-y-2">
                 {section.actions.map((action, actionIndex) => (
-                  <li key={actionIndex} className="text-sm text-gray-500">
-                    • {action}
+                  <li key={actionIndex} className="text-sm text-muted-foreground">
+                    {action}
                   </li>
                 ))}
               </ul>

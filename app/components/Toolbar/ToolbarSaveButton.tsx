@@ -15,6 +15,12 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 export default function ToolbarSaveButton() {
   const { catalog } = useCatalogContext();
@@ -22,9 +28,7 @@ export default function ToolbarSaveButton() {
   const unselectAll = usePlannerStore((state) => state.unselectAll);
 
   const saveProjectToJSONFile = () => {
-    // Unselect all before saving
     unselectAll();
-    // Get the current scene state
     const currentScene = usePlannerStore.getState().scene;
     browserDownload(JSON.stringify(currentScene), "json");
   };
@@ -55,14 +59,24 @@ export default function ToolbarSaveButton() {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button>
-          <Save size={18} />
-          Save
-        </Button>
-      </PopoverTrigger>
+      <TooltipProvider>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                className="relative flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground transition-all duration-200 ease-out"
+              >
+                <Save size={20} />
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p>Save</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
-      <PopoverContent side="right" className="w-80 bg-white">
+      <PopoverContent side="right" className="w-80 bg-card border-border text-foreground">
         <Label>Save as</Label>
         <div>
           <Button className="w-full mb-2" onClick={saveProjectToJSONFile}>

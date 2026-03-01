@@ -48,10 +48,10 @@ const SettingsButton: React.FC = () => {
           active={isOpen}
           onClick={() => setIsOpen(true)}
         >
-          <Settings className="w-4 h-4" /> Settings
+          <Settings size={20} />
         </ToolbarButton>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] text-black">
+      <DialogContent className="sm:max-w-[500px] text-foreground">
         <DialogHeader>
           <DialogTitle>Project Config</DialogTitle>
         </DialogHeader>

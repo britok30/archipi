@@ -24,8 +24,7 @@ export default function ToolbarLoadButton() {
       tooltip="Load Project"
       onClick={(e) => loadProjectFromFile(e)}
     >
-      <Upload size={18} />
-      Upload JSON
+      <Upload size={20} />
     </ToolbarButton>
   );
 }

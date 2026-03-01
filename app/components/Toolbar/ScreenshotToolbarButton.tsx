@@ -84,8 +84,7 @@ export default function ScreenshotToolbarButton() {
         tooltip={tooltip}
         onClick={saveScreenshotToFile}
       >
-        <Camera size={23} />
-        Snap
+        <Camera size={20} />
       </ToolbarButton>
     );
   }
@@ -97,8 +96,7 @@ export default function ScreenshotToolbarButton() {
         tooltip={tooltip}
         onClick={saveSVGScreenshotToFile}
       >
-        <Camera size={23} />
-        Snap
+        <Camera size={20} />
       </ToolbarButton>
     );
   }
