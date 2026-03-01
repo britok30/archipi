@@ -64,7 +64,7 @@ const PropertyColor = ({
   );
 
   // Don't render in 3D view mode
-  if (state.get("mode") === MODE_3D_VIEW) return null;
+  if (state?.mode === MODE_3D_VIEW) return null;
 
   return (
     <div className={`space-y-2 ${className} mb-2`}>

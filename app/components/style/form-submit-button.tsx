@@ -1,0 +1,25 @@
+"use client";
+
+import React from 'react';
+import Button, { ButtonProps } from './button';
+import * as SharedStyle from '../../styles/shared-style';
+
+const STYLE: React.CSSProperties = {
+  borderColor: "#415375",
+  backgroundColor: "#415375",
+  color: SharedStyle.COLORS.white
+};
+
+const STYLE_HOVER: React.CSSProperties = {
+  borderColor: "#1f3149",
+  backgroundColor: "#1f3149",
+  color: SharedStyle.COLORS.white
+};
+
+export default function FormSubmitButton({ children, ...rest }: ButtonProps) {
+  return (
+    <Button type="submit" style={STYLE} styleHover={STYLE_HOVER} {...rest}>
+      {children}
+    </Button>
+  );
+}

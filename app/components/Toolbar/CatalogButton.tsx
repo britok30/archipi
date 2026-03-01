@@ -1,6 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Book } from "lucide-react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
+import { MODE_VIEWING_CATALOG } from "../../store/types";
 import {
   Dialog,
   DialogContent,
@@ -11,24 +12,19 @@ import {
 import CatalogList from "../CatalogView/CatalogList";
 import ToolbarButton from "./ToolbarButton";
 
-const CatalogButton = ({ state, mode }) => {
+const CatalogButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { projectActions } = useContext(ReactPlannerContext);
+  const mode = usePlannerStore((state) => state.mode);
 
   const handleOpenCatalog = () => {
-    // projectActions.openCatalog();
     setIsOpen(true);
-  };
-
-  const handleCloseCatalog = () => {
-    setIsOpen(false);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <ToolbarButton
-          active={mode === "MODE_VIEWING_CATALOG"}
+          active={mode === MODE_VIEWING_CATALOG}
           tooltip="Open Catalog"
           onClick={handleOpenCatalog}
         >
@@ -43,7 +39,7 @@ const CatalogButton = ({ state, mode }) => {
           <DialogTitle>Catalog</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto pr-6 -mr-6">
-          <CatalogList state={state} onClose={() => setIsOpen(false)} />
+          <CatalogList onClose={() => setIsOpen(false)} />
         </div>
       </DialogContent>
     </Dialog>

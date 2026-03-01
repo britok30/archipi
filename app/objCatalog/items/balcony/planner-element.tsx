@@ -1,9 +1,6 @@
 "use client";
 
 import * as THREE from "three";
-import { useMemo } from "react";
-import { Map } from "immutable";
-
 // Constants
 const PI_2 = Math.PI / 2;
 const TEXTURE_PATHS = {
@@ -31,7 +28,7 @@ interface BalconyProps {
 }
 
 interface Element2DProps {
-  properties: Map<string, any>;
+  properties: Record<string, any>;
   selected: boolean;
   rotation: number;
   name: string;
@@ -45,7 +42,7 @@ interface Element3DProps extends Element2DProps {
 // Texture loader singleton
 class TextureLoaderSingleton {
   private static instance: THREE.TextureLoader;
-  private static textures: Map<string, THREE.Texture> = Map();
+  private static textures: globalThis.Map<string, THREE.Texture> = new globalThis.Map();
 
   private constructor() {}
 
@@ -209,11 +206,11 @@ const BalconyElement = {
   },
 
   render2D: (element: Element2DProps) => {
-    const width = element.properties.getIn(["width", "length"]);
-    const depth = element.properties.getIn(["depth", "length"]);
+    const width = element.properties?.width?.length;
+    const depth = element.properties?.depth?.length;
     const fillColor = element.selected
       ? "#99c3fb"
-      : element.properties.get("patternColor");
+      : element.properties?.patternColor;
     const angle = element.rotation + 90;
 
     const textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
@@ -236,7 +233,7 @@ const BalconyElement = {
           y={depth / 2}
           transform={`scale(1,-1) rotate(${textRotation})`}
           style={{
-            textAnchor: "middle",
+            textAnchor: "middle" as const,
             fontSize: "11px",
             dominantBaseline: "middle",
           }}
@@ -248,10 +245,10 @@ const BalconyElement = {
   },
 
   render3D: async (element: Element3DProps) => {
-    const width = element.properties.getIn(["width", "length"]);
-    const depth = element.properties.getIn(["depth", "length"]);
-    const height = element.properties.getIn(["height", "length"]);
-    const altitude = element.properties.getIn(["altitude", "length"]);
+    const width = element.properties?.width?.length;
+    const depth = element.properties?.depth?.length;
+    const height = element.properties?.height?.length;
+    const altitude = element.properties?.altitude?.length;
 
     const balcony = await createBalconyMesh({ width, height, depth });
 

@@ -1,0 +1,22 @@
+"use client";
+
+import React from 'react';
+import Button, { ButtonProps } from './button';
+
+const STYLE: React.CSSProperties = {
+  borderColor: "#adadad",
+  backgroundColor: "#e6e6e6"
+};
+
+const STYLE_HOVER: React.CSSProperties = {
+  backgroundColor: "#d4d4d4",
+  borderColor: "#8c8c8c"
+};
+
+export default function CancelButton({ children, ...rest }: ButtonProps) {
+  return (
+    <Button style={STYLE} styleHover={STYLE_HOVER} {...rest}>
+      {children}
+    </Button>
+  );
+}

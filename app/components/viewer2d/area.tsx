@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import polylabel from "polylabel";
 import areapolygon from "area-polygon";
-import { Map as ImmutableMap, List as ImmutableList } from "immutable";
+import type { Layer as LayerType, Area as AreaType, Scene as SceneType, RuntimeCatalog } from "../../store/types";
 
 const styleText: React.CSSProperties = {
   textAnchor: "middle",
@@ -17,40 +17,11 @@ const styleText: React.CSSProperties = {
   userSelect: "none",
 };
 
-interface Vertex {
-  x: number;
-  y: number;
-}
-
-interface AreaType {
-  id: string;
-  name: string;
-  type: string;
-  prototype: string;
-  selected: boolean;
-  vertices: ImmutableList<string>;
-  holes: ImmutableList<string>;
-}
-
-interface LayerType {
-  id: string;
-  name: string;
-  vertices: ImmutableMap<string, Vertex>;
-  areas: ImmutableMap<string, AreaType>;
-}
-
-interface CatalogElement {
-  render2D: (element: AreaType, layer: LayerType) => React.ReactNode;
-}
-
-export interface CatalogType {
-  getElement: (type: string) => CatalogElement;
-}
-
 interface AreaProps {
   layer: LayerType;
   area: AreaType;
-  catalog: CatalogType;
+  scene: SceneType;
+  catalog: RuntimeCatalog | null;
 }
 
 const calculatePolygonWithHoles = (
@@ -58,57 +29,51 @@ const calculatePolygonWithHoles = (
   layer: LayerType
 ): number[][][] => {
   // Outer ring
-  const outerRing: number[][] = area.vertices
-    .toArray()
-    .map((vertexID: string) => {
-      const vertex = layer.vertices.get(vertexID);
-      if (vertex) {
-        return [vertex.x, vertex.y];
-      }
-      throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
-    });
+  const outerRing: number[][] = area.vertices.map((vertexID: string) => {
+    const vertex = layer.vertices[vertexID];
+    if (vertex) {
+      return [vertex.x, vertex.y];
+    }
+    throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
+  });
 
   // Holes
-  const holesRings: number[][][] = area.holes
-    .map((holeID: string) => {
-      const holeArea = layer.areas.get(holeID);
-      if (holeArea) {
-        const holeRing = holeArea.vertices.toArray().map((vertexID: string) => {
-          const vertex = layer.vertices.get(vertexID);
-          if (vertex) {
-            return [vertex.x, vertex.y];
-          }
-          throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
-        });
-        return holeRing;
-      }
-      throw new Error(`Hole area ${holeID} not found in layer.areas`);
-    })
-    .toArray();
+  const holesRings: number[][][] = area.holes.map((holeID: string) => {
+    const holeArea = layer.areas[holeID];
+    if (holeArea) {
+      const holeRing = holeArea.vertices.map((vertexID: string) => {
+        const vertex = layer.vertices[vertexID];
+        if (vertex) {
+          return [vertex.x, vertex.y];
+        }
+        throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
+      });
+      return holeRing;
+    }
+    throw new Error(`Hole area ${holeID} not found in layer.areas`);
+  });
 
   return [outerRing, ...holesRings];
 };
 
 const calculateAreaSize = (area: AreaType, layer: LayerType): number => {
   // Outer ring
-  const outerRing: number[][] = area.vertices
-    .toArray()
-    .map((vertexID: string) => {
-      const vertex = layer.vertices.get(vertexID);
-      if (vertex) {
-        return [vertex.x, vertex.y];
-      }
-      throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
-    });
+  const outerRing: number[][] = area.vertices.map((vertexID: string) => {
+    const vertex = layer.vertices[vertexID];
+    if (vertex) {
+      return [vertex.x, vertex.y];
+    }
+    throw new Error(`Vertex ${vertexID} not found in layer.vertices`);
+  });
 
   let areaSize = areapolygon(outerRing, false);
 
   // Subtract hole areas
   area.holes.forEach((holeID: string) => {
-    const holeArea = layer.areas.get(holeID);
+    const holeArea = layer.areas[holeID];
     if (holeArea) {
-      const holeRing = holeArea.vertices.toArray().map((vertexID: string) => {
-        const vertex = layer.vertices.get(vertexID);
+      const holeRing = holeArea.vertices.map((vertexID: string) => {
+        const vertex = layer.vertices[vertexID];
         if (vertex) {
           return [vertex.x, vertex.y];
         }
@@ -121,10 +86,10 @@ const calculateAreaSize = (area: AreaType, layer: LayerType): number => {
   return areaSize;
 };
 
-export const Area: React.FC<AreaProps> = ({ layer, area, catalog }) => {
+export const Area: React.FC<AreaProps> = ({ layer, area, scene, catalog }) => {
   const rendered = useMemo(
-    () => catalog.getElement(area.type).render2D(area, layer),
-    [area, catalog, layer]
+    () => catalog?.getElement(area.type)?.render2D?.(area, layer, scene),
+    [area, catalog, layer, scene]
   );
 
   const polygonWithHoles = useMemo(

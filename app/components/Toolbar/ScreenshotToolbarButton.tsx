@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useContext } from "react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { ReactPlannerConstants } from "../../utils";
+import React from "react";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
 import { ReactPlannerUtils } from "../../utils";
 import { Camera } from "lucide-react";
 import ToolbarButton from "./ToolbarButton";
-
-const { imageBrowserDownload } = ReactPlannerUtils.BrowserUtils;
-const { saveSVGtoPngFile } = ReactPlannerUtils.ImageUtils;
-
-const {
+import {
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
   MODE_2D_ZOOM_OUT,
@@ -26,16 +22,14 @@ const {
   MODE_ROTATING_ITEM,
   MODE_3D_FIRST_PERSON,
   MODE_3D_VIEW,
-} = ReactPlannerConstants;
+} from "../../store/types";
 
-interface ScreenshotToolbarButtonProps {
-  mode: string;
-}
+const { imageBrowserDownload } = ReactPlannerUtils.BrowserUtils;
+const { saveSVGtoPngFile } = ReactPlannerUtils.ImageUtils;
 
-export default function ScreenshotToolbarButton({
-  mode,
-}: ScreenshotToolbarButtonProps) {
-  const { translator } = useContext(ReactPlannerContext);
+export default function ScreenshotToolbarButton() {
+  const { translator } = useCatalogContext();
+  const mode = usePlannerStore((state) => state.mode);
 
   const saveScreenshotToFile = (event: React.MouseEvent) => {
     event.preventDefault();

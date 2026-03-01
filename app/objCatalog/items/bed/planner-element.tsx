@@ -12,7 +12,7 @@ const width = { length: 160, unit: "cm" };
 const depth = { length: 200, unit: "cm" };
 const height = { length: 60, unit: "cm" };
 
-let cachedJSONBed = null;
+let cachedJSONBed: any = null;
 
 export default {
   name: "bed",
@@ -34,7 +34,7 @@ export default {
     },
   },
 
-  render2D: function (element, layer, scene) {
+  render2D: function (element: any, layer: any, scene: any) {
     let angle = element.rotation + 90;
     let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
@@ -66,7 +66,7 @@ export default {
           transform={`translate(${width.length / 2}, ${
             depth.length / 2
           }) scale(1,-1) rotate(${textRotation})`}
-          style={{ textAnchor: "middle", fontSize: "11px" }}
+          style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
           {element.type}
         </text>
@@ -74,8 +74,8 @@ export default {
     );
   },
 
-  render3D: async function (element, layer, scene) {
-    let onLoadItem = (object) => {
+  render3D: async function (element: any, layer: any, scene: any) {
+    let onLoadItem = (object: any) => {
       let newWidth = convert(width.length)
         .from(width.unit as Unit)
         .to(scene.unit);
@@ -117,7 +117,7 @@ export default {
       return await Promise.resolve(onLoadItem(object));
     }
 
-    return loadObjWithMaterial(mtl, obj).then((object) => {
+    return loadObjWithMaterial(mtl, obj).then((object: any) => {
       cachedJSONBed = object.toJSON();
       let loader = new ObjectLoader();
       return onLoadItem(loader.parse(cachedJSONBed));
@@ -125,14 +125,14 @@ export default {
   },
 
   updateRender3D: (
-    element,
-    layer,
-    scene,
-    mesh,
-    oldElement,
-    differences,
-    selfDestroy,
-    selfBuild
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
   ) => {
     let noPerf = () => {
       selfDestroy();

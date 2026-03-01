@@ -9,53 +9,32 @@ import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { Map as ImmutableMap } from "immutable";
 
 interface LineAttributesEditorProps {
-  /**
-   * The current element (line) data as an Immutable Map.
-   */
-  element: ImmutableMap<string, any>;
-
-  /**
-   * Callback function to handle updates to attributes.
-   * @param attributeName - The name of the attribute being updated.
-   * @param value - The new value for the attribute.
-   */
+  element: ImmutableMap<string, any> | { [key: string]: any };
   onUpdate: (attributeName: string, value: any) => void;
-
-  /**
-   * The form data for attributes as an Immutable Map.
-   */
   attributeFormData: ImmutableMap<string, any>;
-
-  /**
-   * The current state of the application.
-   */
-  state: any; // Replace 'any' with the actual type if available
-
-  /**
-   * Additional CSS classes for styling.
-   */
+  onValid?: (valid: boolean) => void;
   className?: string;
-
-  /**
-   * Additional props to pass to child components.
-   */
-  [key: string]: any;
 }
 
 const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
   element,
   onUpdate,
   attributeFormData,
-  state,
   className = "",
-  ...rest
 }) => {
   const { translator } = useContext(ReactPlannerContext);
+
+  const getElementValue = (key: string) => {
+    if (ImmutableMap.isMap(element)) {
+      return (element as ImmutableMap<string, any>).get(key);
+    }
+    return (element as any)[key];
+  };
 
   // Extracting attribute values with fallback to element's properties
   const name = attributeFormData.has("name")
     ? attributeFormData.get("name")
-    : element.get("name");
+    : getElementValue("name");
 
   const vertexOne = attributeFormData.has("vertexOne")
     ? attributeFormData.get("vertexOne")
@@ -158,12 +137,11 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
           value={lineLength}
           onUpdate={(mapped: any) => onUpdate("lineLength", mapped)}
           configs={{
-            label: translator.t("Length"),
+            label: translator?.t("Length") ?? "Length",
             min: 0,
             max: Infinity,
             precision: 2,
           }}
-          state={state}
         />
       )}
     </div>

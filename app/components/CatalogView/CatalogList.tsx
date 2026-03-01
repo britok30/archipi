@@ -1,7 +1,8 @@
 "use client";
 
-import { useContext, useState } from "react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { useState, useMemo } from "react";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
 import CatalogItem from "./CatalogItem";
 import CatalogBreadcrumb from "./CatalogBreadcrumb";
 import CatalogPageItem from "./CatalogPageItem";
@@ -9,30 +10,7 @@ import CatalogTurnBackPageItem from "./CatalogTurnBackPageItem";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-// Types
-interface ElementInfo {
-  title: string;
-  visibility?: {
-    catalog: boolean;
-  };
-  image: string;
-  tag: string[];
-  description: string;
-}
-
-export interface CatalogElement {
-  name: string;
-  prototype: "lines" | "items" | "holes";
-  info: ElementInfo;
-}
-
-interface Category {
-  name: string;
-  label: string;
-  categories: Category[];
-  elements: CatalogElement[];
-}
+import type { CatalogElement, CatalogCategory } from "../../store/types";
 
 interface BreadcrumbItem {
   name: string;
@@ -40,7 +18,6 @@ interface BreadcrumbItem {
 }
 
 interface CatalogListProps {
-  state: any;
   onClose?: () => void;
 }
 
@@ -52,40 +29,56 @@ const ITEMS_GRID: React.CSSProperties = {
   marginTop: "1em",
 };
 
-const CatalogList: React.FC<CatalogListProps> = ({ state, onClose }) => {
-  const {
-    catalog,
-    translator,
-    itemsActions,
-    linesActions,
-    holesActions,
-    projectActions,
-  } = useContext(ReactPlannerContext);
+const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
+  const { catalog } = useCatalogContext();
 
-  const currentCategory = catalog.getCategory(state.catalog.page);
-  const categoriesToDisplay = currentCategory.categories;
-  const elementsToDisplay = currentCategory.elements.filter((element) =>
-    element.info.visibility ? element.info.visibility.catalog : true
+  // Get state from Zustand
+  const catalogState = usePlannerStore((state) => state.catalog);
+  const selectedElementsHistory = usePlannerStore((state) => state.selectedElementsHistory);
+
+  // Get actions from Zustand
+  const selectToolDrawingLine = usePlannerStore((state) => state.selectToolDrawingLine);
+  const selectToolDrawingItem = usePlannerStore((state) => state.selectToolDrawingItem);
+  const selectToolDrawingHole = usePlannerStore((state) => state.selectToolDrawingHole);
+  const goBackToCatalogPage = usePlannerStore((state) => state.goBackToCatalogPage);
+  const changeCatalogPage = usePlannerStore((state) => state.changeCatalogPage);
+  const pushLastSelectedCatalogElementToHistory = usePlannerStore(
+    (state) => state.pushLastSelectedCatalogElementToHistory
   );
 
-  const [categories] = useState<Category[]>(currentCategory.categories);
-  const [elements] = useState<CatalogElement[]>(elementsToDisplay);
+  const currentCategory = useMemo(() => {
+    if (!catalog) return { name: 'root', label: '/', elements: [], categories: [] };
+    return catalog.getCategory(catalogState.page);
+  }, [catalog, catalogState.page]);
+
+  const categoriesToDisplay = currentCategory.categories;
+  const elementsToDisplay = useMemo(
+    () =>
+      currentCategory.elements.filter((element) =>
+        element.info.visibility ? element.info.visibility.catalog : true
+      ),
+    [currentCategory.elements]
+  );
+
   const [matchString, setMatchString] = useState("");
   const [matchedElements, setMatchedElements] = useState<CatalogElement[]>([]);
 
-  const flattenCategories = (categories: Category[]): CatalogElement[] => {
-    return categories.reduce((acc: CatalogElement[], curr: Category) => {
+  const flattenCategories = (categories: CatalogCategory[]): CatalogElement[] => {
+    return categories.reduce((acc: CatalogElement[], curr: CatalogCategory) => {
       return [...acc, ...curr.elements, ...flattenCategories(curr.categories)];
     }, []);
   };
 
   const handleSearch = (text: string) => {
-    const array = [...elements, ...flattenCategories(categories)];
+    const allElements = [...elementsToDisplay, ...flattenCategories(categoriesToDisplay)];
     let filtered: CatalogElement[] = [];
 
     if (text) {
       const regexp = new RegExp(text, "i");
-      filtered = array.filter((item) => regexp.test(item.info.title));
+      filtered = allElements.filter((item) => {
+        const title = item.info.title || item.name;
+        return regexp.test(title);
+      });
     }
 
     setMatchString(text);
@@ -93,32 +86,32 @@ const CatalogList: React.FC<CatalogListProps> = ({ state, onClose }) => {
   };
 
   const handleElementSelect = (element: CatalogElement) => {
-    console.log(element);
     switch (element.prototype) {
       case "lines":
-        linesActions.selectToolDrawingLine(element.name);
+        selectToolDrawingLine(element.name);
         break;
       case "items":
-        itemsActions.selectToolDrawingItem(element.name);
+        selectToolDrawingItem(element.name);
         break;
       case "holes":
-        holesActions.selectToolDrawingHole(element.name);
+        selectToolDrawingHole(element.name);
         break;
     }
 
-    projectActions.pushLastSelectedCatalogElementToHistory(element);
-    onClose();
+    pushLastSelectedCatalogElementToHistory(element.name);
+    onClose?.();
   };
 
   const renderBreadcrumb = () => {
-    if (state.catalog.page === "root") return null;
+    if (catalogState.page === "root") return null;
+    if (!catalog) return null;
 
     const breadcrumbsItems: BreadcrumbItem[] = [];
 
-    state.catalog.path.forEach((pathName: string) => {
+    catalogState.path.forEach((pathName: string) => {
       breadcrumbsItems.push({
         name: catalog.getCategory(pathName).label,
-        action: () => projectActions.goBackToCatalogPage(pathName),
+        action: () => goBackToCatalogPage(),
       });
     });
 
@@ -131,35 +124,41 @@ const CatalogList: React.FC<CatalogListProps> = ({ state, onClose }) => {
   };
 
   const renderTurnBackButton = () => {
-    const pathSize = state.catalog.path.size;
-    if (pathSize === 0) return null;
+    const pathSize = catalogState.path.length;
+    if (pathSize === 0 || !catalog) return null;
+
+    const previousPage = catalogState.path[pathSize - 1];
+    const previousCategory = catalog.getCategory(previousPage);
 
     return (
       <CatalogTurnBackPageItem
         key={pathSize}
-        page={catalog.categories[state.catalog.path.get(pathSize - 1)]}
+        page={previousCategory}
       />
     );
   };
 
   const renderSelectedHistory = () => {
-    const selectedHistory = state.get("selectedElementsHistory");
-    if (!selectedHistory.size) return null;
+    if (selectedElementsHistory.length === 0 || !catalog) return null;
 
     return (
       <div className="w-full overflow-x-scroll mt-4 flex items-center relative px-2 rounded-lg">
         <Label className="inline-block mr-5 text-sm">Last Selected</Label>
-        {selectedHistory.map((element: CatalogElement, index: number) => (
-          <Button
-            variant="secondary"
-            className="mr-2"
-            key={index}
-            title={element.name}
-            onClick={() => handleElementSelect(element)}
-          >
-            {element.name}
-          </Button>
-        ))}
+        {selectedElementsHistory.map((elementName: string, index: number) => {
+          const element = catalog.hasElement(elementName) ? catalog.getElement(elementName) : null;
+          if (!element) return null;
+          return (
+            <Button
+              variant="secondary"
+              className="mr-2"
+              key={index}
+              title={element.name}
+              onClick={() => handleElementSelect(element)}
+            >
+              {element.name}
+            </Button>
+          );
+        })}
       </div>
     );
   };

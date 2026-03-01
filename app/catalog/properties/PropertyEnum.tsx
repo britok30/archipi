@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Map } from "immutable";
 
 interface PropertyEnumConfig {
   label: string;
@@ -62,7 +61,7 @@ const PropertyEnum = ({
     [configs, onUpdate, sourceElement, internalState, state]
   );
 
-  const enumEntries = Map(configs.values).entrySeq().toArray();
+  const enumEntries = Object.entries(configs.values);
 
   return (
     <div className={`space-y-2 ${className} mb-2`}>
@@ -127,7 +126,7 @@ const EnhancedPropertyEnum = ({
     [configs, onUpdate, sourceElement, internalState, state]
   );
 
-  const enumEntries = Map(configs.values).entrySeq().toArray();
+  const enumEntries = Object.entries(configs.values);
 
   return (
     <div className={`space-y-2 ${className}`}>

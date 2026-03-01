@@ -3,39 +3,47 @@
 import React, { useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { Seq, Map } from "immutable";
 import ElementEditor from "./ElementEditor";
+import { usePlannerStore } from "../../store";
+import type { Line, Hole, Item, Area, Layer } from "../../store/types";
 
-const PanelElementEditor: React.FC<{ state: any }> = ({ state }) => {
+type SceneElement = Line | Hole | Item | Area;
+
+const PanelElementEditor: React.FC = () => {
   const { translator } = useContext(ReactPlannerContext);
+  const scene = usePlannerStore((state) => state.scene);
 
-  const { scene, mode } = state;
-
-  const componentRenderer = (element: any, layer: any) => (
+  const componentRenderer = (element: SceneElement, layer: Layer) => (
     <Panel
       key={element.id}
-      name={translator.t("Properties: [{0}] {1}", element.type, element.id)}
+      name={translator?.t("Properties: [{0}] {1}",
+        element.type,
+        element.id
+      ) ?? `Properties: [${element.type}] ${element.id}`}
       opened={true}
     >
       <div style={{ padding: "5px 15px" }}>
-        <ElementEditor element={element} layer={layer} state={state} />
+        <ElementEditor element={element} layer={layer} />
       </div>
     </Panel>
   );
 
-  const layerRenderer = (layer: any) =>
-    Seq()
-      .concat(
-        layer.get("lines") || Map(),
-        layer.get("holes") || Map(),
-        layer.get("areas") || Map(),
-        layer.get("items") || Map()
-      )
-      .filter((element: any) => element.get("selected"))
-      .map((element: any) => componentRenderer(element, layer))
-      .valueSeq();
+  const layerRenderer = (layer: Layer) => {
+    const lines = layer.lines || {};
+    const holes = layer.holes || {};
+    const areas = layer.areas || {};
+    const items = layer.items || {};
 
-  return <div>{scene.get("layers").valueSeq().map(layerRenderer)}</div>;
+    const allElements: Record<string, SceneElement> = { ...lines, ...holes, ...areas, ...items };
+
+    return Object.values(allElements)
+      .filter((element) => element.selected)
+      .map((element) => componentRenderer(element, layer));
+  };
+
+  if (!scene.layers) return null;
+
+  return <div>{Object.values(scene.layers).flatMap(layerRenderer)}</div>;
 };
 
 export default PanelElementEditor;

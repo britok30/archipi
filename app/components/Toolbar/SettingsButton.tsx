@@ -1,6 +1,6 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Settings } from "lucide-react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
 import {
   Dialog,
   DialogContent,
@@ -13,29 +13,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ToolbarButton from "./ToolbarButton";
 
-const SettingsButton = ({ state }) => {
+const SettingsButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { projectActions, translator } = useContext(ReactPlannerContext);
-  const scene = state.scene;
+  const scene = usePlannerStore((state) => state.scene);
+  const setProjectProperties = usePlannerStore((state) => state.setProjectProperties);
+  const rollback = usePlannerStore((state) => state.rollback);
 
-  const [dataWidth, setDataWidth] = useState(scene.width);
-  const [dataHeight, setDataHeight] = useState(scene.height);
+  const [dataWidth, setDataWidth] = useState(scene.width.toString());
+  const [dataHeight, setDataHeight] = useState(scene.height.toString());
 
-  const onSubmit = (event) => {
+  const onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    let width = parseInt(dataWidth);
-    let height = parseInt(dataHeight);
+    const width = parseInt(dataWidth);
+    const height = parseInt(dataHeight);
     if (width <= 100 || height <= 100) {
       alert("Scene size too small");
     } else {
-      projectActions.setProjectProperties({ width, height });
-      setIsOpen(false); // Close dialog after successful save
+      setProjectProperties({ width, height });
+      setIsOpen(false);
     }
   };
 
   const handleCancel = () => {
-    projectActions.rollback();
+    rollback();
     setIsOpen(false);
   };
 

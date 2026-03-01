@@ -1,87 +1,91 @@
 "use client";
 
-import React from "react";
-import { Map as ImmutableMap } from "immutable";
+import React, { useMemo } from "react";
+import { usePlannerStore } from "../../store";
 import PanelElementEditor from "./PanelElementEditor";
 import PanelGroupEditor from "./PanelGroupEditor";
 import PanelLayers from "./PanelLayers";
 import PanelGuides from "./PanelGuides";
 import PanelGroups from "./PanelGroups";
 import PanelLayerElements from "./PanelLayerElements";
-
-import * as constants from "../../utils/constants";
-import { StateType } from "@/app/models/models";
+import {
+  MODE_VIEWING_CATALOG,
+  MODE_IDLE,
+  MODE_2D_ZOOM_IN,
+  MODE_2D_ZOOM_OUT,
+  MODE_2D_PAN,
+  MODE_WAITING_DRAWING_LINE,
+  MODE_DRAGGING_LINE,
+  MODE_DRAGGING_VERTEX,
+  MODE_DRAGGING_ITEM,
+  MODE_DRAWING_LINE,
+  MODE_DRAWING_HOLE,
+  MODE_DRAWING_ITEM,
+  MODE_DRAGGING_HOLE,
+  MODE_ROTATING_ITEM,
+  MODE_3D_VIEW,
+} from "../../store/types";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
 } from "@/components/ui/sidebar";
 
-interface SidebarProps {
-  state: any;
-}
+const VISIBLE_MODES = [
+  MODE_IDLE,
+  MODE_2D_ZOOM_IN,
+  MODE_2D_ZOOM_OUT,
+  MODE_2D_PAN,
+  MODE_WAITING_DRAWING_LINE,
+  MODE_DRAGGING_LINE,
+  MODE_DRAGGING_VERTEX,
+  MODE_DRAGGING_ITEM,
+  MODE_DRAWING_LINE,
+  MODE_DRAWING_HOLE,
+  MODE_DRAWING_ITEM,
+  MODE_DRAGGING_HOLE,
+  MODE_ROTATING_ITEM,
+  MODE_3D_VIEW,
+];
 
-const Sidebar: React.FC<SidebarProps> = ({ state }) => {
-  const mode: string = state.get("mode");
-  let isVisible = true;
+const Sidebar: React.FC = () => {
+  const mode = usePlannerStore((state) => state.mode);
+  const scene = usePlannerStore((state) => state.scene);
 
-  switch (mode) {
-    case constants.MODE_VIEWING_CATALOG:
-      isVisible = false;
-      break;
+  const isVisible = VISIBLE_MODES.includes(mode);
 
-    case constants.MODE_IDLE:
-    case constants.MODE_2D_ZOOM_IN:
-    case constants.MODE_2D_ZOOM_OUT:
-    case constants.MODE_2D_PAN:
-    case constants.MODE_WAITING_DRAWING_LINE:
-    case constants.MODE_DRAGGING_LINE:
-    case constants.MODE_DRAGGING_VERTEX:
-    case constants.MODE_DRAGGING_ITEM:
-    case constants.MODE_DRAWING_LINE:
-    case constants.MODE_DRAWING_HOLE:
-    case constants.MODE_DRAWING_ITEM:
-    case constants.MODE_DRAGGING_HOLE:
-    case constants.MODE_ROTATING_ITEM:
-    case constants.MODE_3D_VIEW:
-      isVisible = true;
-      break;
-    default:
-      isVisible = false;
-      break;
-  }
+  const selectedLayerId = scene.selectedLayer;
+  const selectedLayer = selectedLayerId ? scene.layers[selectedLayerId] : null;
+
+  // Check for multiselection
+  const multiselected = useMemo(() => {
+    if (!selectedLayer) return false;
+    const selected = selectedLayer.selected;
+    const linesCount = selected.lines.length;
+    const itemsCount = selected.items.length;
+    const holesCount = selected.holes.length;
+    const areasCount = selected.areas.length;
+
+    return (
+      linesCount > 1 ||
+      itemsCount > 1 ||
+      holesCount > 1 ||
+      areasCount > 1 ||
+      linesCount + itemsCount + holesCount + areasCount > 1
+    );
+  }, [selectedLayer]);
+
+  // Find selected group
+  const selectedGroupId = useMemo(() => {
+    const groups = scene.groups;
+    for (const [groupId, group] of Object.entries(groups)) {
+      if (group.selected) {
+        return groupId;
+      }
+    }
+    return null;
+  }, [scene.groups]);
 
   if (!isVisible) return null;
-
-  const selectedLayer: string = state.getIn(["scene", "selectedLayer"]);
-
-  // TODO: change in multi-layer check
-  const selected = state.getIn([
-    "scene",
-    "layers",
-    selectedLayer,
-    "selected",
-  ]) as ImmutableMap<string, any>;
-
-  const multiselected =
-    selected.get("lines").size > 1 ||
-    selected.get("items").size > 1 ||
-    selected.get("holes").size > 1 ||
-    selected.get("areas").size > 1 ||
-    selected.get("lines").size +
-      selected.get("items").size +
-      selected.get("holes").size +
-      selected.get("areas").size >
-      1;
-
-  const groups = state.getIn(["scene", "groups"]) as ImmutableMap<
-    string,
-    ImmutableMap<string, any>
-  >;
-
-  const selectedGroup = groups.findEntry((g) => g.get("selected"));
 
   return (
     <ShadcnSidebar
@@ -93,49 +97,38 @@ const Sidebar: React.FC<SidebarProps> = ({ state }) => {
         event.stopPropagation()
       }
     >
-      <SidebarContent className="bg-black text-white scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black ">
+      <SidebarContent className="bg-black text-white scrollbar scrollbar-thumb-zinc-200 scrollbar-track-black">
         {/* PanelGuides */}
         <div style={{ position: "relative" }}>
-          <PanelGuides state={state} />
+          <PanelGuides />
         </div>
 
         {/* PanelLayers */}
         <div style={{ position: "relative" }}>
-          <PanelLayers state={state} />
+          <PanelLayers />
         </div>
 
         {/* PanelLayerElements */}
         <div style={{ position: "relative" }}>
-          <PanelLayerElements
-            mode={state.get("mode")}
-            layers={state.getIn(["scene", "layers"])}
-            selectedLayer={state.getIn(["scene", "selectedLayer"])}
-          />
+          <PanelLayerElements />
         </div>
 
         {/* PanelGroups */}
         <div style={{ position: "relative" }}>
-          <PanelGroups
-            mode={state.get("mode")}
-            groups={state.getIn(["scene", "groups"])}
-            layers={state.getIn(["scene", "layers"])}
-          />
+          <PanelGroups />
         </div>
 
         {/* PanelElementEditor */}
         {!multiselected && (
           <div style={{ position: "relative" }}>
-            <PanelElementEditor state={state} />
+            <PanelElementEditor />
           </div>
         )}
 
         {/* PanelGroupEditor */}
-        {selectedGroup && (
+        {selectedGroupId && (
           <div style={{ position: "relative" }}>
-            <PanelGroupEditor
-              state={state}
-              groupID={selectedGroup ? selectedGroup[0] : null}
-            />
+            <PanelGroupEditor groupID={selectedGroupId} />
           </div>
         )}
       </SidebarContent>

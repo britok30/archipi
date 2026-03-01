@@ -54,6 +54,11 @@ interface FormNumberInputProps {
    * Additional CSS classes to apply to the input component.
    */
   className?: string;
+
+  /**
+   * Inline styles to apply to the input component.
+   */
+  style?: React.CSSProperties;
 }
 
 const FormNumberInput: React.FC<FormNumberInputProps> = ({

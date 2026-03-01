@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
 
 interface Page {
   name: string;
@@ -15,14 +15,14 @@ interface CatalogPageItemProps {
 }
 
 const CatalogPageItem: React.FC<CatalogPageItemProps> = ({ page, oldPage }) => {
-  const { projectActions } = useContext<any>(ReactPlannerContext);
+  const changeCatalogPage = usePlannerStore((state) => state.changeCatalogPage);
 
-  const changePage = (newPage: string) => {
-    projectActions.changeCatalogPage(newPage, oldPage.name);
+  const handleClick = () => {
+    changeCatalogPage(page.name, oldPage.name);
   };
 
   return (
-    <Card className="cursor-pointer" onClick={() => changePage(page.name)}>
+    <Card className="cursor-pointer" onClick={handleClick}>
       <CardContent className="flex items-center justify-center h-full">
         <h3 className="text-2xl">{page.label}</h3>
       </CardContent>

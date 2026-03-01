@@ -33,16 +33,12 @@ import {
   MODE_FITTING_IMAGE,
   MODE_UPLOADING_IMAGE,
   MODE_ROTATING_ITEM,
-} from "../../utils/constants";
+} from "../../store/types";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { StateType } from "@/app/models/models";
+import { usePlannerStore } from "../../store";
 
-interface PanelLayersProps {
-  state: StateType;
-}
-
-const VISIBILITY_MODE = {
+const VISIBILITY_MODES = [
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
   MODE_2D_ZOOM_OUT,
@@ -60,26 +56,32 @@ const VISIBILITY_MODE = {
   MODE_ROTATING_ITEM,
   MODE_UPLOADING_IMAGE,
   MODE_FITTING_IMAGE,
-};
+];
 
-const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
-  const scene = state.scene;
-  const { sceneActions, translator } = useContext(ReactPlannerContext);
+const PanelLayers: React.FC = () => {
+  const { translator } = useContext(ReactPlannerContext);
+  const mode = usePlannerStore((state) => state.mode);
+  const scene = usePlannerStore((state) => state.scene);
+  const selectLayerAction = usePlannerStore((state) => state.selectLayer);
+  const setLayerPropertiesAction = usePlannerStore((state) => state.setLayerProperties);
+  const addLayerAction = usePlannerStore((state) => state.addLayer);
+  const removeLayerAction = usePlannerStore((state) => state.removeLayer);
+
   const [layerAddUIVisible, setLayerAddUIVisible] = useState(false);
-  const [editingLayer, setEditingLayer] = useState<Map<string, any> | null>(
-    null
-  );
-  const layers = scene.get("layers");
-  const selectedLayer = scene.get("selectedLayer");
+  const [editingLayer, setEditingLayer] = useState<Map<string, any> | null>(null);
 
-  const addLayer = (e: React.MouseEvent) => {
+  const layers = scene.layers;
+  const selectedLayerId = scene.selectedLayer;
+  const layerEntries = Object.entries(layers);
+
+  const handleAddLayer = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!layerAddUIVisible) {
       const newLayer = Map({
         name: "",
         opacity: 1,
         altitude: 0,
-        order: layers.size,
+        order: layerEntries.length,
       });
       setEditingLayer(newLayer);
       setLayerAddUIVisible(true);
@@ -100,19 +102,22 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
     const { name, opacity, altitude, order } = layerData.toJS();
 
     if (layerId) {
-      sceneActions.setLayerProperties(layerId, {
+      setLayerPropertiesAction(layerId, {
         name,
         opacity,
         altitude: parseInt(altitude, 10),
         order,
       });
     } else {
-      sceneActions.addLayer(name, parseInt(altitude, 10));
-      const newLayerID = layers.keySeq().last();
-      sceneActions.setLayerProperties(newLayerID, {
-        opacity,
-        order,
-      });
+      addLayerAction(name, parseInt(altitude, 10));
+      const layerKeys = Object.keys(layers);
+      const newLayerID = layerKeys[layerKeys.length - 1];
+      if (newLayerID) {
+        setLayerPropertiesAction(newLayerID, {
+          opacity,
+          order,
+        });
+      }
     }
 
     setLayerAddUIVisible(false);
@@ -121,35 +126,34 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
 
   const delLayer = (e: React.MouseEvent, layerID: string) => {
     e.stopPropagation();
-    sceneActions.removeLayer(layerID);
+    removeLayerAction(layerID);
     setLayerAddUIVisible(false);
     setEditingLayer(null);
   };
 
   const selectClick = (e: React.MouseEvent, layerID: string) => {
     e.stopPropagation();
-    sceneActions.selectLayer(layerID);
+    selectLayerAction(layerID);
   };
 
   const configureClick = (e: React.MouseEvent, layer: any, layerID: string) => {
     e.stopPropagation();
-    setEditingLayer(layer.set("id", layerID));
+    setEditingLayer(Map({ ...layer, id: layerID }));
     setLayerAddUIVisible(true);
   };
 
   const swapVisibility = (e: React.MouseEvent, layer: any, layerID: string) => {
     e.stopPropagation();
-    const currentVisibility = layer.get("visible");
-    sceneActions.setLayerProperties(layerID, {
-      visible: !currentVisibility,
+    setLayerPropertiesAction(layerID, {
+      visible: !layer.visible,
     });
   };
 
-  const isCurrentLayer = (layerID: string) => layerID === selectedLayer;
+  const isCurrentLayer = (layerID: string) => layerID === selectedLayerId;
 
-  if (!VISIBILITY_MODE[state.mode]) return null;
+  if (!VISIBILITY_MODES.includes(mode)) return null;
 
-  const isLastLayer = layers.size === 1;
+  const isLastLayer = layerEntries.length === 1;
 
   return (
     <Panel name="Layers">
@@ -159,7 +163,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
         <div className="text-sm text-right">Actions</div>
       </div>
 
-      {layers.entrySeq().map(([layerID, layer]: [string, any]) => (
+      {layerEntries.map(([layerID, layer]: [string, any]) => (
         <div
           key={layerID}
           className={`grid grid-cols-4 gap-3 text-white cursor-pointer hover:bg-[#292929] transition duration-200 ease-in-out py-3 px-3 ${
@@ -167,8 +171,8 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
           }`}
           onClick={(e) => selectClick(e, layerID)}
         >
-          <div className="text-sm">[ h : {layer.get("altitude")} ]</div>
-          <div className="text-sm col-span-2">{layer.get("name")}</div>
+          <div className="text-sm">[ h : {layer.altitude} ]</div>
+          <div className="text-sm col-span-2">{layer.name}</div>
 
           <div className="flex items-center justify-end space-x-2">
             {!isCurrentLayer(layerID) && (
@@ -176,7 +180,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
                 onClick={(e) => swapVisibility(e, layer, layerID)}
                 className="p-1"
               >
-                {layer.get("visible") ? (
+                {layer.visible ? (
                   <Eye className="w-4 h-4 text-white" />
                 ) : (
                   <EyeOff className="w-4 h-4 text-gray-500" />
@@ -206,7 +210,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
       ))}
 
       <div className="flex justify-center my-3">
-        <Button variant="default" onClick={addLayer}>
+        <Button variant="default" onClick={handleAddLayer}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New Layer
         </Button>
@@ -223,7 +227,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
               }
             />
 
-            <label className="text-white">{translator.t("Opacity")}:</label>
+            <label className="text-white">{translator?.t("Opacity") ?? "Opacity"}:</label>
             <Slider
               value={[editingLayer.get("opacity") * 100]}
               onValueChange={(value) =>
@@ -233,7 +237,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
               max={100}
             />
 
-            <label className="text-white">{translator.t("Altitude")}:</label>
+            <label className="text-white">{translator?.t("Altitude") ?? "Altitude"}:</label>
             <Input
               type="number"
               value={editingLayer.get("altitude") || 0}
@@ -244,7 +248,7 @@ const PanelLayers: React.FC<PanelLayersProps> = ({ state }) => {
               }
             />
 
-            <label className="text-white">{translator.t("Order")}:</label>
+            <label className="text-white">{translator?.t("Order") ?? "Order"}:</label>
             <Input
               type="number"
               value={editingLayer.get("order")}

@@ -35,20 +35,12 @@ interface Element {
   selected: boolean;
   vertices: string[];
   holes: string[];
-  properties: {
-    get: (key: string) => any;
-  };
+  properties: Record<string, any>;
 }
 
 export interface Layer {
-  vertices: Map<string, Vertex>;
-  areas: Map<
-    string,
-    {
-      vertices: string[];
-    }
-  >;
-  getIn: (path: string[]) => any;
+  vertices: Record<string, Vertex>;
+  areas: Record<string, { vertices: string[] }>;
 }
 
 interface PropertyDefinition {
@@ -115,7 +107,7 @@ export default function AreaFactory(
 
       // Print area path
       element.vertices.forEach((vertexID, ind) => {
-        const vertex = layer.vertices.get(vertexID);
+        const vertex = layer.vertices[vertexID];
         if (vertex) {
           path += (ind ? "L" : "M") + vertex.x + " " + vertex.y + " ";
         }
@@ -123,10 +115,10 @@ export default function AreaFactory(
 
       // Add holes
       element.holes.forEach((areaID) => {
-        const area = layer.areas.get(areaID);
+        const area = layer.areas[areaID];
         if (area) {
           [...area.vertices].reverse().forEach((vertexID, ind) => {
-            const vertex = layer.vertices.get(vertexID);
+            const vertex = layer.vertices[vertexID];
             if (vertex) {
               path += (ind ? "L" : "M") + vertex.x + " " + vertex.y + " ";
             }
@@ -136,7 +128,7 @@ export default function AreaFactory(
 
       const fill = element.selected
         ? SharedStyle.AREA_MESH_COLOR.selected
-        : element.properties.get("patternColor");
+        : element.properties?.patternColor;
 
       return <path d={path} fill={fill} />;
     },

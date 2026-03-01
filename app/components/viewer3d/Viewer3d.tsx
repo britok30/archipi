@@ -1,21 +1,18 @@
 "use client";
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   Environment,
   SoftShadows,
-  useHelper,
 } from "@react-three/drei";
 import { Vector2, Raycaster, Object3D, Object3DEventMap } from "three";
-import { parseData, updateScene } from "./scene-creator";
-import diff from "immutablediff";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { usePrevious } from "@uidotdev/usehooks";
+import { parseData } from "./scene-creator";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
 
 type Scene3DViewerProps = {
-  state: any;
   width: number;
   height: number;
 };
@@ -28,21 +25,21 @@ interface InteractiveObject extends Object3D<Object3DEventMap> {
   };
 }
 
-const Scene = ({ state, planData, projectActions }) => {
-  const { scene, camera } = useThree();
-  const spotLightRef = useRef(null);
-  const directionalLightRef = useRef(null);
-  const fillLightRef = useRef(null);
+const Scene = ({ planData }: { planData: any }) => {
+  const { scene: threeScene } = useThree();
+  const spotLightRef = useRef<any>(null);
+  const directionalLightRef = useRef<any>(null);
+  const fillLightRef = useRef<any>(null);
   // Initialize the spotlight target to avoid null references
   const spotLightTargetRef = useRef<Object3D>(new Object3D());
 
   // Ensure the spotlight target is added to the scene
   useEffect(() => {
-    scene.add(spotLightTargetRef.current);
+    threeScene.add(spotLightTargetRef.current);
     return () => {
-      scene.remove(spotLightTargetRef.current);
+      threeScene.remove(spotLightTargetRef.current);
     };
-  }, [scene]);
+  }, [threeScene]);
 
   useEffect(() => {
     // Enhance materials for the plan objects
@@ -60,14 +57,14 @@ const Scene = ({ state, planData, projectActions }) => {
       }
     });
 
-    scene.add(planData.plan);
-    scene.add(planData.grid);
+    threeScene.add(planData.plan);
+    threeScene.add(planData.grid);
 
     return () => {
-      scene.remove(planData.plan);
-      scene.remove(planData.grid);
+      threeScene.remove(planData.plan);
+      threeScene.remove(planData.grid);
     };
-  }, [planData, scene]);
+  }, [planData, threeScene]);
 
   // Update spotlight position to follow the camera
   useFrame(({ camera }) => {
@@ -123,59 +120,61 @@ const Scene = ({ state, planData, projectActions }) => {
   );
 };
 
-const InteractionHandler = ({ projectActions, toIntersect }) => {
+const InteractionHandler = ({ toIntersect }: { toIntersect: Object3D[] }) => {
   const { camera, gl } = useThree();
+  const unselectAll = usePlannerStore((state) => state.unselectAll);
   const raycaster = useRef(new Raycaster());
-  const lastPointerPosition = useRef({ x: null, y: null });
+  const lastPointerPosition = useRef<{ x: number | null; y: number | null }>({ x: null, y: null });
   const clickThreshold = 2; // in pixels
 
-  const handlePointerDown = (event: PointerEvent) => {
-    lastPointerPosition.current = { x: event.clientX, y: event.clientY };
-  };
-
-  const handlePointerUp = (event: PointerEvent) => {
-    const { x: startX, y: startY } = lastPointerPosition.current;
-    if (startX === null || startY === null) return;
-    const dx = event.clientX - startX;
-    const dy = event.clientY - startY;
-    if (Math.abs(dx) > clickThreshold || Math.abs(dy) > clickThreshold) return;
-
-    const rect = gl.domElement.getBoundingClientRect();
-    const mouse = new Vector2(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1
-    );
-    raycaster.current.setFromCamera(mouse, camera);
-    const intersects = raycaster.current.intersectObjects(toIntersect, true);
-    if (intersects.length > 0 && !isNaN(intersects[0].distance)) {
-      // Cast the intersected object to InteractiveObject
-      let object = intersects[0].object as InteractiveObject;
-      let interactionFound = false;
-      while (object) {
-        if (object.interact && typeof object.interact === "function") {
-          object.interact();
-          interactionFound = true;
-          break;
-        }
-        if (
-          object.userData &&
-          object.userData.interact &&
-          typeof object.userData.interact === "function"
-        ) {
-          object.userData.interact();
-          interactionFound = true;
-          break;
-        }
-        object = object.parent as InteractiveObject;
-      }
-      if (!interactionFound) {
-        projectActions.unselectAll();
-      }
-    } else {
-      projectActions.unselectAll();
-    }
-  };
   useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      lastPointerPosition.current = { x: event.clientX, y: event.clientY };
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      const { x: startX, y: startY } = lastPointerPosition.current;
+      if (startX === null || startY === null) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (Math.abs(dx) > clickThreshold || Math.abs(dy) > clickThreshold) return;
+
+      const rect = gl.domElement.getBoundingClientRect();
+      const mouse = new Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      raycaster.current.setFromCamera(mouse, camera);
+      const intersects = raycaster.current.intersectObjects(toIntersect, true);
+      if (intersects.length > 0 && !isNaN(intersects[0].distance)) {
+        // Cast the intersected object to InteractiveObject
+        let object = intersects[0].object as InteractiveObject;
+        let interactionFound = false;
+        while (object) {
+          if (object.interact && typeof object.interact === "function") {
+            object.interact();
+            interactionFound = true;
+            break;
+          }
+          if (
+            object.userData &&
+            object.userData.interact &&
+            typeof object.userData.interact === "function"
+          ) {
+            object.userData.interact();
+            interactionFound = true;
+            break;
+          }
+          object = object.parent as InteractiveObject;
+        }
+        if (!interactionFound) {
+          unselectAll();
+        }
+      } else {
+        unselectAll();
+      }
+    };
+
     const canvas = gl.domElement;
     canvas.addEventListener("pointerdown", handlePointerDown);
     canvas.addEventListener("pointerup", handlePointerUp);
@@ -183,47 +182,30 @@ const InteractionHandler = ({ projectActions, toIntersect }) => {
       canvas.removeEventListener("pointerdown", handlePointerDown);
       canvas.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [camera, gl, projectActions]);
+  }, [camera, gl, unselectAll, toIntersect]);
 
   return null;
 };
 
-const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
-  const previousProps = usePrevious(props);
+const Viewer3D: React.FC<Scene3DViewerProps> = ({ width, height }) => {
   const canvasWrapper = useRef<HTMLDivElement>(null);
-  const actions = useContext(ReactPlannerContext);
-  const { projectActions, catalog } = actions;
-  const [planData, setPlanData] = useState(null);
-  const { width, height, state } = props;
+  const { catalog } = useCatalogContext();
+  const scene = usePlannerStore((state) => state.scene);
+  const [planData, setPlanData] = useState<any>(null);
+
+  const actions = {
+    selectLine: usePlannerStore.getState().selectLine,
+    selectHole: usePlannerStore.getState().selectHole,
+    selectItem: usePlannerStore.getState().selectItem,
+    selectArea: usePlannerStore.getState().selectArea,
+  };
 
   useEffect(() => {
-    const data = parseData(state.scene, actions, catalog);
-    setPlanData(data);
-  }, [state.scene, actions, catalog]);
-
-  useEffect(() => {
-    if (
-      previousProps &&
-      planData &&
-      props.state.scene !== previousProps.state.scene
-    ) {
-      const changedValues = diff(previousProps.state.scene, props.state.scene);
-      updateScene(
-        planData,
-        props.state.scene,
-        previousProps.state.scene,
-        changedValues.toJS(),
-        actions,
-        catalog
-      );
+    if (catalog) {
+      const data = parseData(scene, actions, catalog);
+      setPlanData(data);
     }
-  }, [
-    props.state.scene,
-    previousProps?.state.scene,
-    planData,
-    actions,
-    catalog,
-  ]);
+  }, [scene, catalog]);
 
   if (!planData) return null;
 
@@ -252,11 +234,7 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
           up: [0, 1, 0],
         }}
       >
-        <Scene
-          state={state}
-          planData={planData}
-          projectActions={projectActions}
-        />
+        <Scene planData={planData} />
         <OrbitControls
           enableDamping
           dampingFactor={0.05}
@@ -264,10 +242,7 @@ const Viewer3D: React.FC<Scene3DViewerProps> = (props) => {
           maxDistance={1000000}
           maxPolarAngle={Math.PI / 1.5}
         />
-        <InteractionHandler
-          projectActions={projectActions}
-          toIntersect={[planData.plan]}
-        />
+        <InteractionHandler toIntersect={[planData.plan]} />
       </Canvas>
     </div>
   );

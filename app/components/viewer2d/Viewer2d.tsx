@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useCallback, memo, useMemo } from "react";
+import React, { useCallback, memo, useMemo } from "react";
 import {
   ReactSVGPanZoom,
   TOOL_NONE,
@@ -10,77 +10,92 @@ import {
   TOOL_AUTO,
   Value,
   Tool,
+  ViewerMouseEvent,
 } from "react-svg-pan-zoom";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
-import * as constants from "../../utils/constants";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
+import {
+  MODE_IDLE,
+  MODE_2D_PAN,
+  MODE_2D_ZOOM_IN,
+  MODE_2D_ZOOM_OUT,
+  MODE_DRAWING_LINE,
+  MODE_DRAWING_HOLE,
+  MODE_DRAWING_ITEM,
+  MODE_DRAGGING_HOLE,
+  MODE_DRAGGING_ITEM,
+  MODE_DRAGGING_LINE,
+  MODE_DRAGGING_VERTEX,
+  MODE_WAITING_DRAWING_LINE,
+  MODE_ROTATING_ITEM,
+} from "../../store/types";
+import type { Mode } from "../../store/types";
 import { State } from "./state";
 import * as SharedStyle from "../../styles/shared-style";
 import { RulerX } from "./rulerX";
 import { RulerY } from "./rulerY";
-import { StateType } from "@/app/models/models";
 
 interface Viewer2DProps {
-  state: StateType;
   width: number;
   height: number;
 }
 
-const mode2Tool = (mode: string): Tool => {
+const mode2Tool = (mode: Mode): Tool => {
   switch (mode) {
-    case constants.MODE_2D_PAN:
+    case MODE_2D_PAN:
       return TOOL_PAN;
-    case constants.MODE_2D_ZOOM_IN:
+    case MODE_2D_ZOOM_IN:
       return TOOL_ZOOM_IN;
-    case constants.MODE_2D_ZOOM_OUT:
+    case MODE_2D_ZOOM_OUT:
       return TOOL_ZOOM_OUT;
-    case constants.MODE_IDLE:
+    case MODE_IDLE:
       return TOOL_AUTO;
     default:
       return TOOL_NONE;
   }
 };
 
-const mode2PointerEvents = (mode: string): React.CSSProperties => {
+const mode2PointerEvents = (mode: Mode): React.CSSProperties => {
   switch (mode) {
-    case constants.MODE_DRAWING_LINE:
-    case constants.MODE_DRAWING_HOLE:
-    case constants.MODE_DRAWING_ITEM:
-    case constants.MODE_DRAGGING_HOLE:
-    case constants.MODE_DRAGGING_ITEM:
-    case constants.MODE_DRAGGING_LINE:
-    case constants.MODE_DRAGGING_VERTEX:
+    case MODE_DRAWING_LINE:
+    case MODE_DRAWING_HOLE:
+    case MODE_DRAWING_ITEM:
+    case MODE_DRAGGING_HOLE:
+    case MODE_DRAGGING_ITEM:
+    case MODE_DRAGGING_LINE:
+    case MODE_DRAGGING_VERTEX:
       return { pointerEvents: "none" };
     default:
       return {};
   }
 };
 
-const mode2Cursor = (mode: string): React.CSSProperties => {
+const mode2Cursor = (mode: Mode): React.CSSProperties => {
   switch (mode) {
-    case constants.MODE_DRAGGING_HOLE:
-    case constants.MODE_DRAGGING_LINE:
-    case constants.MODE_DRAGGING_VERTEX:
-    case constants.MODE_DRAGGING_ITEM:
+    case MODE_DRAGGING_HOLE:
+    case MODE_DRAGGING_LINE:
+    case MODE_DRAGGING_VERTEX:
+    case MODE_DRAGGING_ITEM:
       return { cursor: "move" };
-    case constants.MODE_ROTATING_ITEM:
+    case MODE_ROTATING_ITEM:
       return { cursor: "ew-resize" };
-    case constants.MODE_WAITING_DRAWING_LINE:
-    case constants.MODE_DRAWING_LINE:
+    case MODE_WAITING_DRAWING_LINE:
+    case MODE_DRAWING_LINE:
       return { cursor: "crosshair" };
     default:
       return { cursor: "default" };
   }
 };
 
-const mode2DetectAutopan = (mode: string): boolean => {
+const mode2DetectAutopan = (mode: Mode): boolean => {
   switch (mode) {
-    case constants.MODE_DRAWING_LINE:
-    case constants.MODE_DRAGGING_LINE:
-    case constants.MODE_DRAGGING_VERTEX:
-    case constants.MODE_DRAGGING_HOLE:
-    case constants.MODE_DRAGGING_ITEM:
-    case constants.MODE_DRAWING_HOLE:
-    case constants.MODE_DRAWING_ITEM:
+    case MODE_DRAWING_LINE:
+    case MODE_DRAGGING_LINE:
+    case MODE_DRAGGING_VERTEX:
+    case MODE_DRAGGING_HOLE:
+    case MODE_DRAGGING_ITEM:
+    case MODE_DRAWING_HOLE:
+    case MODE_DRAWING_ITEM:
       return true;
     default:
       return false;
@@ -114,24 +129,67 @@ const extractElementData = (node: HTMLElement): ElementData | null => {
   };
 };
 
-export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
-  const {
-    viewer2DActions,
-    linesActions,
-    holesActions,
-    verticesActions,
-    itemsActions,
-    areaActions,
-    projectActions,
-    catalog,
-  } = useContext(ReactPlannerContext);
-  const { viewer2D, mode, scene, zoom, mouse, snapMask } = state;
+export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
+  const { catalog } = useCatalogContext();
 
-  const layerID = scene.get("selectedLayer");
-  const sceneWidth = scene.get("width");
-  const sceneHeight = scene.get("height");
+  // Get state from Zustand
+  const mode = usePlannerStore((state) => state.mode);
+  const scene = usePlannerStore((state) => state.scene);
+  const viewer2D = usePlannerStore((state) => state.viewer2D);
+  const zoom = usePlannerStore((state) => state.zoom);
+  const mouse = usePlannerStore((state) => state.mouse);
 
-  // Cache the scene height for mapping function
+  // Get actions from Zustand
+  const updateCameraView = usePlannerStore((state) => state.updateCameraView);
+  const updateMouseCoords = usePlannerStore((state) => state.updateMouseCoords);
+  const updateZoomScale = usePlannerStore((state) => state.updateZoomScale);
+  const selectToolEdit = usePlannerStore((state) => state.selectToolEdit);
+  const selectToolPan = usePlannerStore((state) => state.selectToolPan);
+  const selectToolZoomIn = usePlannerStore((state) => state.selectToolZoomIn);
+  const selectToolZoomOut = usePlannerStore((state) => state.selectToolZoomOut);
+  const unselectAll = usePlannerStore((state) => state.unselectAll);
+
+  // Line actions
+  const selectLine = usePlannerStore((state) => state.selectLine);
+  const beginDrawingLine = usePlannerStore((state) => state.beginDrawingLine);
+  const updateDrawingLine = usePlannerStore((state) => state.updateDrawingLine);
+  const endDrawingLine = usePlannerStore((state) => state.endDrawingLine);
+  const beginDraggingLine = usePlannerStore((state) => state.beginDraggingLine);
+  const updateDraggingLine = usePlannerStore((state) => state.updateDraggingLine);
+  const endDraggingLine = usePlannerStore((state) => state.endDraggingLine);
+
+  // Vertex actions
+  const beginDraggingVertex = usePlannerStore((state) => state.beginDraggingVertex);
+  const updateDraggingVertex = usePlannerStore((state) => state.updateDraggingVertex);
+  const endDraggingVertex = usePlannerStore((state) => state.endDraggingVertex);
+
+  // Hole actions
+  const selectHole = usePlannerStore((state) => state.selectHole);
+  const updateDrawingHole = usePlannerStore((state) => state.updateDrawingHole);
+  const endDrawingHole = usePlannerStore((state) => state.endDrawingHole);
+  const beginDraggingHole = usePlannerStore((state) => state.beginDraggingHole);
+  const updateDraggingHole = usePlannerStore((state) => state.updateDraggingHole);
+  const endDraggingHole = usePlannerStore((state) => state.endDraggingHole);
+
+  // Item actions
+  const selectItem = usePlannerStore((state) => state.selectItem);
+  const updateDrawingItem = usePlannerStore((state) => state.updateDrawingItem);
+  const endDrawingItem = usePlannerStore((state) => state.endDrawingItem);
+  const beginDraggingItem = usePlannerStore((state) => state.beginDraggingItem);
+  const updateDraggingItem = usePlannerStore((state) => state.updateDraggingItem);
+  const endDraggingItem = usePlannerStore((state) => state.endDraggingItem);
+  const beginRotatingItem = usePlannerStore((state) => state.beginRotatingItem);
+  const updateRotatingItem = usePlannerStore((state) => state.updateRotatingItem);
+  const endRotatingItem = usePlannerStore((state) => state.endRotatingItem);
+
+  // Area actions
+  const selectArea = usePlannerStore((state) => state.selectArea);
+
+  const layerID = scene.selectedLayer || "";
+  const sceneWidth = scene.width;
+  const sceneHeight = scene.height;
+
+  // Map cursor position (flip Y axis)
   const mapCursorPosition = useCallback(
     ({ x, y }: { x: number; y: number }) => ({
       x,
@@ -141,38 +199,38 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
   );
 
   const onMouseMove = useCallback(
-    (viewerEvent: any) => {
-      const evt = new Event("mousemove-planner-event") as any;
+    (viewerEvent: ViewerMouseEvent<any>) => {
+      const evt = new Event("mousemove-planner-event") as Event & { viewerEvent: ViewerMouseEvent<any> };
       evt.viewerEvent = viewerEvent;
       document.dispatchEvent(evt);
 
       const { x, y } = mapCursorPosition(viewerEvent);
-      projectActions.updateMouseCoord({ x, y });
+      updateMouseCoords({ x, y });
 
       switch (mode) {
-        case constants.MODE_DRAWING_LINE:
-          linesActions.updateDrawingLine(x, y, String(snapMask));
+        case MODE_DRAWING_LINE:
+          updateDrawingLine(x, y);
           break;
-        case constants.MODE_DRAWING_HOLE:
-          holesActions.updateDrawingHole(layerID, x, y);
+        case MODE_DRAWING_HOLE:
+          updateDrawingHole(layerID, x, y);
           break;
-        case constants.MODE_DRAWING_ITEM:
-          itemsActions.updateDrawingItem(layerID, x, y);
+        case MODE_DRAWING_ITEM:
+          updateDrawingItem(layerID, x, y);
           break;
-        case constants.MODE_DRAGGING_HOLE:
-          holesActions.updateDraggingHole(x, y);
+        case MODE_DRAGGING_HOLE:
+          updateDraggingHole(x, y);
           break;
-        case constants.MODE_DRAGGING_LINE:
-          linesActions.updateDraggingLine(x, y, String(snapMask));
+        case MODE_DRAGGING_LINE:
+          updateDraggingLine(x, y);
           break;
-        case constants.MODE_DRAGGING_VERTEX:
-          verticesActions.updateDraggingVertex(x, y, String(snapMask));
+        case MODE_DRAGGING_VERTEX:
+          updateDraggingVertex(x, y);
           break;
-        case constants.MODE_DRAGGING_ITEM:
-          itemsActions.updateDraggingItem(x, y);
+        case MODE_DRAGGING_ITEM:
+          updateDraggingItem(x, y);
           break;
-        case constants.MODE_ROTATING_ITEM:
-          itemsActions.updateRotatingItem(x, y);
+        case MODE_ROTATING_ITEM:
+          updateRotatingItem(x, y);
           break;
         default:
           break;
@@ -182,71 +240,47 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
     [
       mapCursorPosition,
       mode,
-      projectActions,
-      linesActions,
-      holesActions,
-      itemsActions,
-      verticesActions,
-      snapMask,
       layerID,
+      updateMouseCoords,
+      updateDrawingLine,
+      updateDrawingHole,
+      updateDrawingItem,
+      updateDraggingHole,
+      updateDraggingLine,
+      updateDraggingVertex,
+      updateDraggingItem,
+      updateRotatingItem,
     ]
   );
 
   const onMouseDown = useCallback(
-    (viewerEvent: any) => {
+    (viewerEvent: ViewerMouseEvent<any>) => {
       const event = viewerEvent.originalEvent;
-      const evt = new Event("mousedown-planner-event") as any;
+      const evt = new Event("mousedown-planner-event") as Event & { viewerEvent: ViewerMouseEvent<any> };
       evt.viewerEvent = viewerEvent;
       document.dispatchEvent(evt);
 
       const { x, y } = mapCursorPosition(viewerEvent);
 
-      if (mode === constants.MODE_IDLE) {
+      if (mode === MODE_IDLE) {
         const elementData = extractElementData(event.target as HTMLElement);
         if (!elementData || !elementData.selected) return;
 
         switch (elementData.prototype) {
           case "lines":
-            linesActions.beginDraggingLine(
-              elementData.layer,
-              elementData.id,
-              x,
-              y,
-              String(snapMask)
-            );
+            beginDraggingLine(elementData.layer, elementData.id, x, y);
             break;
           case "vertices":
-            verticesActions.beginDraggingVertex(
-              elementData.layer,
-              elementData.id,
-              x,
-              y,
-              String(snapMask)
-            );
+            beginDraggingVertex(elementData.layer, elementData.id, x, y);
             break;
           case "items":
             if (elementData.part === "rotation-anchor")
-              itemsActions.beginRotatingItem(
-                elementData.layer,
-                elementData.id,
-                x,
-                y
-              );
+              beginRotatingItem(elementData.layer, elementData.id, x, y);
             else
-              itemsActions.beginDraggingItem(
-                elementData.layer,
-                elementData.id,
-                x,
-                y
-              );
+              beginDraggingItem(elementData.layer, elementData.id, x, y);
             break;
           case "holes":
-            holesActions.beginDraggingHole(
-              elementData.layer,
-              elementData.id,
-              x,
-              y
-            );
+            beginDraggingHole(elementData.layer, elementData.id, x, y);
             break;
           default:
             break;
@@ -257,76 +291,75 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
     [
       mode,
       mapCursorPosition,
-      linesActions,
-      verticesActions,
-      itemsActions,
-      holesActions,
-      snapMask,
+      beginDraggingLine,
+      beginDraggingVertex,
+      beginDraggingItem,
+      beginRotatingItem,
+      beginDraggingHole,
     ]
   );
 
   const onMouseUp = useCallback(
-    (viewerEvent: any) => {
+    (viewerEvent: ViewerMouseEvent<any>) => {
       const event = viewerEvent.originalEvent;
-      const evt = new Event("mouseup-planner-event") as any;
+      const evt = new Event("mouseup-planner-event") as Event & { viewerEvent: ViewerMouseEvent<any> };
       evt.viewerEvent = viewerEvent;
       document.dispatchEvent(evt);
 
       const { x, y } = mapCursorPosition(viewerEvent);
 
       switch (mode) {
-        case constants.MODE_IDLE: {
+        case MODE_IDLE: {
           const elementData = extractElementData(event.target as HTMLElement);
           if (elementData && elementData.selected) return;
           const proto = elementData ? elementData.prototype : "none";
           switch (proto) {
             case "areas":
-              areaActions.selectArea(elementData!.layer, elementData!.id);
+              selectArea(elementData!.layer, elementData!.id);
               break;
             case "lines":
-              linesActions.selectLine(elementData!.layer, elementData!.id);
+              selectLine(elementData!.layer, elementData!.id);
               break;
             case "holes":
-              holesActions.selectHole(elementData!.layer, elementData!.id);
+              selectHole(elementData!.layer, elementData!.id);
               break;
             case "items":
-              itemsActions.selectItem(elementData!.layer, elementData!.id);
+              selectItem(elementData!.layer, elementData!.id);
               break;
             case "none":
-              projectActions.unselectAll();
+              unselectAll();
               break;
             default:
               break;
           }
           break;
         }
-        case constants.MODE_WAITING_DRAWING_LINE:
-          linesActions.beginDrawingLine(layerID, x, y, String(snapMask));
+        case MODE_WAITING_DRAWING_LINE:
+          beginDrawingLine(layerID, x, y);
           break;
-        case constants.MODE_DRAWING_LINE:
-          linesActions.endDrawingLine(x, y, String(snapMask));
-          linesActions.beginDrawingLine(layerID, x, y, String(snapMask));
+        case MODE_DRAWING_LINE:
+          endDrawingLine(x, y);
           break;
-        case constants.MODE_DRAWING_HOLE:
-          holesActions.endDrawingHole(layerID, x, y);
+        case MODE_DRAWING_HOLE:
+          endDrawingHole(layerID, x, y);
           break;
-        case constants.MODE_DRAWING_ITEM:
-          itemsActions.endDrawingItem(layerID, x, y);
+        case MODE_DRAWING_ITEM:
+          endDrawingItem(layerID, x, y);
           break;
-        case constants.MODE_DRAGGING_LINE:
-          linesActions.endDraggingLine(x, y, String(snapMask));
+        case MODE_DRAGGING_LINE:
+          endDraggingLine(x, y);
           break;
-        case constants.MODE_DRAGGING_VERTEX:
-          verticesActions.endDraggingVertex(x, y, String(snapMask));
+        case MODE_DRAGGING_VERTEX:
+          endDraggingVertex(x, y);
           break;
-        case constants.MODE_DRAGGING_ITEM:
-          itemsActions.endDraggingItem(x, y);
+        case MODE_DRAGGING_ITEM:
+          endDraggingItem(x, y);
           break;
-        case constants.MODE_DRAGGING_HOLE:
-          holesActions.endDraggingHole(x, y);
+        case MODE_DRAGGING_HOLE:
+          endDraggingHole(x, y);
           break;
-        case constants.MODE_ROTATING_ITEM:
-          itemsActions.endRotatingItem(x, y);
+        case MODE_ROTATING_ITEM:
+          endRotatingItem(x, y);
           break;
         default:
           break;
@@ -336,53 +369,60 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
     [
       mode,
       mapCursorPosition,
-      areaActions,
-      linesActions,
-      holesActions,
-      itemsActions,
-      verticesActions,
-      projectActions,
       layerID,
-      snapMask,
+      selectArea,
+      selectLine,
+      selectHole,
+      selectItem,
+      unselectAll,
+      beginDrawingLine,
+      endDrawingLine,
+      endDrawingHole,
+      endDrawingItem,
+      endDraggingLine,
+      endDraggingVertex,
+      endDraggingItem,
+      endDraggingHole,
+      endRotatingItem,
     ]
   );
 
   const onChangeValue = useCallback(
     (value: Value) => {
-      projectActions.updateZoomScale(value.a);
-      viewer2DActions.updateCameraView(value);
+      updateZoomScale(value.a);
+      updateCameraView(value);
     },
-    [projectActions, viewer2DActions]
+    [updateZoomScale, updateCameraView]
   );
 
   const onChangeTool = useCallback(
     (tool: Tool) => {
       switch (tool) {
         case TOOL_NONE:
-          projectActions.selectToolEdit();
+          selectToolEdit();
           break;
         case TOOL_PAN:
-          viewer2DActions.selectToolPan();
+          selectToolPan();
           break;
         case TOOL_ZOOM_IN:
-          viewer2DActions.selectToolZoomIn();
+          selectToolZoomIn();
           break;
         case TOOL_ZOOM_OUT:
-          viewer2DActions.selectToolZoomOut();
+          selectToolZoomOut();
           break;
       }
     },
-    [projectActions, viewer2DActions]
+    [selectToolEdit, selectToolPan, selectToolZoomIn, selectToolZoomOut]
   );
 
-  // Compute viewer2D value once (if not empty)
+  // Viewer2D value (plain object now)
   const viewer2DValue = useMemo(
-    () => (viewer2D.isEmpty() ? {} : viewer2D.toJS()),
+    () => (Object.keys(viewer2D).length === 0 ? {} : viewer2D),
     [viewer2D]
   );
 
   // Ruler properties
-  const rulerSize = 15; // px
+  const rulerSize = 15;
   const rulerUnitPixelSize = 100;
   const rulerBgColor = "#292929";
   const rulerFnColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
@@ -414,9 +454,9 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
           <RulerX
             unitPixelSize={rulerUnitPixelSize}
             zoom={sceneZoom}
-            mouseX={mouse.get("x") || 0}
+            mouseX={mouse.x || 0}
             width={width - rulerSize}
-            zeroLeftPosition={viewer2D.get("e") || 0}
+            zeroLeftPosition={viewer2D.e || 0}
             backgroundColor={rulerBgColor}
             fontColor={rulerFnColor}
             markerColor={rulerMkColor}
@@ -433,9 +473,9 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
           <RulerY
             unitPixelSize={rulerUnitPixelSize}
             zoom={sceneZoom}
-            mouseY={mouse.get("y") || 0}
+            mouseY={mouse.y || 0}
             height={height - rulerSize}
-            zeroTopPosition={sceneHeight * sceneZoom + (viewer2D.get("f") || 0)}
+            zeroTopPosition={sceneHeight * sceneZoom + (viewer2D.f || 0)}
             backgroundColor={rulerBgColor}
             fontColor={rulerFnColor}
             markerColor={rulerMkColor}
@@ -448,7 +488,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
         style={{ gridColumn: 2, gridRow: 2 }}
         width={width - rulerSize}
         height={height - rulerSize}
-        value={viewer2DValue}
+        value={viewer2DValue as any}
         onChangeValue={onChangeValue}
         tool={mode2Tool(mode)}
         onChangeTool={onChangeTool}
@@ -481,7 +521,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ state, width, height }) => {
             </pattern>
           </defs>
           <g style={{ ...mode2Cursor(mode), ...mode2PointerEvents(mode) }}>
-            <State state={state} catalog={catalog} />
+            <State scene={scene} catalog={catalog} />
           </g>
         </svg>
       </ReactSVGPanZoom>

@@ -20,7 +20,7 @@ interface PropertyStringProps {
   configs: PropertyStringConfig;
   sourceElement?: any;
   internalState?: any;
-  state: any;
+  state?: any;
   className?: string;
 }
 

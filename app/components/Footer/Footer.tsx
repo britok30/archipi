@@ -1,73 +1,44 @@
 "use client";
 
 import React from "react";
-import { Map as ImmutableMap } from "immutable";
-import { useContext } from "react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { usePlannerStore } from "../../store";
+import { useCatalogContext } from "../../context/ReactPlannerContext";
 import FooterToggleButton from "./FooterToggleButton";
-import {
-  SNAP_POINT,
-  SNAP_LINE,
-  SNAP_SEGMENT,
-  SNAP_GRID,
-  SNAP_GUIDE,
-} from "../../utils/snap";
 import { MODE_SNAPPING } from "../../utils/constants";
-
-// Define strict types for the snap mask values
-type SnapMaskKey =
-  | typeof SNAP_POINT
-  | typeof SNAP_LINE
-  | typeof SNAP_SEGMENT
-  | typeof SNAP_GRID
-  | typeof SNAP_GUIDE;
-type SnapMask = Record<SnapMaskKey, boolean>;
-
-interface MousePosition {
-  x: number;
-  y: number;
-}
+import type { SnapMask } from "../../store/types";
 
 interface FooterProps {
-  state: ImmutableMap<string, any>;
   width: number;
   height: number;
-  footerbarComponents: React.ReactNode[];
   softwareSignature?: string;
 }
 
 const Footer: React.FC<FooterProps> = ({
-  state: globalState,
   width,
   height,
   softwareSignature,
 }) => {
-  const { translator, projectActions } = useContext(ReactPlannerContext);
+  const { translator } = useCatalogContext();
 
-  // Extract and type mouse position
-  const mouse = globalState.get("mouse");
-  const { x, y }: MousePosition = mouse?.toJS() ?? { x: 0, y: 0 };
+  // Get state from Zustand
+  const mouse = usePlannerStore((state) => state.mouse);
+  const zoom = usePlannerStore((state) => state.zoom);
+  const mode = usePlannerStore((state) => state.mode);
+  const snapMask = usePlannerStore((state) => state.snapMask);
+  const toggleSnap = usePlannerStore((state) => state.toggleSnap);
 
-  const zoom = globalState.get("zoom") ?? 1;
-  const mode = globalState.get("mode");
-
-  const updateSnapMask = (val: Partial<SnapMask>) => {
-    const snapMask = globalState.get("snapMask") as ImmutableMap<
-      SnapMaskKey,
-      boolean
-    >;
-    const newSnapMask = snapMask ? snapMask.merge(val) : ImmutableMap(val);
-    projectActions.toggleSnap(newSnapMask);
-  };
+  const { x, y } = mouse;
 
   // Snap button configurations for cleaner rendering
-  const snapButtons = [
-    { key: SNAP_POINT, text: "Snap PT", title: "Snap to Point" },
-    { key: SNAP_LINE, text: "Snap LN", title: "Snap to Line" },
-    { key: SNAP_SEGMENT, text: "Snap SEG", title: "Snap to Segment" },
-    { key: SNAP_GRID, text: "Snap GRD", title: "Snap to Grid" },
-    { key: SNAP_GUIDE, text: "Snap GDE", title: "Snap to Guide" },
+  const snapButtons: Array<{ key: keyof SnapMask; text: string; title: string }> = [
+    { key: "SNAP_POINT", text: "Snap PT", title: "Snap to Point" },
+    { key: "SNAP_LINE", text: "Snap LN", title: "Snap to Line" },
+    { key: "SNAP_SEGMENT", text: "Snap SEG", title: "Snap to Segment" },
+    { key: "SNAP_GRID", text: "Snap GRD", title: "Snap to Grid" },
+    { key: "SNAP_GUIDE", text: "Snap GDE", title: "Snap to Guide" },
   ];
+
+  const t = (text: string) => translator?.t(text) ?? text;
 
   return (
     <footer
@@ -79,10 +50,10 @@ const Footer: React.FC<FooterProps> = ({
           {/* Coordinates Section */}
           <div className="flex items-center px-4 border-r border-gray-700 w-[200px]">
             <div className="space-x-4">
-              <span title={translator.t("Mouse X Coordinate")}>
+              <span title={t("Mouse X Coordinate")}>
                 X: {x.toFixed(3)}
               </span>
-              <span title={translator.t("Mouse Y Coordinate")}>
+              <span title={t("Mouse Y Coordinate")}>
                 Y: {y.toFixed(3)}
               </span>
             </div>
@@ -91,9 +62,9 @@ const Footer: React.FC<FooterProps> = ({
           {/* Zoom Section */}
           <div
             className="px-4 border-r border-gray-700 w-[150px]"
-            title={translator.t("Scene Zoom Level")}
+            title={t("Scene Zoom Level")}
           >
-            Zoom: {zoom.toFixed(3)}X
+            Zoom: {(zoom || 1).toFixed(3)}X
           </div>
 
           {/* Snap Controls */}
@@ -101,11 +72,11 @@ const Footer: React.FC<FooterProps> = ({
             {snapButtons.map(({ key, text, title }) => (
               <FooterToggleButton
                 key={key}
-                toggleOn={() => updateSnapMask({ [key]: true })}
-                toggleOff={() => updateSnapMask({ [key]: false })}
+                toggleOn={() => toggleSnap(key)}
+                toggleOff={() => toggleSnap(key)}
                 text={text}
-                toggleState={globalState.getIn(["snapMask", key], false)}
-                title={translator.t(title)}
+                toggleState={snapMask[key]}
+                title={t(title)}
               />
             ))}
           </div>

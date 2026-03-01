@@ -3,24 +3,7 @@
 import Image from "next/image";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-type ElementInfo = {
-  title: string;
-  description: string;
-  image: string;
-  tag: string[];
-  visibility?: {
-    catalog: boolean;
-  };
-};
-
-type ElementPrototype = "lines" | "items" | "holes";
-
-export type CatalogElement = {
-  name: string;
-  prototype: ElementPrototype;
-  info: ElementInfo;
-};
+import type { CatalogElement } from "../../store/types";
 
 type CatalogItemProps = {
   element: CatalogElement;
@@ -68,7 +51,7 @@ const CatalogItem = ({
     >
       <CardHeader className="pb-2">
         <CardTitle className="line-clamp-1 text-lg">
-          {element.info.title}
+          {element.info.title || element.name}
         </CardTitle>
       </CardHeader>
 
@@ -85,14 +68,14 @@ const CatalogItem = ({
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority={false}
-            alt={`Preview of ${element.info.title}`}
+            alt={`Preview of ${element.info.title || element.name}`}
           />
         </div>
 
         {/* Tags */}
-        {element.info.tag.length > 0 && (
+        {element.info.tag && (Array.isArray(element.info.tag) ? element.info.tag.length > 0 : element.info.tag) && (
           <div className="flex flex-wrap gap-1.5">
-            {element.info.tag.map((tag) => (
+            {(Array.isArray(element.info.tag) ? element.info.tag : [element.info.tag]).map((tag) => (
               <Badge
                 key={`${element.name}-${tag}`}
                 variant="secondary"
