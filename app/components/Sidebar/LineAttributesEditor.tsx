@@ -36,13 +36,16 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
     ? attributeFormData.get("name")
     : getElementValue("name");
 
-  const vertexOne = attributeFormData.has("vertexOne")
+  const rawVertexOne = attributeFormData.has("vertexOne")
     ? attributeFormData.get("vertexOne")
-    : ImmutableMap<string, any>();
+    : {};
 
-  const vertexTwo = attributeFormData.has("vertexTwo")
+  const rawVertexTwo = attributeFormData.has("vertexTwo")
     ? attributeFormData.get("vertexTwo")
-    : ImmutableMap<string, any>();
+    : {};
+
+  const vertexOne = ImmutableMap.isMap(rawVertexOne) ? rawVertexOne : ImmutableMap(rawVertexOne as any);
+  const vertexTwo = ImmutableMap.isMap(rawVertexTwo) ? rawVertexTwo : ImmutableMap(rawVertexTwo as any);
 
   const lineLength = attributeFormData.has("lineLength")
     ? attributeFormData.get("lineLength")
