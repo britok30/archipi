@@ -74,7 +74,7 @@ const PropertyEnum = ({
         </Label>
 
         <Select value={value} onValueChange={handleUpdate}>
-          <SelectTrigger id={`enum-${configs.label}`} className="h-9 text-white bg-black">
+          <SelectTrigger id={`enum-${configs.label}`} className="h-9 text-foreground bg-secondary">
             <SelectValue placeholder={`Select ${configs.label}`} />
           </SelectTrigger>
           <SelectContent>

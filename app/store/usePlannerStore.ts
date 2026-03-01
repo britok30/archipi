@@ -63,6 +63,21 @@ function deepClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+/** Inline unselectAll on an Immer draft — avoids nested set() which loses changes */
+function unselectAllInDraft(state: PlannerState): void {
+  const layerId = state.scene.selectedLayer;
+  if (layerId && state.scene.layers[layerId]) {
+    const layer = state.scene.layers[layerId];
+    Object.values(layer.vertices).forEach((v) => (v.selected = false));
+    Object.values(layer.lines).forEach((l) => (l.selected = false));
+    Object.values(layer.holes).forEach((h) => (h.selected = false));
+    Object.values(layer.areas).forEach((a) => (a.selected = false));
+    Object.values(layer.items).forEach((i) => (i.selected = false));
+    layer.selected = { vertices: [], lines: [], holes: [], areas: [], items: [], selected: [] };
+  }
+  Object.values(state.scene.groups).forEach((g) => (g.selected = false));
+}
+
 const VERTEX_MERGE_THRESHOLD = 30; // scene units (cm) - merge vertices within this distance
 
 /**
@@ -335,19 +350,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       unselectAll: () =>
         set((state) => {
-          const layerId = state.scene.selectedLayer;
-          if (layerId && state.scene.layers[layerId]) {
-            const layer = state.scene.layers[layerId];
-            // Unselect all elements
-            Object.values(layer.vertices).forEach((v) => (v.selected = false));
-            Object.values(layer.lines).forEach((l) => (l.selected = false));
-            Object.values(layer.holes).forEach((h) => (h.selected = false));
-            Object.values(layer.areas).forEach((a) => (a.selected = false));
-            Object.values(layer.items).forEach((i) => (i.selected = false));
-            layer.selected = { ...DEFAULT_ELEMENTS_SET };
-          }
-          // Unselect all groups
-          Object.values(state.scene.groups).forEach((g) => (g.selected = false));
+          unselectAllInDraft(state);
         }),
 
       remove: () =>
@@ -409,7 +412,7 @@ export const usePlannerStore = create<PlannerStore>()(
           }
 
           // Clear selection
-          layer.selected = { ...DEFAULT_ELEMENTS_SET };
+          layer.selected = { vertices: [], lines: [], holes: [], areas: [], items: [], selected: [] };
           state.mode = MODE_IDLE;
         }),
 
@@ -762,7 +765,7 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       selectLine: (layerId, lineId) =>
         set((state) => {
-          get().unselectAll();
+          unselectAllInDraft(state);
           const layer = state.scene.layers[layerId];
           if (layer && layer.lines[lineId]) {
             layer.lines[lineId].selected = true;
@@ -1120,7 +1123,7 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       selectHole: (layerId, holeId) =>
         set((state) => {
-          get().unselectAll();
+          unselectAllInDraft(state);
           const layer = state.scene.layers[layerId];
           if (layer && layer.holes[holeId]) {
             layer.holes[holeId].selected = true;
@@ -1256,7 +1259,7 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       selectArea: (layerId, areaId) =>
         set((state) => {
-          get().unselectAll();
+          unselectAllInDraft(state);
           const layer = state.scene.layers[layerId];
           if (layer && layer.areas[areaId]) {
             layer.areas[areaId].selected = true;
@@ -1269,7 +1272,7 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       selectItem: (layerId, itemId) =>
         set((state) => {
-          get().unselectAll();
+          unselectAllInDraft(state);
           const layer = state.scene.layers[layerId];
           if (layer && layer.items[itemId]) {
             layer.items[itemId].selected = true;
@@ -1473,7 +1476,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       selectGroup: (groupId) =>
         set((state) => {
-          get().unselectAll();
+          unselectAllInDraft(state);
           if (state.scene.groups[groupId]) {
             state.scene.groups[groupId].selected = true;
           }

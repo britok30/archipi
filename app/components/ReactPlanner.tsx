@@ -10,6 +10,7 @@ import Toolbar from "./Toolbar/Toolbar";
 import type { RuntimeCatalog } from "../store/types";
 
 const FOOTER_HEIGHT = 25;
+const TOOLBAR_GUTTER = 72;
 
 interface ReactPlannerProps {
   width: number;
@@ -46,7 +47,9 @@ function ReactPlanner({
     <PlannerProvider catalog={catalog} translator={translator}>
       <div className="flex flex-row flex-nowrap w-full h-full">
         <Toolbar toolbarButtons={toolbarButtons} />
-        <Content width={width} height={contentHeight} />
+        <div style={{ paddingLeft: TOOLBAR_GUTTER }} className="flex-1 min-w-0">
+          <Content width={width - TOOLBAR_GUTTER} height={contentHeight} />
+        </div>
         <Sidebar />
         <Footer
           width={width}
