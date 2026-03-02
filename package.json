@@ -55,7 +55,7 @@
     "shortid": "^2.2.16",
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.5.4",
-    "tailwind-scrollbar": "^3.1.0",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.183.2",
     "three-csg-ts": "^3.2.0",
