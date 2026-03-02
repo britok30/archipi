@@ -24,7 +24,7 @@ ArchiPi is a comprehensive modernization of [react-planner](https://github.com/c
 | Framework | React 16 + Webpack 4 | Next.js 16 + Turbopack |
 | Language | JavaScript (ES6) + prop-types | TypeScript (strict mode) |
 | State | Redux 4 + react-redux 5 | Zustand 5 + Immer |
-| 3D Engine | Three.js 0.94 (imperative) | Three.js 0.183 + React Three Fiber (declarative) |
+| 3D Engine | Three.js 0.94 (imperative) | Three.js 0.183 + React Three Fiber 9 (declarative) |
 | Styling | Inline styles + custom components | Tailwind CSS v4 + shadcn/ui |
 | Icons | react-icons 3.x | Lucide React |
 
@@ -56,7 +56,7 @@ Replaced inline CSS and custom form components with 17 shadcn/ui components (acc
 - **Project configurator** — Dynamic scene width/height configuration with validation
 - **Drawing overlay system** — Extensible overlay architecture for custom visualizations
 - **Enhanced toolbar** — New/Load/Save with improved UX, screenshot export, 3D view toggle, tips and settings modals
-- **Sidebar redesign** — Collapsible accordion panels for properties, layers, groups, and guides
+- **Sidebar redesign** — Polished accordion panels for layers, elements, groups, guides, and element properties with consistent styling
 - **Auto-save** — Browser localStorage persistence with dirty-state tracking
 - **Toast notifications** — User feedback via Sonner
 
@@ -93,25 +93,23 @@ npx tsc --noEmit
 ```
 app/
 ├── components/
-│   ├── Sidebar/              # Property panels, layers, groups, guides
+│   ├── Sidebar/              # Accordion panels: layers, elements, groups, guides, properties
 │   ├── Toolbar/              # Action buttons, mode toggles
-│   ├── viewer2d/             # 2D SVG rendering (rulers, grid, snap)
-│   ├── viewer3d/             # 3D R3F components (elements, lighting, LOD)
-│   ├── properties/           # Property editor components
+│   ├── Viewer2D/             # 2D SVG rendering (rulers, grid, snap)
+│   ├── Viewer3D/             # 3D R3F components (elements, lighting, LOD)
+│   ├── Properties/           # Property editor components (string, number, enum, color, etc.)
 │   ├── CatalogView/          # Catalog browsing UI
-│   ├── ProjectConfigurator/  # Scene configuration
-│   ├── Footer/               # Footer controls
 │   └── ui/                   # shadcn/ui primitives
 ├── store/                    # Zustand store + types
 ├── catalog/                  # Catalog system (factories, registration)
 ├── objCatalog/               # ~75 element definitions (items, holes, lines, area)
-├── context/                  # React context (catalog, translator)
+├── context/                  # React context (catalog provider)
 └── utils/                    # Geometry, snap, graph, math utilities
 ```
 
 ## Tech Stack
 
-- **[Next.js](https://nextjs.org/)** 16 — React framework with Turbopack
+- **[Next.js](https://nextjs.org/)** 16.1 — React framework with Turbopack
 - **[TypeScript](https://www.typescriptlang.org/)** — Strict mode, full coverage
 - **[Zustand](https://zustand.docs.pmnd.rs/)** — State management with Immer
 - **[Three.js](https://threejs.org/)** + **[React Three Fiber](https://r3f.docs.pmnd.rs/)** — 3D rendering
