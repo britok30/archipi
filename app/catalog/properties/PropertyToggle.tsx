@@ -84,7 +84,7 @@ const PropertyToggle = ({
           </Button>
         </div>
         {configs.description && (
-          <p className="text-sm text-muted-foreground pl-[8rem]">
+          <p className="text-sm text-muted-foreground pl-32">
             {configs.description}
           </p>
         )}
@@ -118,7 +118,7 @@ const PropertyToggle = ({
         </div>
       </div>
       {configs.description && (
-        <p className="text-sm text-muted-foreground pl-[8rem]">
+        <p className="text-sm text-muted-foreground pl-32">
           {configs.description}
         </p>
       )}
@@ -214,7 +214,7 @@ const EnhancedPropertyToggle = ({
         </div>
       </div>
       {configs.description && (
-        <p className="text-sm text-muted-foreground pl-[8rem]">
+        <p className="text-sm text-muted-foreground pl-32">
           {configs.description}
         </p>
       )}

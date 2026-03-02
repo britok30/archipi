@@ -9,7 +9,7 @@ interface FormSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> 
 export default function FormSelect({ children, ...rest }: FormSelectProps) {
   return (
     <select
-      className="bg-secondary text-foreground border border-border rounded-md ml-2 outline-none px-1 py-2.5 w-full block focus:ring-1 focus:ring-ring"
+      className="bg-secondary text-foreground border border-border rounded-md ml-2 outline-hidden px-1 py-2.5 w-full block focus:ring-1 focus:ring-ring"
       {...rest}
     >
       {children}

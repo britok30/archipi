@@ -35,7 +35,7 @@ const Footer: React.FC<FooterProps> = ({ width, height, softwareSignature }) => 
 
   return (
     <footer
-      className="fixed bottom-0 z-50 flex items-center bg-zinc-900/95 backdrop-blur-sm text-[11px] text-zinc-400 select-none border-t border-zinc-800"
+      className="fixed bottom-0 z-50 flex items-center bg-zinc-900/95 backdrop-blur-xs text-[11px] text-zinc-400 select-none border-t border-zinc-800"
       style={{ width, height }}
     >
       {/* Coordinates */}

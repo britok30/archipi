@@ -43,7 +43,7 @@ export default function FormSlider({ value, onChange, min = 0, max = 100, step =
           type="number"
           value={value}
           onChange={(e) => onChange([Number(e.target.value)])}
-          className="h-[34px] text-center w-full bg-secondary text-foreground border border-border rounded-md outline-none"
+          className="h-[34px] text-center w-full bg-secondary text-foreground border border-border rounded-md outline-hidden"
         />
       </div>
     </div>

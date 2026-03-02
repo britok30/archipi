@@ -67,7 +67,7 @@ const PropertyReadOnly = ({
         </div>
       </div>
       {configs.description && (
-        <p className="text-sm text-muted-foreground pl-[8rem]">
+        <p className="text-sm text-muted-foreground pl-32">
           {configs.description}
         </p>
       )}
@@ -139,7 +139,7 @@ const EnhancedPropertyReadOnly = ({
         </div>
       </div>
       {configs.description && (
-        <p className="text-sm text-muted-foreground pl-[8rem]">
+        <p className="text-sm text-muted-foreground pl-32">
           {configs.description}
         </p>
       )}

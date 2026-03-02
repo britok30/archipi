@@ -24,7 +24,7 @@ const Panel: React.FC<PanelProps> = ({
 }) => {
   return (
     <AccordionItem value={value} className="border-b border-border/40">
-      <AccordionTrigger className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:no-underline hover:text-foreground [&[data-state=open]]:text-primary">
+      <AccordionTrigger className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:no-underline hover:text-foreground data-[state=open]:text-primary">
         <span className="flex items-center gap-2">
           {icon}
           {name}
