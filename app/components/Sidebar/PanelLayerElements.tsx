@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useContext } from "react";
+import React, { useState, useMemo } from "react";
 import Panel from "./Panel";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import {
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
@@ -73,7 +72,6 @@ const filterElements = (
 };
 
 const PanelLayerElement: React.FC = () => {
-  const { translator } = useContext(ReactPlannerContext);
   const mode = usePlannerStore((state) => state.mode);
   const scene = usePlannerStore((state) => state.scene);
   const selectItem = usePlannerStore((state) => state.selectItem);
@@ -136,7 +134,7 @@ const PanelLayerElement: React.FC = () => {
         {lineEntries.length ? (
           <div>
             <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
-              {translator?.t("Lines") ?? "Lines"}
+              Lines
             </p>
             <div className="gap-2 grid grid-cols-2 items-center">
               {lineEntries.map(([lineID, line]) => (

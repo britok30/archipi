@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormNumberInput } from "../FormNumberInput";
-import { PropertyLengthMeasure } from "../properties/export";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
+import { PropertyLengthMeasure } from "../Properties";
 import { Map as ImmutableMap } from "immutable";
 
 interface LineAttributesEditorProps {
@@ -22,8 +21,6 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
   attributeFormData,
   className = "",
 }) => {
-  const { translator } = useContext(ReactPlannerContext);
-
   const getElementValue = (key: string) => {
     if (ImmutableMap.isMap(element)) {
       return (element as ImmutableMap<string, any>).get(key);
@@ -140,7 +137,7 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
           value={lineLength}
           onUpdate={(mapped: any) => onUpdate("lineLength", mapped)}
           configs={{
-            label: translator?.t("Length") ?? "Length",
+            label: "Length",
             min: 0,
             max: Infinity,
             precision: 2,

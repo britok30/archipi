@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { usePlannerStore } from "../../store";
-import type { SnapMask } from "../../store/types";
+import { usePlannerStore } from "../store";
+import type { SnapMask } from "../store/types";
 import {
   MODE_3D_FIRST_PERSON,
   MODE_3D_VIEW,
-} from "../../store/types";
+} from "../store/types";
 
 const SNAP_BUTTONS: Array<{ key: keyof SnapMask; label: string }> = [
   { key: "SNAP_POINT", label: "Point" },

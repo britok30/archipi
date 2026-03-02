@@ -8,7 +8,7 @@ import {
   PropertyCheckbox,
   PropertyHidden,
   PropertyReadOnly,
-} from "../../app/components/properties/export";
+} from "../../app/components/Properties";
 
 import { UNIT_CENTIMETER } from "../floorplan-utils/constants";
 

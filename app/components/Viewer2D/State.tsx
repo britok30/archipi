@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Scene as SceneComponent } from "./scene";
+import { Scene as SceneComponent } from "./Scene";
 import { DrawingPreview } from "./DrawingPreview";
 import * as SharedStyle from "../../styles/shared-style";
 import type { Scene, RuntimeCatalog } from "../../store/types";

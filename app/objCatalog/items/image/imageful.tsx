@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Map } from "immutable";
-import ReactPlannerContext from "../../../context/ReactPlannerContext";
 
 const grabCircleRadius = 10;
 const hoverCircleRadius = 14;
@@ -46,8 +45,6 @@ const ImageFul = (props: any) => {
     layer,
     scene,
   } = props;
-  const { catalog, translator } =
-    useContext(ReactPlannerContext);
   const projectActions: any = {};
 
   const [state, setState] = useState({

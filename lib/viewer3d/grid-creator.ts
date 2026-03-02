@@ -1,9 +1,9 @@
 import * as Three from "three";
-import { HELVETIKER } from "./libs/helvetiker_regular.typeface";
+import { HELVETIKER } from "./helvetiker_regular.typeface";
 import gridHorizontalStreak from "./grids/grid-horizontal-streak";
 import gridVerticalStreak from "./grids/grid-vertical-streak";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
-import type { Scene } from "../../store/types";
+import type { Scene } from "@/app/store/types";
 
 export default function createGrid(scene: Scene): Three.Object3D {
   let gridMesh = new Three.Object3D();

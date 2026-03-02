@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import Panel from "./Panel";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import {
   Eye,
   EyeOff,
@@ -68,7 +67,6 @@ interface EditingLayer {
 }
 
 const PanelLayers: React.FC = () => {
-  const { translator } = useContext(ReactPlannerContext);
   const mode = usePlannerStore((state) => state.mode);
   const scene = usePlannerStore((state) => state.scene);
   const selectLayerAction = usePlannerStore((state) => state.selectLayer);
@@ -239,7 +237,7 @@ const PanelLayers: React.FC = () => {
               }
             />
 
-            <label className="text-foreground">{translator?.t("Opacity") ?? "Opacity"}:</label>
+            <label className="text-foreground">Opacity:</label>
             <Slider
               value={[editingLayer.opacity * 100]}
               onValueChange={(value) =>
@@ -249,7 +247,7 @@ const PanelLayers: React.FC = () => {
               max={100}
             />
 
-            <label className="text-foreground">{translator?.t("Altitude") ?? "Altitude"}:</label>
+            <label className="text-foreground">Altitude:</label>
             <Input
               type="number"
               value={editingLayer.altitude || 0}
@@ -261,7 +259,7 @@ const PanelLayers: React.FC = () => {
               }
             />
 
-            <label className="text-foreground">{translator?.t("Order") ?? "Order"}:</label>
+            <label className="text-foreground">Order:</label>
             <Input
               type="number"
               value={editingLayer.order}

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import Panel from "./Panel";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { FormNumberInput } from "../FormNumberInput";
 import { Button } from "@/components/ui/button";
 import { Ruler, Trash, X } from "lucide-react";
@@ -11,7 +10,6 @@ import { TabsContent, TabsTrigger } from "@radix-ui/react-tabs";
 import { usePlannerStore } from "../../store";
 
 const PanelGuides: React.FC = () => {
-  const { translator } = useContext(ReactPlannerContext);
   const scene = usePlannerStore((state) => state.scene);
   const addHorizontalGuide = usePlannerStore((state) => state.addHorizontalGuide);
   const addVerticalGuide = usePlannerStore((state) => state.addVerticalGuide);

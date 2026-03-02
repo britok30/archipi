@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Line } from "./line";
-import { Area } from "./area";
-import { Vertex } from "./vertex";
-import { Item } from "./item";
-import { Group } from "./group";
+import { Line } from "./Line";
+import { Area } from "./Area";
+import { Vertex } from "./Vertex";
+import { Item } from "./Item";
+import { Group } from "./Group";
 import type {
   Layer as LayerType,
   Scene as SceneType,

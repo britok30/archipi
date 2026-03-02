@@ -1,6 +1,6 @@
 import * as Three from "three";
 import createGrid from "./grid-creator";
-import type { Scene, Layer, RuntimeCatalog } from "../../store/types";
+import type { Scene, Layer, RuntimeCatalog } from "@/app/store/types";
 
 const MAX_BUSY_RETRIES = 50;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import createGrid from "./grid-creator";
+import createGrid from "@/lib/viewer3d/grid-creator";
 import type { Scene } from "../../store/types";
 
 interface Grid3DProps {

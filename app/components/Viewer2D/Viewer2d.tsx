@@ -30,10 +30,10 @@ import {
   MODE_ROTATING_ITEM,
 } from "../../store/types";
 import type { Mode } from "../../store/types";
-import { State } from "./state";
+import { State } from "./State";
 import * as SharedStyle from "../../styles/shared-style";
-import { RulerX } from "./rulerX";
-import { RulerY } from "./rulerY";
+import { RulerX } from "./RulerX";
+import { RulerY } from "./RulerY";
 
 interface Viewer2DProps {
   width: number;

@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import { FormNumberInput } from "../FormNumberInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { Map as ImmutableMap } from "immutable";
 
 interface ItemAttributesEditorProps {
@@ -21,8 +20,6 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
   attributeFormData,
   className = "",
 }) => {
-  const { translator } = useContext(ReactPlannerContext);
-
   const getElementValue = (key: string) => {
     if (ImmutableMap.isMap(element)) {
       return (element as ImmutableMap<string, any>).get(key);
@@ -47,7 +44,7 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
     <div className={`flex flex-col space-y-3 ${className}`}>
       <div className="flex flex-col space-y-2">
         <Label className="text-xs" htmlFor="item-name">
-          {translator?.t("Name") ?? "Name"}
+          Name
         </Label>
         <Input
           id="item-name"
@@ -83,7 +80,7 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
 
       <div className="flex flex-col space-y-2">
         <Label className="text-xs" htmlFor="item-rotation">
-          {translator?.t("Rotation") ?? "Rotation"}
+          Rotation
         </Label>
         <FormNumberInput
           id="item-rotation"

@@ -4,7 +4,6 @@ import React from "react";
 import * as THREE from "three";
 import { buildWall, updatedWall } from "./wall-factory-3d";
 import * as Geometry from "../../floorplan-utils/geometry";
-import Translator from "../../../app/translator/translator";
 import * as SharedStyle from "../../../app/styles/shared-style";
 import type { TextureConfig } from "./types";
 
@@ -97,7 +96,6 @@ const STYLE_RECT_SELECTED: React.CSSProperties = {
   stroke: SharedStyle.LINE_MESH_COLOR.selected,
 };
 
-const translator = new Translator();
 
 export default function WallFactory(
   name: string,
@@ -110,14 +108,14 @@ export default function WallFactory(
     info,
     properties: {
       height: {
-        label: translator.t("height"),
+        label: "height",
         type: "length-measure",
         defaultValue: {
           length: 300,
         },
       },
       thickness: {
-        label: translator.t("thickness"),
+        label: "thickness",
         type: "length-measure",
         defaultValue: {
           length: 20,
@@ -216,14 +214,14 @@ export default function WallFactory(
     }
 
     wallElement.properties.textureA = {
-      label: translator.t("texture") + " A",
+      label: "texture A",
       type: "enum",
       defaultValue: textureValues.bricks ? "bricks" : "none",
       values: textureValues,
     };
 
     wallElement.properties.textureB = {
-      label: translator.t("texture") + " B",
+      label: "texture B",
       type: "enum",
       defaultValue: textureValues.bricks ? "bricks" : "none",
       values: textureValues,

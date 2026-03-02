@@ -2,9 +2,9 @@
 
 import React from "react";
 import * as Three from "three";
-import { useRender3D } from "../hooks/useRender3D";
-import { useApplyOpacity } from "../hooks/useApplyOpacity";
-import { useEnhanceMaterials } from "../hooks/useEnhanceMaterials";
+import { useRender3D } from "@/lib/viewer3d/hooks/useRender3D";
+import { useApplyOpacity } from "@/lib/viewer3d/hooks/useApplyOpacity";
+import { useEnhanceMaterials } from "@/lib/viewer3d/hooks/useEnhanceMaterials";
 import type { RuntimeCatalog, Scene, Layer } from "../../../store/types";
 
 interface CatalogElement3DProps {

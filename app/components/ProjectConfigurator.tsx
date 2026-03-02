@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePlannerStore } from "../../store";
+import { usePlannerStore } from "../store";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import * as Three from "three";
-import type { RuntimeCatalog, Scene, Layer } from "../../../store/types";
+import type { RuntimeCatalog, Scene, Layer } from "@/app/store/types";
 
 interface UseRender3DResult {
   object3D: Three.Object3D | null;

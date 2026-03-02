@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { usePlannerStore } from "../store";
 import { PlannerProvider } from "../context/ReactPlannerContext";
-import Footer from "./Footer/Footer";
+import Footer from "./Footer";
 import Sidebar from "./Sidebar/Sidebar";
 import Content from "./Content";
 import Toolbar from "./Toolbar/Toolbar";
@@ -16,7 +16,6 @@ interface ReactPlannerProps {
   width: number;
   height: number;
   catalog?: RuntimeCatalog;
-  translator?: { t: (phrase: string, ...params: (string | number)[]) => string };
   plugins?: Array<(state: unknown) => unknown>;
   toolbarButtons?: React.ReactNode[];
   softwareSignature?: string;
@@ -26,7 +25,6 @@ function ReactPlanner({
   width,
   height,
   catalog,
-  translator,
   plugins = [],
   toolbarButtons = [],
   softwareSignature = "ArchiPi",
@@ -44,7 +42,7 @@ function ReactPlanner({
   const contentHeight = height - FOOTER_HEIGHT;
 
   return (
-    <PlannerProvider catalog={catalog} translator={translator}>
+    <PlannerProvider catalog={catalog}>
       <div className="flex flex-row flex-nowrap w-full h-full">
         <Toolbar toolbarButtons={toolbarButtons} />
         <div style={{ paddingLeft: TOOLBAR_GUTTER }} className="flex-1 min-w-0">

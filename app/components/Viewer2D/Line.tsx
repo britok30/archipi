@@ -2,7 +2,7 @@
 
 import React from "react";
 import { GeometryUtils } from "../../../lib/floorplan-utils/export";
-import { Ruler } from "./ruler";
+import { Ruler } from "./Ruler";
 import type {
   Line as LineType,
   Layer as LayerType,

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import * as sharedStyles from "../../styles/shared-style";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import type { Group as GroupType, Layer, Scene } from "../../store/types";
 
 interface GroupProps {
@@ -23,8 +22,6 @@ const STYLE_CIRCLE: React.CSSProperties = {
 };
 
 export const Group: React.FC<GroupProps> = ({ layer, group, scene, catalog }) => {
-  const { translator } = useContext(ReactPlannerContext);
-
   return (
     <g
       data-element-root
@@ -45,7 +42,7 @@ export const Group: React.FC<GroupProps> = ({ layer, group, scene, catalog }) =>
           data-part="rotation-anchor"
         >
           <circle cx={cx} cy={cy} r={radius} style={STYLE_CIRCLE}>
-            <title>{translator?.t("Group's Barycenter")}</title>
+            <title>Group&apos;s Barycenter</title>
           </circle>
         </g>
       )}

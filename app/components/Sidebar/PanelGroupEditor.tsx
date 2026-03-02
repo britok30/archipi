@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import Panel from "./Panel";
 import { FormNumberInput } from "../FormNumberInput";
 import { Input } from "@/components/ui/input";
 import { FolderOpen, Unlink } from "lucide-react";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { usePlannerStore } from "../../store";
 import type { Layer } from "../../store/types";
 import { Accordion } from "@/components/ui/accordion";
@@ -31,7 +30,6 @@ interface PanelGroupEditorProps {
 }
 
 const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
-  const { translator } = useContext(ReactPlannerContext);
   const scene = usePlannerStore((state) => state.scene);
   const mode = usePlannerStore((state) => state.mode);
   const setGroupProperties = usePlannerStore((state) => state.setGroupProperties);
@@ -49,13 +47,13 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
   return (
     <Accordion type="multiple" defaultValue={[`group-${groupID}`]}>
       <Panel
-        name={translator?.t("Group [{0}]", group.name) ?? `Group [${group.name}]`}
+        name={`Group [${group.name}]`}
         value={`group-${groupID}`}
         icon={<FolderOpen className="w-3.5 h-3.5" />}
       >
         <div className="space-y-3 px-2">
           <div className="flex items-center gap-3">
-            <span className="w-16 text-muted-foreground text-sm shrink-0">{translator?.t("Name") ?? "Name"}</span>
+            <span className="w-16 text-muted-foreground text-sm shrink-0">Name</span>
             <Input
               value={group.name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -87,7 +85,7 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
             />
           </div>
           <div className="flex items-center gap-3">
-            <span className="w-16 text-muted-foreground text-sm shrink-0">{translator?.t("Rotation") ?? "Rotation"}</span>
+            <span className="w-16 text-muted-foreground text-sm shrink-0">Rotation</span>
             <FormNumberInput
               value={group.rotation}
               onChange={(value: number) =>
@@ -101,14 +99,14 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
           {Object.keys(elements).length > 0 ? (
             <div>
               <p className="text-center border-b border-border/40 pb-3 text-muted-foreground">
-                {translator?.t("Group's Elements") ?? "Group's Elements"}
+                Group&apos;s Elements
               </p>
               <div className="space-y-2 mt-3 max-h-80 overflow-y-auto">
                 <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-muted-foreground">
                   <div></div>
-                  <div>{translator?.t("Layer") ?? "Layer"}</div>
-                  <div>{translator?.t("Prototype") ?? "Prototype"}</div>
-                  <div>{translator?.t("Name") ?? "Name"}</div>
+                  <div>Layer</div>
+                  <div>Prototype</div>
+                  <div>Name</div>
                 </div>
                 {Object.entries(elements).map(([layerID, layerElements]) => {
                   return Object.entries(layerElements || {}).map(
@@ -126,7 +124,7 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 text-foreground hover:text-destructive"
-                                title={translator?.t("Un-chain Element from Group") ?? "Un-chain Element from Group"}
+                                title="Un-chain Element from Group"
                                 onClick={() =>
                                   removeFromGroup(
                                     groupID,

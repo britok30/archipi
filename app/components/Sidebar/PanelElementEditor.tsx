@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import Panel from "./Panel";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import ElementEditor from "./ElementEditor";
 import { usePlannerStore } from "../../store";
 import type { Line, Hole, Item, Area, Layer } from "../../store/types";
@@ -12,7 +11,6 @@ import { Accordion } from "@/components/ui/accordion";
 type SceneElement = Line | Hole | Item | Area;
 
 const PanelElementEditor: React.FC = () => {
-  const { translator } = useContext(ReactPlannerContext);
   const scene = usePlannerStore((state) => state.scene);
 
   const selectedElements: { element: SceneElement; layer: Layer }[] = [];
@@ -40,10 +38,7 @@ const PanelElementEditor: React.FC = () => {
   const panels = selectedElements.map(({ element, layer }) => (
     <Panel
       key={element.id}
-      name={translator?.t("Properties: [{0}] {1}",
-        element.type,
-        element.id
-      ) ?? `Properties: [${element.type}] ${element.id}`}
+      name={`Properties: [${element.type}] ${element.id}`}
       value={`element-${element.id}`}
       icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
     >

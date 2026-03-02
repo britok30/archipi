@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { usePlannerStore } from "../../store";
-import { useCatalogContext } from "../../context/ReactPlannerContext";
 import ToolbarButton from "./ToolbarButton";
 import ToolbarSaveButton from "./ToolbarSaveButton";
 import ToolbarLoadButton from "./ToolbarLoadButton";
@@ -51,8 +50,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
   toolbarButtons = [],
   allowProjectFileSupport = true,
 }) => {
-  const { translator } = useCatalogContext();
-
   const mode = usePlannerStore((state) => state.mode);
   const newProject = usePlannerStore((state) => state.newProject);
   const markClean = usePlannerStore((state) => state.markClean);
@@ -70,8 +67,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
     typeof navigator !== "undefined" &&
     /Mac|iPhone|iPad/.test(navigator.userAgent);
   const mod = isMac ? "⌘" : "Ctrl+";
-  const t = (text: string) => translator?.t(text) ?? text;
-
   const handleNewProjectConfirm = () => {
     newProject();
     markClean();
@@ -99,7 +94,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <>
             <ToolbarButton
               active={false}
-              tooltip={t("New project")}
+              tooltip="New project"
               onClick={() => setNewProjectDialogOpen(true)}
             >
               <File size={20} />

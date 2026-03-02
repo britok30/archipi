@@ -21,10 +21,10 @@ import {
   MODE_VIEWING_CATALOG,
   MODE_CONFIGURING_PROJECT,
 } from "../store/types";
-import { Viewer2D } from "./viewer2d/Viewer2d";
+import { Viewer2D } from "./Viewer2D/Viewer2d";
 import CatalogList from "./CatalogView/CatalogList";
-import ProjectConfigurator from "./ProjectConfigurator/ProjectConfigurator";
-import Viewer3D from "./viewer3d/Viewer3d";
+import ProjectConfigurator from "./ProjectConfigurator";
+import Viewer3D from "./Viewer3D/Viewer3d";
 
 interface ContentProps {
   width: number;

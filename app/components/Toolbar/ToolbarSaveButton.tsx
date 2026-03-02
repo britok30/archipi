@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { usePlannerStore } from "../../store";
 import { useCatalogContext } from "../../context/ReactPlannerContext";
 import { browserDownloadWithName } from "../../../lib/floorplan-utils/browser";
-import { OBJExporter } from "./OBJExporter";
-import { parseData } from "../viewer3d/scene-creator";
+import { OBJExporter } from "@/lib/OBJExporter";
+import { parseData } from "@/lib/viewer3d/scene-creator";
 import * as Three from "three";
 import { Save } from "lucide-react";
 import {

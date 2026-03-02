@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import Panel from "./Panel";
-import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { Eye, EyeOff, Link, Unlink, Trash, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlannerStore } from "../../store";
@@ -48,7 +47,6 @@ const VISIBILITY_MODES = [
 ];
 
 const PanelGroups: React.FC = () => {
-  const { translator } = useContext(ReactPlannerContext);
   const mode = usePlannerStore((state) => state.mode);
   const scene = usePlannerStore((state) => state.scene);
   const selectGroup = usePlannerStore((state) => state.selectGroup);
@@ -98,7 +96,7 @@ const PanelGroups: React.FC = () => {
 
   return (
     <Panel
-      name={translator?.t("Groups") ?? "Groups"}
+      name="Groups"
       value="groups"
       icon={<FolderOpen className="w-3.5 h-3.5" />}
     >

@@ -1,7 +1,6 @@
 import React from "react";
 import { createArea, updatedArea } from "./area-factory-3d";
 import * as SharedStyle from "../../../app/styles/shared-style";
-import Translator from "../../../app/translator/translator";
 import { Object3D, Mesh } from "three";
 import type { TextureConfig } from "./types";
 
@@ -58,7 +57,6 @@ interface AreaElement {
   ) => Promise<Object3D>;
 }
 
-const translator = new Translator();
 
 export default function AreaFactory(
   name: string,
@@ -156,7 +154,7 @@ export default function AreaFactory(
     }
 
     areaElement.properties.texture = {
-      label: translator.t("texture"),
+      label: "texture",
       type: "enum",
       defaultValue: "none",
       values: textureValues,

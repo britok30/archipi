@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Layer } from "./layer";
+import { Layer } from "./Layer";
 import { Grids } from "./grids/Grids";
 import type { Scene as SceneType, RuntimeCatalog } from "../../store/types";
 

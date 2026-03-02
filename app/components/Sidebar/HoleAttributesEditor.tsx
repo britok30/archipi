@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import PropertyLengthMeasure from "../properties/PropertyLengthMeasure";
-import PropertyString from "../properties/PropertyString";
+import PropertyLengthMeasure from "../Properties/PropertyLengthMeasure";
+import PropertyString from "../Properties/PropertyString";
 import { Map as ImmutableMap } from "immutable";
 
 interface HoleAttributesEditorProps {

@@ -1,7 +1,7 @@
 import * as Three from "three";
-import { COLORS } from "../../../styles/shared-style";
+import { COLORS } from "@/app/styles/shared-style";
 import type { Font } from "three/examples/jsm/loaders/FontLoader.js";
-import type { Grid } from "../../../store/types";
+import type { Grid } from "@/app/store/types";
 
 export default function gridHorizontalStreak(
   width: number,
