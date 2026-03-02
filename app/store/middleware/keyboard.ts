@@ -23,6 +23,8 @@ const KEYBOARD_BUTTON_CODE = {
   CTRL: 17,
   ENTER: 13,
   TAB: 9,
+  S: 83,
+  O: 79,
 } as const;
 
 /**
@@ -151,6 +153,22 @@ export function setupKeyboardShortcuts(): () => void {
         if (event.ctrlKey || event.metaKey) {
           event.preventDefault();
           pasteProperties();
+        }
+        break;
+
+      // Ctrl+S - Save project
+      case KEYBOARD_BUTTON_CODE.S:
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          window.dispatchEvent(new CustomEvent('archipi:save'));
+        }
+        break;
+
+      // Ctrl+O - Open/Load project
+      case KEYBOARD_BUTTON_CODE.O:
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          window.dispatchEvent(new CustomEvent('archipi:load'));
         }
         break;
 

@@ -166,6 +166,7 @@ export interface PlannerActions {
   newProject: () => void;
   loadProject: (scene: Scene) => void;
   saveProjectToHistory: () => void;
+  markClean: () => void;
   setMode: (mode: Mode) => void;
   selectToolEdit: () => void;
   unselectAll: () => void;
@@ -319,6 +320,7 @@ export const usePlannerStore = create<PlannerStore>()(
         set((state) => {
           Object.assign(state, INITIAL_STATE);
           state.sceneHistory = { past: [], future: [] };
+          state.isDirty = false;
         }),
 
       loadProject: (scene) =>
@@ -326,16 +328,23 @@ export const usePlannerStore = create<PlannerStore>()(
           state.scene = scene;
           state.sceneHistory = { past: [], future: [] };
           state.mode = MODE_IDLE;
+          state.isDirty = false;
         }),
 
       saveProjectToHistory: () =>
         set((state) => {
           state.sceneHistory.past.push(deepClone(state.scene));
           state.sceneHistory.future = [];
+          state.isDirty = true;
           // Keep history size reasonable
           if (state.sceneHistory.past.length > 50) {
             state.sceneHistory.past.shift();
           }
+        }),
+
+      markClean: () =>
+        set((state) => {
+          state.isDirty = false;
         }),
 
       setMode: (mode) =>

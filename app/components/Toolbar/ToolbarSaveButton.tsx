@@ -1,19 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 import { usePlannerStore } from "../../store";
 import { useCatalogContext } from "../../context/ReactPlannerContext";
-import { browserDownload } from "../../utils/browser";
+import { browserDownloadWithName } from "../../utils/browser";
 import { OBJExporter } from "./OBJExporter";
 import { parseData } from "../viewer3d/scene-creator";
 import * as Three from "three";
 import { Save } from "lucide-react";
 import {
-  PopoverTrigger,
-  Popover,
-  PopoverContent,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Tooltip,
@@ -24,13 +29,36 @@ import {
 
 export default function ToolbarSaveButton() {
   const { catalog } = useCatalogContext();
-  const scene = usePlannerStore((state) => state.scene);
   const unselectAll = usePlannerStore((state) => state.unselectAll);
+  const markClean = usePlannerStore((state) => state.markClean);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const filenameRef = useRef("archipi-project");
+  const [filename, setFilename] = useState(filenameRef.current);
+
+  // Listen for custom save event (Ctrl+S)
+  useEffect(() => {
+    const handleSaveEvent = () => setIsOpen(true);
+    window.addEventListener("archipi:save", handleSaveEvent);
+    return () => window.removeEventListener("archipi:save", handleSaveEvent);
+  }, []);
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setFilename(filenameRef.current);
+    }
+    setIsOpen(open);
+  };
 
   const saveProjectToJSONFile = () => {
     unselectAll();
     const currentScene = usePlannerStore.getState().scene;
-    browserDownload(JSON.stringify(currentScene), "json");
+    const name = filename.trim() || "archipi-project";
+    browserDownloadWithName(JSON.stringify(currentScene), name, "json");
+    filenameRef.current = name;
+    markClean();
+    setIsOpen(false);
+    toast.success(`Saved as ${name}.json`);
   };
 
   const saveProjectToObjFile = () => {
@@ -53,40 +81,67 @@ export default function ToolbarSaveButton() {
       plan.position.set(plan.position.x, 0.1, plan.position.z);
       const scene3D = new Three.Scene();
       scene3D.add(planData.plan);
-      browserDownload(objExporter.parse(scene3D), "obj");
+      const name = filename.trim() || "archipi-project";
+      browserDownloadWithName(objExporter.parse(scene3D), name, "obj");
+      filenameRef.current = name;
+      markClean();
+      setIsOpen(false);
+      toast.success(`Exported as ${name}.obj`);
     });
   };
 
   return (
-    <Popover>
+    <>
       <TooltipProvider>
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <button
-                className="relative flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground transition-all duration-200 ease-out"
-              >
-                <Save size={20} />
-              </button>
-            </PopoverTrigger>
+            <button
+              onClick={() => handleOpenChange(true)}
+              className="relative flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-[hsl(217_91%_60%/0.08)] hover:text-foreground transition-all duration-200 ease-out"
+            >
+              <Save size={20} />
+            </button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Save</p>
+            <p>Save ({typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘" : "Ctrl+"}S)</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
-      <PopoverContent side="right" className="w-80 bg-card border-border text-foreground">
-        <Label>Save as</Label>
-        <div>
-          <Button className="w-full mb-2" onClick={saveProjectToJSONFile}>
-            JSON
-          </Button>
-          <Button className="w-full" onClick={saveProjectToObjFile}>
-            OBJ
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-[400px] text-foreground">
+          <DialogHeader>
+            <DialogTitle>Save Project</DialogTitle>
+            <DialogDescription>
+              Enter a filename and choose a format.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="save-filename" className="text-xs">
+              Filename
+            </Label>
+            <Input
+              id="save-filename"
+              value={filename}
+              onChange={(e) => setFilename(e.target.value)}
+              placeholder="archipi-project"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  saveProjectToJSONFile();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={saveProjectToObjFile}>
+              Export as OBJ
+            </Button>
+            <Button onClick={saveProjectToJSONFile}>Save as JSON</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

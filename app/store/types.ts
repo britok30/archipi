@@ -432,6 +432,9 @@ export interface PlannerState {
   // Miscellaneous
   misc: Record<string, unknown>;
   alterate: boolean;
+
+  // Dirty state (unsaved changes)
+  isDirty: boolean;
 }
 
 // ============================================================================
@@ -540,4 +543,5 @@ export const INITIAL_STATE: PlannerState = {
   selectedElementsHistory: [],
   misc: {},
   alterate: false,
+  isDirty: false,
 };

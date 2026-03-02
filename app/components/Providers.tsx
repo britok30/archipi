@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, ReactNode } from "react";
+import { Toaster } from "sonner";
 import {
   usePlannerStore,
   setupAutosave,
@@ -33,7 +34,34 @@ function Providers({ children }: ProvidersProps) {
     };
   }, []);
 
-  return <>{children}</>;
+  // Warn before closing tab if there are unsaved changes
+  useEffect(() => {
+    const unsubscribe = usePlannerStore.subscribe(
+      (state) => state.isDirty,
+      (isDirty) => {
+        if (isDirty) {
+          window.onbeforeunload = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+          };
+        } else {
+          window.onbeforeunload = null;
+        }
+      },
+      { fireImmediately: true }
+    );
+
+    return () => {
+      unsubscribe();
+      window.onbeforeunload = null;
+    };
+  }, []);
+
+  return (
+    <>
+      {children}
+      <Toaster richColors position="bottom-right" />
+    </>
+  );
 }
 
 export default Providers;

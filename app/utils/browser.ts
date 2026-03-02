@@ -29,6 +29,27 @@ export function browserDownload(
   URL.revokeObjectURL(url);
 }
 
+export function browserDownloadWithName(
+  file: string,
+  filename: string,
+  ext: FileExtension = "json"
+): void {
+  if (!typeMap[ext]) return;
+
+  const fullName = filename.endsWith(`.${ext}`) ? filename : `${filename}.${ext}`;
+  const data = new Blob([file], { type: typeMap[ext] });
+  const url = URL.createObjectURL(data);
+
+  const link = document.createElement("a");
+  link.setAttribute("download", fullName);
+  link.href = url;
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export function downloadDataURI(dataUri: string, filename: string): void {
   const link = document.createElement("a");
   link.setAttribute("download", filename);
