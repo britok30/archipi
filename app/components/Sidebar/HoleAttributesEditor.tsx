@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import PropertyLengthMeasure from "../Properties/PropertyLengthMeasure";
-import PropertyString from "../Properties/PropertyString";
 import { Map as ImmutableMap } from "immutable";
 
 interface HoleAttributesEditorProps {
@@ -37,12 +38,19 @@ const HoleAttributesEditor: React.FC<HoleAttributesEditorProps> = ({
     : getElementValue("offsetB");
 
   return (
-    <div className={className}>
-      <PropertyString
-        value={name ?? ""}
-        onUpdate={(mapped) => onUpdate("name", mapped)}
-        configs={{ label: "Name" }}
-      />
+    <div className={`space-y-3 ${className}`}>
+      <div className="grid grid-cols-[4rem_1fr] items-center gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor="hole-name">
+          Name
+        </Label>
+        <Input
+          id="hole-name"
+          value={name ?? ""}
+          onChange={(e) => onUpdate("name", e.target.value)}
+          placeholder="Enter name"
+        />
+      </div>
+
       <PropertyLengthMeasure
         value={offsetA}
         onUpdate={(mapped) => onUpdate("offsetA", mapped)}

@@ -47,7 +47,7 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
   return (
     <Accordion type="multiple" defaultValue={[`group-${groupID}`]}>
       <Panel
-        name={`Group [${group.name}]`}
+        name={`Group: ${group.name}`}
         value={`group-${groupID}`}
         icon={<FolderOpen className="w-3.5 h-3.5" />}
       >
@@ -97,12 +97,12 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
           </div>
 
           {Object.keys(elements).length > 0 ? (
-            <div>
-              <p className="text-center border-b border-border/40 pb-3 text-muted-foreground">
-                Group&apos;s Elements
+            <div className="mt-3 pt-3 border-t border-border/40">
+              <p className="text-xs text-muted-foreground mb-2">
+                Elements
               </p>
-              <div className="space-y-2 mt-3 max-h-80 overflow-y-auto">
-                <div className="grid grid-cols-4 gap-2 text-xs font-semibold text-muted-foreground">
+              <div className="space-y-1 max-h-80 overflow-y-auto scrollbar scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                <div className="grid grid-cols-4 gap-2 text-xs text-muted-foreground">
                   <div></div>
                   <div>Layer</div>
                   <div>Prototype</div>
@@ -118,13 +118,13 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                         const element =
                           getLayerElement(scene.layers, layerID, elementPrototype, elementID);
                         return (
-                          <div key={elementID} className="grid grid-cols-4 gap-2 text-xs items-center">
+                          <div key={elementID} className="grid grid-cols-4 gap-2 text-xs items-center py-1 px-1 rounded-md hover:bg-muted/50 transition duration-200 ease-in-out">
                             <div>
                               <Button
                                 variant="ghost"
-                                size="sm"
-                                className="p-1 text-foreground hover:text-destructive"
-                                title="Un-chain Element from Group"
+                                size="icon"
+                                className="h-7 w-7 hover:text-destructive"
+                                title="Unlink from group"
                                 onClick={() =>
                                   removeFromGroup(
                                     groupID,
@@ -134,7 +134,7 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                                   )
                                 }
                               >
-                                <Unlink className="w-3.5 h-3.5" />
+                                <Unlink className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                             <div className="text-center truncate">{layerID}</div>

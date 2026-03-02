@@ -67,7 +67,7 @@ const PropertyToggle = ({
           <Label
             htmlFor={`toggle-${configs.label}`}
             className={`
-              text-sm font-medium capitalize
+              text-xs text-muted-foreground capitalize
               ${disabled ? "text-muted-foreground" : ""}
             `}
           >
@@ -99,7 +99,7 @@ const PropertyToggle = ({
         <Label
           htmlFor={`toggle-${configs.label}`}
           className={`
-            text-sm font-medium capitalize
+            text-xs text-muted-foreground capitalize
             ${disabled ? "text-muted-foreground" : ""}
           `}
         >
@@ -178,7 +178,7 @@ const EnhancedPropertyToggle = ({
         <Label
           htmlFor={`toggle-${configs.label}`}
           className={`
-            text-sm font-medium capitalize
+            text-xs text-muted-foreground capitalize
             ${disabled ? "text-muted-foreground" : ""}
           `}
         >

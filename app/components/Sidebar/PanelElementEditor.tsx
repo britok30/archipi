@@ -38,7 +38,7 @@ const PanelElementEditor: React.FC = () => {
   const panels = selectedElements.map(({ element, layer }) => (
     <Panel
       key={element.id}
-      name={`Properties: [${element.type}] ${element.id}`}
+      name={`Properties: ${element.name || element.type}`}
       value={`element-${element.id}`}
       icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
     >

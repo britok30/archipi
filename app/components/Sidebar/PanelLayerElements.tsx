@@ -23,7 +23,6 @@ import {
 } from "../../store/types";
 import { Boxes, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { usePlannerStore } from "../../store";
 
 interface ElementType {
@@ -71,6 +70,38 @@ const filterElements = (
   return result;
 };
 
+interface ElementSectionProps {
+  label: string;
+  entries: [string, ElementType][];
+  onSelect: (elementId: string) => void;
+}
+
+const ElementSection: React.FC<ElementSectionProps> = ({ label, entries, onSelect }) => {
+  if (entries.length === 0) return null;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <span className="text-xs text-muted-foreground">({entries.length})</span>
+      </div>
+      <div className="space-y-0.5">
+        {entries.map(([id, element]) => (
+          <div
+            key={id}
+            onClick={() => onSelect(element.id)}
+            className={`text-sm truncate cursor-pointer px-2 py-1.5 rounded-md transition duration-200 ease-in-out hover:bg-muted/50 ${
+              element.selected ? "bg-primary/10 text-foreground" : "text-foreground"
+            }`}
+          >
+            {element.name}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const PanelLayerElement: React.FC = () => {
   const mode = usePlannerStore((state) => state.mode);
   const scene = usePlannerStore((state) => state.scene);
@@ -113,86 +144,49 @@ const PanelLayerElement: React.FC = () => {
   const lineEntries = Object.entries(matchedElements.lines);
   const holeEntries = Object.entries(matchedElements.holes);
   const itemEntries = Object.entries(matchedElements.items);
+  const totalCount = lineEntries.length + holeEntries.length + itemEntries.length;
 
   return (
     <Panel
-      name={`Elements on layer ${layer.name}`}
+      name={`Elements on ${layer.name}`}
       value="layer-elements"
       icon={<Boxes className="w-3.5 h-3.5" />}
     >
-      <div className="h-auto overflow-y-auto max-h-40 cursor-pointer mb-2 select-none w-full px-3">
-        <div className="flex items-center space-x-3 mb-3">
-          <Search />
-          <Input
-            type="text"
-            onChange={(e) => {
-              setMatchString(e.target.value);
-            }}
-          />
-        </div>
+      <div className="relative mb-3">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Filter elements..."
+          value={matchString}
+          onChange={(e) => setMatchString(e.target.value)}
+          className="pl-8 h-8 text-sm"
+        />
+      </div>
 
-        {lineEntries.length ? (
-          <div>
-            <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
-              Lines
-            </p>
-            <div className="gap-2 grid grid-cols-2 items-center">
-              {lineEntries.map(([lineID, line]) => (
-                <Button
-                  key={lineID}
-                  size="sm"
-                  variant={line.selected ? "default" : "secondary"}
-                  onClick={() => selectLine(layer.id, line.id)}
-                  className={`${line.selected ? "bg-primary text-primary-foreground" : ""}`}
-                >
-                  {line.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {holeEntries.length ? (
-          <div>
-            <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
-              Holes
-            </p>
-            <div className="gap-2 grid grid-cols-2 items-center">
-              {holeEntries.map(([holeID, hole]) => (
-                <Button
-                  key={holeID}
-                  size="sm"
-                  variant={hole.selected ? "default" : "secondary"}
-                  onClick={() => selectHole(layer.id, hole.id)}
-                  className={`mr-3 ${hole.selected ? "bg-primary text-primary-foreground" : ""}`}
-                >
-                  {hole.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {itemEntries.length ? (
-          <div>
-            <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
-              Items
-            </p>
-            <div className="gap-2 grid grid-cols-2 items-center">
-              {itemEntries.map(([itemID, item]) => (
-                <Button
-                  key={itemID}
-                  size="sm"
-                  variant={item.selected ? "default" : "secondary"}
-                  onClick={() => selectItem(layer.id, item.id)}
-                  className={`mr-3 ${item.selected ? "bg-primary text-primary-foreground" : ""}`}
-                >
-                  {item.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
+      <div className="max-h-64 overflow-y-auto select-none space-y-3 scrollbar scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+        {totalCount === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            {matchString ? "No matching elements" : "No elements on this layer"}
+          </p>
+        ) : (
+          <>
+            <ElementSection
+              label="Lines"
+              entries={lineEntries}
+              onSelect={(id) => selectLine(layer.id, id)}
+            />
+            <ElementSection
+              label="Holes"
+              entries={holeEntries}
+              onSelect={(id) => selectHole(layer.id, id)}
+            />
+            <ElementSection
+              label="Items"
+              entries={itemEntries}
+              onSelect={(id) => selectItem(layer.id, id)}
+            />
+          </>
+        )}
       </div>
     </Panel>
   );

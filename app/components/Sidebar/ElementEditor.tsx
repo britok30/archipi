@@ -351,50 +351,68 @@ const ElementEditor = ({
     pasteProperties();
   };
   return (
-    <div>
-      <AttributesEditor
-        element={element}
-        onUpdate={updateAttribute}
-        attributeFormData={attributesFormData}
-      />
-
-      <div className="flex items-center justify-end space-x-3 py-2 mt-3">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => handleCopyProperties(element.properties)}
-        >
-          <Copy className="w-4 h-4" />
-        </Button>
-
-        {clipboardProperties && Object.keys(clipboardProperties).length > 0 ? (
-          <Button variant="ghost" size="sm" onClick={handlePasteProperties}>
-            <Clipboard className="w-4 h-4" />
-          </Button>
-        ) : null}
+    <div className="space-y-3">
+      <div>
+        <p className="text-xs text-muted-foreground mb-2">Attributes</p>
+        <AttributesEditor
+          element={element}
+          onUpdate={updateAttribute}
+          attributeFormData={attributesFormData}
+        />
       </div>
 
-      {(propertiesFormData as any)
-        ?.entrySeq()
-        .map(([propertyName, data]: [any, any]) => {
-          let currentValue = data.get("currentValue"),
-            configs = data.get("configs");
-          let { Editor } = catalog?.getPropertyType(configs.type) ?? {};
-          if (!Editor) return null;
-          const EditorComponent = Editor as React.ComponentType<any>;
-          return (
-            <EditorComponent
-              key={propertyName}
-              propertyName={propertyName}
-              value={currentValue}
-              configs={configs}
-              onUpdate={(value: any) => updateProperty(propertyName, value)}
-              sourceElement={element}
-              internalState={{ attributesFormData, propertiesFormData }}
-            />
-          );
-        })
-        .toArray()}
+      <div className="pt-3 border-t border-border/40">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-muted-foreground">Properties</p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              title="Copy properties"
+              onClick={() => handleCopyProperties(element.properties)}
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+
+            {clipboardProperties && Object.keys(clipboardProperties).length > 0 ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                title="Paste properties"
+                onClick={handlePasteProperties}
+              >
+                <Clipboard className="h-3.5 w-3.5" />
+              </Button>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {(propertiesFormData as any)
+            ?.entrySeq()
+            .map(([propertyName, data]: [any, any]) => {
+              let currentValue = data.get("currentValue"),
+                configs = data.get("configs");
+              let { Editor } = catalog?.getPropertyType(configs.type) ?? {};
+              if (!Editor) return null;
+              const EditorComponent = Editor as React.ComponentType<any>;
+              return (
+                <EditorComponent
+                  key={propertyName}
+                  propertyName={propertyName}
+                  value={currentValue}
+                  configs={configs}
+                  onUpdate={(value: any) => updateProperty(propertyName, value)}
+                  sourceElement={element}
+                  internalState={{ attributesFormData, propertiesFormData }}
+                />
+              );
+            })
+            .toArray()}
+        </div>
+      </div>
     </div>
   );
 };

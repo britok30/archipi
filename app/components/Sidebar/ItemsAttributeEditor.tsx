@@ -41,9 +41,9 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
     : getElementValue("rotation");
 
   return (
-    <div className={`flex flex-col space-y-3 ${className}`}>
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="item-name">
+    <div className={`space-y-3 ${className}`}>
+      <div className="grid grid-cols-[4rem_1fr] items-center gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor="item-name">
           Name
         </Label>
         <Input
@@ -54,8 +54,8 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
         />
       </div>
 
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="item-x">
+      <div className="grid grid-cols-[4rem_1fr] items-center gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor="item-x">
           X
         </Label>
         <FormNumberInput
@@ -66,8 +66,8 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
         />
       </div>
 
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="item-y">
+      <div className="grid grid-cols-[4rem_1fr] items-center gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor="item-y">
           Y
         </Label>
         <FormNumberInput
@@ -78,8 +78,8 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
         />
       </div>
 
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="item-rotation">
+      <div className="grid grid-cols-[4rem_1fr] items-center gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor="item-rotation">
           Rotation
         </Label>
         <FormNumberInput

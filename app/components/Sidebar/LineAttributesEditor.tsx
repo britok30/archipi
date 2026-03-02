@@ -28,7 +28,6 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
     return (element as any)[key];
   };
 
-  // Extracting attribute values with fallback to element's properties
   const name = attributeFormData.has("name")
     ? attributeFormData.get("name")
     : getElementValue("name");
@@ -49,10 +48,9 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
     : ImmutableMap<string, any>();
 
   return (
-    <div className={`flex flex-col space-y-3 ${className}`}>
-      {/* Name Input */}
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="line-name">
+    <div className={`space-y-3 ${className}`}>
+      <div className="grid grid-cols-[4rem_1fr] items-center gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor="line-name">
           Name
         </Label>
         <Input
@@ -65,73 +63,62 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
         />
       </div>
 
-      {/* Vertex One X */}
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="vertex-one-x">
-          X1
-        </Label>
-        <FormNumberInput
-          id="vertex-one-x"
-          value={vertexOne.get("x") ?? ""}
-          onChange={(value: number) => {
-            onUpdate("vertexOne", { x: value });
-          }}
-          precision={2}
-          min={-Infinity}
-          max={Infinity}
-          placeholder="Enter X1"
-        />
+      <div>
+        <Label className="text-xs text-muted-foreground mb-1.5 block">Vertex 1</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground shrink-0">X</span>
+            <FormNumberInput
+              id="vertex-one-x"
+              value={vertexOne.get("x") ?? ""}
+              onChange={(value: number) => onUpdate("vertexOne", { x: value })}
+              precision={2}
+              min={-Infinity}
+              max={Infinity}
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground shrink-0">Y</span>
+            <FormNumberInput
+              id="vertex-one-y"
+              value={vertexOne.get("y") ?? ""}
+              onChange={(value: number) => onUpdate("vertexOne", { y: value })}
+              precision={2}
+              min={-Infinity}
+              max={Infinity}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Vertex One Y */}
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="vertex-one-y">
-          Y1
-        </Label>
-        <FormNumberInput
-          id="vertex-one-y"
-          value={vertexOne.get("y") ?? ""}
-          onChange={(value: number) => onUpdate("vertexOne", { y: value })}
-          precision={2}
-          min={-Infinity}
-          max={Infinity}
-          placeholder="Enter Y1"
-        />
+      <div>
+        <Label className="text-xs text-muted-foreground mb-1.5 block">Vertex 2</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground shrink-0">X</span>
+            <FormNumberInput
+              id="vertex-two-x"
+              value={vertexTwo.get("x") ?? ""}
+              onChange={(value: number) => onUpdate("vertexTwo", { x: value })}
+              precision={2}
+              min={-Infinity}
+              max={Infinity}
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground shrink-0">Y</span>
+            <FormNumberInput
+              id="vertex-two-y"
+              value={vertexTwo.get("y") ?? ""}
+              onChange={(value: number) => onUpdate("vertexTwo", { y: value })}
+              precision={2}
+              min={-Infinity}
+              max={Infinity}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Vertex Two X */}
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="vertex-two-x">
-          X2
-        </Label>
-        <FormNumberInput
-          id="vertex-two-x"
-          value={vertexTwo.get("x") ?? ""}
-          onChange={(value: number) => onUpdate("vertexTwo", { x: value })}
-          precision={2}
-          min={-Infinity}
-          max={Infinity}
-          placeholder="Enter X2"
-        />
-      </div>
-
-      {/* Vertex Two Y */}
-      <div className="flex flex-col space-y-2">
-        <Label className="text-xs" htmlFor="vertex-two-y">
-          Y2
-        </Label>
-        <FormNumberInput
-          id="vertex-two-y"
-          value={vertexTwo.get("y") ?? ""}
-          onChange={(value: number) => onUpdate("vertexTwo", { y: value })}
-          precision={2}
-          min={-Infinity}
-          max={Infinity}
-          placeholder="Enter Y2"
-        />
-      </div>
-
-      {/* Line Length */}
       {lineLength && (
         <PropertyLengthMeasure
           value={lineLength}

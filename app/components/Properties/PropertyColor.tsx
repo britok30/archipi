@@ -71,7 +71,7 @@ const PropertyColor = ({
       <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
         <Label
           htmlFor={`color-${configs.label}`}
-          className="text-xs font-medium capitalize"
+          className="text-xs text-muted-foreground capitalize"
         >
           {configs.label}
         </Label>

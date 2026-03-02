@@ -2,7 +2,7 @@
 
 import React from "react";
 import Panel from "./Panel";
-import { Eye, EyeOff, Link, Unlink, Trash, FolderOpen } from "lucide-react";
+import { Eye, EyeOff, Link, Unlink, Trash, FolderOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlannerStore } from "../../store";
 import {
@@ -46,6 +46,17 @@ const VISIBILITY_MODES = [
   MODE_FITTING_IMAGE,
 ];
 
+const countGroupElements = (elements: Group["elements"]): number => {
+  if (!elements) return 0;
+  return Object.values(elements).reduce<number>((sum, layerEls) => {
+    return sum + Object.values(layerEls || {}).reduce<number>((lSum, elProt) => {
+      if (Array.isArray(elProt)) return lSum + elProt.length;
+      if (typeof elProt === "object" && elProt !== null) return lSum + Object.keys(elProt).length;
+      return lSum;
+    }, 0);
+  }, 0);
+};
+
 const PanelGroups: React.FC = () => {
   const mode = usePlannerStore((state) => state.mode);
   const scene = usePlannerStore((state) => state.scene);
@@ -62,14 +73,13 @@ const PanelGroups: React.FC = () => {
 
   if (!VISIBILITY_MODES.includes(mode)) return null;
 
-  const selectClick = (groupID: string) => selectGroup(groupID);
-
   const swapVisibility = (e: React.MouseEvent, groupID: string, group: Group) => {
     e.stopPropagation();
     setGroupProperties(groupID, { visible: !group.visible });
   };
 
-  const chainToGroup = (groupID: string) => {
+  const chainToGroup = (e: React.MouseEvent, groupID: string) => {
+    e.stopPropagation();
     Object.values(layers).forEach((layer: Layer) => {
       const layerID = layer.id;
       const layerElements: Record<string, Record<string, { id: string; selected: boolean }>> = {
@@ -79,7 +89,7 @@ const PanelGroups: React.FC = () => {
         areas: layer.areas || {},
       };
 
-      for (let elementPrototype in layerElements) {
+      for (const elementPrototype in layerElements) {
         const elements = layerElements[elementPrototype];
         Object.values(elements)
           .filter((el) => el.selected)
@@ -89,7 +99,7 @@ const PanelGroups: React.FC = () => {
       }
     });
 
-    selectClick(groupID);
+    selectGroup(groupID);
   };
 
   const groupEntries = Object.entries(groups);
@@ -100,108 +110,107 @@ const PanelGroups: React.FC = () => {
       value="groups"
       icon={<FolderOpen className="w-3.5 h-3.5" />}
     >
-      <div className="grid grid-cols-6 text-sm text-muted-foreground">
-        <div className="col-span-2">Actions</div>
-        <div className="col-span-2">Elements</div>
-        <div className="col-span-2">Name</div>
-      </div>
-
-      <div className="mb-2">
-        {groupEntries
-          .map(([groupID, group]: [string, Group]) => {
-            const isCurrentGroup = group.selected;
-            const elements = group.elements || {};
-            const dimension = Object.values(elements).reduce<number>((sum, layerEls) => {
-              return sum + Object.values(layerEls || {}).reduce<number>((lSum, elProt) => {
-                if (Array.isArray(elProt)) return lSum + elProt.length;
-                if (typeof elProt === 'object' && elProt !== null) return lSum + Object.keys(elProt).length;
-                return lSum;
-              }, 0);
-            }, 0);
+      {groupEntries.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          No groups
+        </p>
+      ) : (
+        <div className="space-y-0.5">
+          {groupEntries.map(([groupID, group]: [string, Group]) => {
+            const elementCount = countGroupElements(group.elements);
 
             return (
-              <div key={groupID} className="grid grid-cols-6 mb-3">
-                <div className="flex col-span-2 items-center">
+              <div
+                key={groupID}
+                className={`grid grid-cols-[1fr_auto] items-center cursor-pointer hover:bg-muted/50 transition duration-200 ease-in-out py-2 px-2 rounded-md ${
+                  group.selected ? "bg-primary/10" : ""
+                }`}
+                onClick={() => selectGroup(groupID)}
+              >
+                <div className="min-w-0">
+                  <span className="text-sm text-foreground truncate block">
+                    {group.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {elementCount} {elementCount === 1 ? "element" : "elements"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="p-1"
+                    size="icon"
+                    className="h-7 w-7"
+                    title="Toggle visibility"
                     onClick={(e) => swapVisibility(e, groupID, group)}
                   >
                     {group.visible ? (
-                      <Eye className="w-4 h-4 text-foreground" />
+                      <Eye className="h-3.5 w-3.5" />
                     ) : (
-                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                      <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
                   </Button>
 
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className={`p-1 ${
-                      isCurrentGroup ? "text-primary" : "text-foreground"
-                    }`}
-                    onClick={() => chainToGroup(groupID)}
+                    size="icon"
+                    className="h-7 w-7"
+                    title="Link selected elements"
+                    onClick={(e) => chainToGroup(e, groupID)}
                   >
-                    <Link className="w-4 h-4" />
+                    <Link className="h-3.5 w-3.5" />
                   </Button>
 
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className={`p-1 ${
-                      isCurrentGroup ? "text-primary" : "text-foreground"
-                    }`}
-                    onClick={() => removeGroup(groupID)}
+                    size="icon"
+                    className="h-7 w-7"
+                    title="Unlink group"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeGroup(groupID);
+                    }}
                   >
-                    <Unlink className="w-4 h-4" />
+                    <Unlink className="h-3.5 w-3.5" />
                   </Button>
 
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className={`p-1 ${
-                      isCurrentGroup ? "text-primary" : "text-foreground"
-                    }`}
-                    onClick={() => removeGroupAndDeleteElements(groupID)}
+                    size="icon"
+                    className="h-7 w-7 hover:text-destructive"
+                    title="Delete group and elements"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeGroupAndDeleteElements(groupID);
+                    }}
                   >
-                    <Trash className="w-4 h-4" />
+                    <Trash className="h-3.5 w-3.5" />
                   </Button>
-                </div>
-
-                <div className="col-span-2 flex items-center text-foreground">
-                  {Object.values(elements)
-                    .reduce<string[]>((acc, layerEls) => {
-                      Object.values(layerEls || {}).forEach((elProt) => {
-                        const size = Array.isArray(elProt)
-                          ? elProt.length
-                          : (typeof elProt === 'object' && elProt !== null)
-                            ? Object.keys(elProt).length
-                            : 0;
-                        if (size > 0) {
-                          acc.push(size.toString());
-                        }
-                      });
-                      return acc;
-                    }, [])
-                    .join(", ")}
-                </div>
-
-                <div className="col-span-2 flex items-center text-foreground">
-                  {dimension} {group.name}
                 </div>
               </div>
             );
           })}
-      </div>
+        </div>
+      )}
 
-      <div className="flex items-center gap-2">
-        <Button size="sm" onClick={() => addGroup()}>
-          <span>New Empty Group</span>
+      <div className="mt-3 pt-3 border-t border-border/40 flex items-center gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex-1"
+          onClick={() => addGroup()}
+        >
+          <Plus className="h-3.5 w-3.5 mr-1" />
+          Empty
         </Button>
-
-        <Button size="sm" onClick={() => addGroupFromSelected()}>
-          <span>New Group From Selected</span>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex-1"
+          onClick={() => addGroupFromSelected()}
+        >
+          <Plus className="h-3.5 w-3.5 mr-1" />
+          From selected
         </Button>
       </div>
     </Panel>

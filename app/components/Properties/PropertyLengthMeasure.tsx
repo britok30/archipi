@@ -83,33 +83,29 @@ const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
   };
 
   return (
-    <div className="property-length-measure flex flex-col gap-2 mb-2">
-      <div className="flex flex-col">
-        <Label className="text-xs mb-2 capitalize">{label}</Label>
-
-        <div className="flex gap-3">
-          <FormNumberInput
-            className="flex-1"
-            value={_length}
-            onChange={(value: number) => update(value, _unit)}
-          />
-
-          <Select
-            value={_unit}
-            onValueChange={(value) => update(_length, value)}
-          >
-            <SelectTrigger className="w-[50px] border rounded-lg">
-              <SelectValue placeholder="Choose a unit" />
-            </SelectTrigger>
-            <SelectContent>
-              {UNITS_LENGTH.map((el) => (
-                <SelectItem key={el} value={el}>
-                  {el}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex flex-col gap-1">
+      <Label className="text-xs text-muted-foreground capitalize">{label}</Label>
+      <div className="flex gap-2">
+        <FormNumberInput
+          className="flex-1"
+          value={_length}
+          onChange={(value: number) => update(value, _unit)}
+        />
+        <Select
+          value={_unit}
+          onValueChange={(value) => update(_length, value)}
+        >
+          <SelectTrigger className="w-[50px] border rounded-lg">
+            <SelectValue placeholder="Choose a unit" />
+          </SelectTrigger>
+          <SelectContent>
+            {UNITS_LENGTH.map((el) => (
+              <SelectItem key={el} value={el}>
+                {el}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

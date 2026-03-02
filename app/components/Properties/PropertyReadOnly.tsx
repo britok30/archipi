@@ -50,7 +50,7 @@ const PropertyReadOnly = ({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
-        <Label className="text-sm font-medium capitalize">
+        <Label className="text-xs text-muted-foreground capitalize">
           {configs.label}
         </Label>
         <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ const EnhancedPropertyReadOnly = ({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
-        <Label className="text-sm font-medium capitalize">
+        <Label className="text-xs text-muted-foreground capitalize">
           {configs.label}
         </Label>
         <div className="flex items-center gap-2">

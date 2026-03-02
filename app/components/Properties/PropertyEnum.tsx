@@ -68,7 +68,7 @@ const PropertyEnum = ({
       <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
         <Label
           htmlFor={`enum-${configs.label}`}
-          className="text-sm font-medium capitalize"
+          className="text-xs text-muted-foreground capitalize"
         >
           {configs.label}
         </Label>

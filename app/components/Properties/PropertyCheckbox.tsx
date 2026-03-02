@@ -44,7 +44,7 @@ export default function PropertyCheckbox({
 
   return (
     <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
-      <Label className="text-xs capitalize">{configs.label}</Label>
+      <Label className="text-xs text-muted-foreground capitalize">{configs.label}</Label>
       <Switch checked={value} onCheckedChange={update} />
     </div>
   );
