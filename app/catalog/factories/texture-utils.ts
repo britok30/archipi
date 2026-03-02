@@ -1,6 +1,8 @@
 import {
   TextureLoader,
   RepeatWrapping,
+  SRGBColorSpace,
+  NoColorSpace,
   Vector2,
 } from "three";
 import type { Material, Texture } from "three";
@@ -26,6 +28,7 @@ export const applyTexture = (
   if (!hasMaps(material)) return;
 
   loader.load(texture.uri, (loadedTexture: Texture) => {
+    loadedTexture.colorSpace = SRGBColorSpace;
     material.map = loadedTexture;
     material.needsUpdate = true;
     material.map.wrapS = RepeatWrapping;
@@ -41,6 +44,7 @@ export const applyTexture = (
     loader.load(normal.uri, (loadedNormalMap: Texture) => {
       if (!loadedNormalMap) return;
 
+      loadedNormalMap.colorSpace = NoColorSpace;
       material.normalMap = loadedNormalMap;
       material.normalScale = new Vector2(
         normal.normalScaleX,
