@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import If from "../../utils/react-if";
 import type { Item as ItemType, Layer, Scene, RuntimeCatalog } from "../../store/types";
 
 interface ItemProps {
@@ -44,7 +43,7 @@ export const Item: React.FC<ItemProps> = ({ layer, item, scene, catalog }) => {
       transform={`translate(${x},${y}) rotate(${rotation})`}
     >
       {renderedItem}
-      <If condition={item.selected}>
+      {item.selected && (
         <g
           data-element-root
           data-prototype={item.prototype}
@@ -56,7 +55,7 @@ export const Item: React.FC<ItemProps> = ({ layer, item, scene, catalog }) => {
           <circle cx="0" cy="150" r="10" style={STYLE_CIRCLE} />
           <circle cx="0" cy="0" r="150" style={STYLE_CIRCLE2} />
         </g>
-      </If>
+      )}
     </g>
   );
 };

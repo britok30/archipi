@@ -6,19 +6,7 @@ const typeMap: Record<FileExtension, string> = {
   mtl: "model/mtl",
 };
 
-export function browserDownload(
-  file: string,
-  ext: FileExtension = "json"
-): void {
-  if (!typeMap[ext]) return;
-
-  let filename: string | null = "output" + Date.now() + "." + ext;
-  filename = window.prompt("Insert output filename", filename);
-  if (!filename) return;
-
-  const data = new Blob([file], { type: typeMap[ext] });
-  const url = URL.createObjectURL(data);
-
+function triggerDownload(url: string, filename: string): void {
   const link = document.createElement("a");
   link.setAttribute("download", filename);
   link.href = url;
@@ -26,7 +14,10 @@ export function browserDownload(
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+}
+
+export function downloadDataURI(dataUri: string, filename: string): void {
+  triggerDownload(dataUri, filename);
 }
 
 export function browserDownloadWithName(
@@ -39,34 +30,8 @@ export function browserDownloadWithName(
   const fullName = filename.endsWith(`.${ext}`) ? filename : `${filename}.${ext}`;
   const data = new Blob([file], { type: typeMap[ext] });
   const url = URL.createObjectURL(data);
-
-  const link = document.createElement("a");
-  link.setAttribute("download", fullName);
-  link.href = url;
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  triggerDownload(url, fullName);
   URL.revokeObjectURL(url);
-}
-
-export function downloadDataURI(dataUri: string, filename: string): void {
-  const link = document.createElement("a");
-  link.setAttribute("download", filename);
-  link.href = dataUri;
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-export function imageBrowserDownload(
-  imageUri: string,
-  filename: string = "output"
-): void {
-  const finalFilename = window.prompt("Insert output filename", filename);
-  if (!finalFilename) return;
-  downloadDataURI(imageUri, finalFilename);
 }
 
 export function browserUpload(): Promise<Record<string, unknown>> {

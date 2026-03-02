@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useContext } from "react";
-import If from "../../utils/react-if";
 import * as sharedStyles from "../../styles/shared-style";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import type { Group as GroupType, Layer, Scene } from "../../store/types";
@@ -36,7 +35,7 @@ export const Group: React.FC<GroupProps> = ({ layer, group, scene, catalog }) =>
       style={group.selected ? { cursor: "move" } : {}}
       transform={`translate(${group.x},${group.y}) rotate(${group.rotation})`}
     >
-      <If condition={group.selected}>
+      {group.selected && (
         <g
           data-element-root
           data-prototype={group.prototype}
@@ -49,7 +48,7 @@ export const Group: React.FC<GroupProps> = ({ layer, group, scene, catalog }) =>
             <title>{translator?.t("Group's Barycenter")}</title>
           </circle>
         </g>
-      </If>
+      )}
     </g>
   );
 };
