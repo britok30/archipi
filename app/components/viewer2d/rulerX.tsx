@@ -1,4 +1,25 @@
-import React from "react";
+"use client";
+
+import React, { memo, useMemo } from "react";
+
+const RULER_H = 15;
+
+/**
+ * Pick "nice" major/minor tick steps so that major ticks are ~targetPx
+ * screen-pixels apart at the current zoom. Steps snap to the sequence
+ * 1, 2, 5, 10, 20, 50, 100, 200, 500, …
+ */
+function niceStep(zoom: number, targetPx = 100): { major: number; minor: number } {
+  if (zoom <= 0) return { major: 100, minor: 100 };
+  const raw = targetPx / zoom;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const r = raw / mag;
+  const major = r < 1.5 ? mag : r < 3.5 ? 2 * mag : r < 7.5 ? 5 * mag : 10 * mag;
+  let minor = major / 5;
+  if (minor * zoom < 10) minor = major / 2;
+  if (minor * zoom < 10) minor = major;
+  return { major, minor };
+}
 
 interface RulerXProps {
   unitPixelSize: number;
@@ -13,109 +34,74 @@ interface RulerXProps {
   markerColor?: string;
 }
 
-export const RulerX: React.FC<RulerXProps> = ({
-  unitPixelSize,
-  positiveUnitsNumber = 50,
-  negativeUnitsNumber = 50,
+const RulerXInner: React.FC<RulerXProps> = ({
   zoom,
   mouseX,
   width,
   zeroLeftPosition,
-  backgroundColor = "#f0f0f0",
-  fontColor = "#ffffff", // Default to white font color
-  markerColor = "#000000",
+  backgroundColor = "#292929",
 }) => {
-  const elementW = unitPixelSize * zoom;
+  const { major, minor } = useMemo(() => niceStep(zoom), [zoom]);
 
-  const elementStyle: React.CSSProperties = {
-    width: elementW,
-    borderLeft: `1px solid white`,
-  };
+  // Visible range in scene coordinates (only generate ticks for viewport)
+  const sceneMin = Math.max(0, -zeroLeftPosition / zoom);
+  const sceneMax = (width - zeroLeftPosition) / zoom;
 
-  const elementClassName = `inline-block relative pl-[0.2em] text-[10px] h-full text-white`;
+  const { ticksPath, labels } = useMemo(() => {
+    const start = Math.floor(sceneMin / minor) * minor;
+    const end = Math.ceil(sceneMax / minor) * minor;
+    let d = "";
+    const lbls: { sx: number; text: string }[] = [];
 
-  const insideElementsClassName = `w-[20%] inline-block m-0 p-0 text-white`;
+    for (let val = start; val <= end; val += minor) {
+      const rv = Math.round(val * 1000) / 1000;
+      const sx = zeroLeftPosition + rv * zoom;
+      if (sx < -20 || sx > width + 20) continue;
 
-  const rulerStyle: React.CSSProperties = {
-    backgroundColor: backgroundColor,
-    width: width,
-  };
+      const isMajor = Math.abs(rv % major) < 0.001;
+      const tickH = isMajor ? 10 : 5;
+      d += `M${sx.toFixed(1)} ${RULER_H}V${RULER_H - tickH}`;
 
-  const rulerClassName = `relative h-full text-white`;
-
-  const markerStyle: React.CSSProperties = {
-    left: zeroLeftPosition + mouseX * zoom - 6.5,
-    borderTop: `8px solid white`,
-  };
-
-  const markerClassName = `absolute top-2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent z-[9001]`;
-
-  const rulerContainerClassName = `absolute h-[10px] top-1 grid grid-rows-[100%] gap-0`;
-
-  const positiveRulerContainerStyle: React.CSSProperties = {
-    width: positiveUnitsNumber * elementW,
-    left: zeroLeftPosition,
-    gridAutoColumns: `${elementW}px`,
-  };
-
-  const negativeRulerContainerStyle: React.CSSProperties = {
-    width: negativeUnitsNumber * elementW,
-    left: zeroLeftPosition - negativeUnitsNumber * elementW,
-    gridAutoColumns: `${elementW}px`,
-  };
-
-  const positiveDomElements: JSX.Element[] = [];
-
-  if (elementW <= 200) {
-    for (let x = 0; x < positiveUnitsNumber; x++) {
-      positiveDomElements.push(
-        <div
-          key={x}
-          className={elementClassName}
-          style={{ ...elementStyle, gridColumn: x + 1, gridRow: 1 }}
-        >
-          {elementW > 30 ? x * 100 : ""}
-        </div>
-      );
+      if (isMajor) {
+        lbls.push({ sx, text: String(Math.round(rv)) });
+      }
     }
-  } else {
-    for (let x = 0; x < positiveUnitsNumber; x++) {
-      const val = x * 100;
-      positiveDomElements.push(
-        <div
-          key={x}
-          className={elementClassName}
-          style={{ ...elementStyle, gridColumn: x + 1, gridRow: 1 }}
-        >
-          <div className={insideElementsClassName}>{val}</div>
-          <div className={insideElementsClassName}>{val + 20}</div>
-          <div className={insideElementsClassName}>{val + 40}</div>
-          <div className={insideElementsClassName}>{val + 60}</div>
-          <div className={insideElementsClassName}>{val + 80}</div>
-        </div>
-      );
-    }
-  }
+
+    return { ticksPath: d, labels: lbls };
+  }, [sceneMin, sceneMax, major, minor, zeroLeftPosition, zoom, width]);
+
+  const markerX = zeroLeftPosition + mouseX * zoom;
 
   return (
-    <div className={rulerClassName} style={rulerStyle}>
-      <div
-        id="horizontalMarker"
-        className={markerClassName}
-        style={markerStyle}
-      ></div>
-      <div
-        id="negativeRuler"
-        className={rulerContainerClassName}
-        style={negativeRulerContainerStyle}
-      ></div>
-      <div
-        id="positiveRuler"
-        className={rulerContainerClassName}
-        style={positiveRulerContainerStyle}
-      >
-        {positiveDomElements}
-      </div>
-    </div>
+    <svg
+      width={width}
+      height={RULER_H}
+      style={{ backgroundColor, display: "block" }}
+    >
+      <path
+        d={ticksPath}
+        stroke="rgba(255,255,255,0.4)"
+        strokeWidth={1}
+        fill="none"
+      />
+      {labels.map((lbl) => (
+        <text
+          key={lbl.text}
+          x={lbl.sx + 3}
+          y={9}
+          fill="rgba(255,255,255,0.8)"
+          fontSize={9}
+          fontFamily="system-ui, sans-serif"
+        >
+          {lbl.text}
+        </text>
+      ))}
+      <polygon
+        points={`${markerX - 4},1 ${markerX + 4},1 ${markerX},7`}
+        fill="white"
+      />
+    </svg>
   );
 };
+
+export const RulerX = memo(RulerXInner);

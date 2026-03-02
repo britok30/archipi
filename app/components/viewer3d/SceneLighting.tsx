@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Environment, SoftShadows } from "@react-three/drei";
+import { Environment } from "@react-three/drei";
 import { Object3D } from "three";
 
 const SceneLighting: React.FC = () => {
@@ -25,16 +25,15 @@ const SceneLighting: React.FC = () => {
 
   return (
     <>
-      <SoftShadows size={2.5} samples={16} focus={0.5} />
-
-      <ambientLight intensity={0.7} />
-      <hemisphereLight args={[0xffffff, 0xffa07a, 0.5]} />
+      <ambientLight intensity={0.4} />
+      <hemisphereLight args={[0xffffff, 0xffa07a, 0.3]} />
 
       <directionalLight
         position={[1, 1.5, 1]}
-        intensity={1.0}
+        intensity={1.4}
         castShadow
         shadow-bias={-0.0001}
+        shadow-radius={2.5}
         shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-10}
         shadow-camera-right={10}
@@ -44,13 +43,13 @@ const SceneLighting: React.FC = () => {
 
       <directionalLight
         position={[-1, 0.5, -1]}
-        intensity={0.4}
+        intensity={0.3}
         color={0xffd700}
       />
 
       <spotLight
         ref={spotLightRef}
-        intensity={0.6}
+        intensity={0.5}
         angle={Math.PI / 4}
         penumbra={0.2}
         decay={1.2}

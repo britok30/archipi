@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 type BreadcrumbItem = {
   name: string;
@@ -10,57 +9,41 @@ type BreadcrumbItem = {
 
 type BreadcrumbProps = {
   names: BreadcrumbItem[];
-  className?: string;
 };
 
-const BreadcrumbItem = ({
-  item,
-  isLast,
-}: {
-  item: BreadcrumbItem;
-  isLast: boolean;
-}) => {
-  const isClickable = Boolean(item.action);
-
-  return (
-    <div className="flex items-center">
-      <Button
-        onClick={item.action}
-        disabled={!isClickable}
-        className={`
-          text-lg text-white
-          ${isLast ? "font-bold" : ""}
-          ${isClickable ? "hover:opacity-80 cursor-pointer" : "cursor-default"}
-          disabled:cursor-text disabled:opacity-100
-          transition-opacity
-        `}
-        aria-current={isLast ? "page" : undefined}
-      >
-        {item.name}
-      </Button>
-
-      {!isLast && (
-        <ArrowLeft
-          className="text-2xl mx-2.5 fill-black"
-          aria-hidden="true"
-          role="presentation"
-        />
-      )}
-    </div>
-  );
-};
-
-const CatalogBreadcrumb = ({ names, className = "" }: BreadcrumbProps) => {
+const CatalogBreadcrumb = ({ names }: BreadcrumbProps) => {
   if (!names.length) return null;
 
   return (
-    <nav aria-label="Breadcrumb navigation" className={`py-6 ${className}`}>
-      <ol className="flex flex-wrap gap-1">
-        {names.map((item, index) => (
-          <li key={`${item.name}-${index}`} className="flex items-center">
-            <BreadcrumbItem item={item} isLast={index === names.length - 1} />
-          </li>
-        ))}
+    <nav aria-label="Breadcrumb navigation">
+      <ol className="flex items-center gap-1 text-sm">
+        {names.map((item, index) => {
+          const isLast = index === names.length - 1;
+          const isClickable = !isLast && Boolean(item.action);
+
+          return (
+            <li key={`${item.name}-${index}`} className="flex items-center gap-1">
+              {index > 0 && (
+                <ChevronRight className="size-3.5 text-muted-foreground/60 shrink-0" />
+              )}
+              {isClickable ? (
+                <button
+                  onClick={item.action}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <span
+                  className="text-foreground font-medium"
+                  aria-current={isLast ? "page" : undefined}
+                >
+                  {item.name}
+                </span>
+              )}
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

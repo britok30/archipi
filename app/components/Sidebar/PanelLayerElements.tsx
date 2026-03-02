@@ -61,7 +61,7 @@ const VISIBILITY_MODE = new Set([
 
 const filterElements = (
   elements: Record<string, ElementType>,
-  regexp: RegExp
+  regexp: RegExp,
 ): Record<string, ElementType> => {
   const result: Record<string, ElementType> = {};
   for (const [key, el] of Object.entries(elements)) {
@@ -138,17 +138,19 @@ const PanelLayerElement: React.FC = () => {
             <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
               {translator?.t("Lines") ?? "Lines"}
             </p>
-            {lineEntries.map(([lineID, line]) => (
-              <Button
-                key={lineID}
-                size="sm"
-                variant={line.selected ? "default" : "secondary"}
-                onClick={() => selectLine(layer.id, line.id)}
-                className={`mr-3 ${line.selected ? "bg-primary text-primary-foreground" : ""}`}
-              >
-                {line.name}
-              </Button>
-            ))}
+            <div className="gap-2 grid grid-cols-2 items-center">
+              {lineEntries.map(([lineID, line]) => (
+                <Button
+                  key={lineID}
+                  size="sm"
+                  variant={line.selected ? "default" : "secondary"}
+                  onClick={() => selectLine(layer.id, line.id)}
+                  className={`${line.selected ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  {line.name}
+                </Button>
+              ))}
+            </div>
           </div>
         ) : null}
 
@@ -157,17 +159,19 @@ const PanelLayerElement: React.FC = () => {
             <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
               Holes
             </p>
-            {holeEntries.map(([holeID, hole]) => (
-              <Button
-                key={holeID}
-                size="sm"
-                variant={hole.selected ? "default" : "secondary"}
-                onClick={() => selectHole(layer.id, hole.id)}
-                className={`mr-3 ${hole.selected ? "bg-primary text-primary-foreground" : ""}`}
-              >
-                {hole.name}
-              </Button>
-            ))}
+            <div className="gap-2 grid grid-cols-2 items-center">
+              {holeEntries.map(([holeID, hole]) => (
+                <Button
+                  key={holeID}
+                  size="sm"
+                  variant={hole.selected ? "default" : "secondary"}
+                  onClick={() => selectHole(layer.id, hole.id)}
+                  className={`mr-3 ${hole.selected ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  {hole.name}
+                </Button>
+              ))}
+            </div>
           </div>
         ) : null}
 
@@ -176,17 +180,19 @@ const PanelLayerElement: React.FC = () => {
             <p className="pb-2 border-b border-border/40 text-muted-foreground mb-2">
               Items
             </p>
-            {itemEntries.map(([itemID, item]) => (
-              <Button
-                key={itemID}
-                size="sm"
-                variant={item.selected ? "default" : "secondary"}
-                onClick={() => selectItem(layer.id, item.id)}
-                className={`mr-3 ${item.selected ? "bg-primary text-primary-foreground" : ""}`}
-              >
-                {item.name}
-              </Button>
-            ))}
+            <div className="gap-2 grid grid-cols-2 items-center">
+              {itemEntries.map(([itemID, item]) => (
+                <Button
+                  key={itemID}
+                  size="sm"
+                  variant={item.selected ? "default" : "secondary"}
+                  onClick={() => selectItem(layer.id, item.id)}
+                  className={`mr-3 ${item.selected ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  {item.name}
+                </Button>
+              ))}
+            </div>
           </div>
         ) : null}
       </div>

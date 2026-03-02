@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Book } from "lucide-react";
 import { usePlannerStore } from "../../store";
@@ -16,26 +18,24 @@ const CatalogButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const mode = usePlannerStore((state) => state.mode);
 
-  const handleOpenCatalog = () => {
-    setIsOpen(true);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <ToolbarButton
-          active={mode === MODE_VIEWING_CATALOG}
-          tooltip="Open Catalog"
-          onClick={handleOpenCatalog}
-        >
-          <Book size={20} />
-        </ToolbarButton>
+        <div>
+          <ToolbarButton
+            active={mode === MODE_VIEWING_CATALOG || isOpen}
+            tooltip="Catalog"
+            onClick={() => setIsOpen(true)}
+          >
+            <Book size={20} />
+          </ToolbarButton>
+        </div>
       </DialogTrigger>
-      <DialogContent className="max-w-[80vw] h-[80vh] text-foreground">
+      <DialogContent className="max-w-[80vw] h-[80vh] flex flex-col text-foreground">
         <DialogHeader>
           <DialogTitle>Catalog</DialogTitle>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto pr-6 -mr-6">
+        <div className="flex-1 overflow-y-auto min-h-0 scrollbar scrollbar-thumb-zinc-700 scrollbar-track-transparent">
           <CatalogList onClose={() => setIsOpen(false)} />
         </div>
       </DialogContent>

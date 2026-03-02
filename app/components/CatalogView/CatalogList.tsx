@@ -7,9 +7,8 @@ import CatalogItem from "./CatalogItem";
 import CatalogBreadcrumb from "./CatalogBreadcrumb";
 import CatalogPageItem from "./CatalogPageItem";
 import CatalogTurnBackPageItem from "./CatalogTurnBackPageItem";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Search, PackageOpen } from "lucide-react";
 import type { CatalogElement, CatalogCategory } from "../../store/types";
 
 interface BreadcrumbItem {
@@ -21,37 +20,50 @@ interface CatalogListProps {
   onClose?: () => void;
 }
 
-// Styles
-const ITEMS_GRID: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(14em, 1fr))",
-  gridGap: "10px",
-  marginTop: "1em",
-};
+function flattenCategories(categories: CatalogCategory[]): CatalogElement[] {
+  return categories.reduce((acc: CatalogElement[], curr: CatalogCategory) => {
+    return [...acc, ...curr.elements, ...flattenCategories(curr.categories)];
+  }, []);
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
   const { catalog } = useCatalogContext();
 
-  // Get state from Zustand
   const catalogState = usePlannerStore((state) => state.catalog);
-  const selectedElementsHistory = usePlannerStore((state) => state.selectedElementsHistory);
+  const selectedElementsHistory = usePlannerStore(
+    (state) => state.selectedElementsHistory
+  );
 
-  // Get actions from Zustand
-  const selectToolDrawingLine = usePlannerStore((state) => state.selectToolDrawingLine);
-  const selectToolDrawingItem = usePlannerStore((state) => state.selectToolDrawingItem);
-  const selectToolDrawingHole = usePlannerStore((state) => state.selectToolDrawingHole);
-  const goBackToCatalogPage = usePlannerStore((state) => state.goBackToCatalogPage);
-  const changeCatalogPage = usePlannerStore((state) => state.changeCatalogPage);
+  const selectToolDrawingLine = usePlannerStore(
+    (state) => state.selectToolDrawingLine
+  );
+  const selectToolDrawingItem = usePlannerStore(
+    (state) => state.selectToolDrawingItem
+  );
+  const selectToolDrawingHole = usePlannerStore(
+    (state) => state.selectToolDrawingHole
+  );
+  const goBackToCatalogPage = usePlannerStore(
+    (state) => state.goBackToCatalogPage
+  );
   const pushLastSelectedCatalogElementToHistory = usePlannerStore(
     (state) => state.pushLastSelectedCatalogElementToHistory
   );
 
+  const [searchQuery, setSearchQuery] = useState("");
+
   const currentCategory = useMemo(() => {
-    if (!catalog) return { name: 'root', label: '/', elements: [], categories: [] };
+    if (!catalog)
+      return { name: "root", label: "/", elements: [], categories: [] };
     return catalog.getCategory(catalogState.page);
   }, [catalog, catalogState.page]);
 
   const categoriesToDisplay = currentCategory.categories;
+
   const elementsToDisplay = useMemo(
     () =>
       currentCategory.elements.filter((element) =>
@@ -60,30 +72,21 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
     [currentCategory.elements]
   );
 
-  const [matchString, setMatchString] = useState("");
-  const [matchedElements, setMatchedElements] = useState<CatalogElement[]>([]);
+  // All searchable elements (current + nested categories), memoized
+  const allElements = useMemo(
+    () => [...elementsToDisplay, ...flattenCategories(categoriesToDisplay)],
+    [elementsToDisplay, categoriesToDisplay]
+  );
 
-  const flattenCategories = (categories: CatalogCategory[]): CatalogElement[] => {
-    return categories.reduce((acc: CatalogElement[], curr: CatalogCategory) => {
-      return [...acc, ...curr.elements, ...flattenCategories(curr.categories)];
-    }, []);
-  };
-
-  const handleSearch = (text: string) => {
-    const allElements = [...elementsToDisplay, ...flattenCategories(categoriesToDisplay)];
-    let filtered: CatalogElement[] = [];
-
-    if (text) {
-      const regexp = new RegExp(text, "i");
-      filtered = allElements.filter((item) => {
-        const title = item.info.title || item.name;
-        return regexp.test(title);
-      });
-    }
-
-    setMatchString(text);
-    setMatchedElements(filtered);
-  };
+  // Derived search results — no separate state needed
+  const matchedElements = useMemo(() => {
+    if (!searchQuery) return [];
+    const pattern = new RegExp(escapeRegex(searchQuery), "i");
+    return allElements.filter((item) => {
+      const title = item.info.title || item.name;
+      return pattern.test(title);
+    });
+  }, [searchQuery, allElements]);
 
   const handleElementSelect = (element: CatalogElement) => {
     switch (element.prototype) {
@@ -102,118 +105,114 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
     onClose?.();
   };
 
-  const renderBreadcrumb = () => {
-    if (catalogState.page === "root") return null;
-    if (!catalog) return null;
+  const breadcrumbItems = useMemo((): BreadcrumbItem[] => {
+    if (catalogState.page === "root" || !catalog) return [];
 
-    const breadcrumbsItems: BreadcrumbItem[] = [];
-
-    catalogState.path.forEach((pathName: string) => {
-      breadcrumbsItems.push({
+    const items: BreadcrumbItem[] = catalogState.path.map(
+      (pathName: string) => ({
         name: catalog.getCategory(pathName).label,
         action: () => goBackToCatalogPage(),
-      });
-    });
+      })
+    );
 
-    breadcrumbsItems.push({
+    items.push({
       name: currentCategory.label,
       action: () => {},
     });
 
-    return <CatalogBreadcrumb names={breadcrumbsItems} />;
-  };
+    return items;
+  }, [catalogState.page, catalogState.path, catalog, currentCategory.label, goBackToCatalogPage]);
 
-  const renderTurnBackButton = () => {
-    const pathSize = catalogState.path.length;
-    if (pathSize === 0 || !catalog) return null;
+  // Recently used elements
+  const historyElements = useMemo(() => {
+    if (!catalog || selectedElementsHistory.length === 0) return [];
+    return selectedElementsHistory
+      .map((name: string) =>
+        catalog.hasElement(name) ? catalog.getElement(name) : null
+      )
+      .filter(Boolean) as CatalogElement[];
+  }, [catalog, selectedElementsHistory]);
 
-    const previousPage = catalogState.path[pathSize - 1];
-    const previousCategory = catalog.getCategory(previousPage);
-
-    return (
-      <CatalogTurnBackPageItem
-        key={pathSize}
-        page={previousCategory}
-      />
-    );
-  };
-
-  const renderSelectedHistory = () => {
-    if (selectedElementsHistory.length === 0 || !catalog) return null;
-
-    return (
-      <div className="w-full overflow-x-scroll mt-4 flex items-center relative px-2 rounded-lg">
-        <Label className="inline-block mr-5 text-sm">Last Selected</Label>
-        {selectedElementsHistory.map((elementName: string, index: number) => {
-          const element = catalog.hasElement(elementName) ? catalog.getElement(elementName) : null;
-          if (!element) return null;
-          return (
-            <Button
-              variant="secondary"
-              className="mr-2"
-              key={index}
-              title={element.name}
-              onClick={() => handleElementSelect(element)}
-            >
-              {element.name}
-            </Button>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderCatalogItems = () => {
-    if (matchString) {
-      return matchedElements.map((elem) => (
-        <CatalogItem
-          key={elem.name}
-          element={elem}
-          onSelect={handleElementSelect}
-        />
-      ));
-    }
-
-    return (
-      <>
-        {renderTurnBackButton()}
-        {categoriesToDisplay.map((cat) => (
-          <CatalogPageItem
-            key={cat.name}
-            page={cat}
-            oldPage={currentCategory}
-          />
-        ))}
-        {elementsToDisplay.map((elem) => (
-          <CatalogItem
-            key={elem.name}
-            element={elem}
-            onSelect={handleElementSelect}
-          />
-        ))}
-      </>
-    );
-  };
+  const isSearching = searchQuery.length > 0;
 
   return (
-    <div className="w-full px-2">
-      <h1 className="text-4xl text-white mb-4">Catalog</h1>
-      {renderBreadcrumb()}
+    <div className="space-y-4">
+      {/* Breadcrumb */}
+      {breadcrumbItems.length > 0 && (
+        <CatalogBreadcrumb names={breadcrumbItems} />
+      )}
 
-      <div className="flex flex-col space-y-2">
-        <Label htmlFor="search">Search Elements</Label>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
-          id="search"
           type="text"
-          name="search"
-          placeholder="Search catalog"
-          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Search elements..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
         />
       </div>
 
-      {renderSelectedHistory()}
+      {/* Recently used */}
+      {!isSearching && historyElements.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Recently used
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {historyElements.map((element) => (
+              <button
+                key={element.name}
+                onClick={() => handleElementSelect(element)}
+                className="px-3 py-1.5 text-sm rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              >
+                {element.info.title || element.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-      <div style={ITEMS_GRID}>{renderCatalogItems()}</div>
+      {/* Grid */}
+      {isSearching ? (
+        matchedElements.length > 0 ? (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
+            {matchedElements.map((elem) => (
+              <CatalogItem
+                key={elem.name}
+                element={elem}
+                onSelect={handleElementSelect}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <PackageOpen className="size-12 mb-3 opacity-40" />
+            <p className="text-sm">
+              No elements matching &ldquo;{searchQuery}&rdquo;
+            </p>
+          </div>
+        )
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
+          {catalogState.path.length > 0 && <CatalogTurnBackPageItem />}
+          {categoriesToDisplay.map((cat) => (
+            <CatalogPageItem
+              key={cat.name}
+              page={cat}
+              oldPage={currentCategory}
+            />
+          ))}
+          {elementsToDisplay.map((elem) => (
+            <CatalogItem
+              key={elem.name}
+              element={elem}
+              onSelect={handleElementSelect}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

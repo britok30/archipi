@@ -1,4 +1,20 @@
-import React from "react";
+"use client";
+
+import React, { memo, useMemo } from "react";
+
+const RULER_W = 15;
+
+function niceStep(zoom: number, targetPx = 100): { major: number; minor: number } {
+  if (zoom <= 0) return { major: 100, minor: 100 };
+  const raw = targetPx / zoom;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const r = raw / mag;
+  const major = r < 1.5 ? mag : r < 3.5 ? 2 * mag : r < 7.5 ? 5 * mag : 10 * mag;
+  let minor = major / 5;
+  if (minor * zoom < 10) minor = major / 2;
+  if (minor * zoom < 10) minor = major;
+  return { major, minor };
+}
 
 interface RulerYProps {
   unitPixelSize: number;
@@ -13,131 +29,77 @@ interface RulerYProps {
   negativeUnitsNumber?: number;
 }
 
-export const RulerY: React.FC<RulerYProps> = ({
-  unitPixelSize,
+const RulerYInner: React.FC<RulerYProps> = ({
   zoom,
   mouseY,
   height,
   zeroTopPosition,
-  backgroundColor = "#f0f0f0",
-  fontColor = "#ffffff", // Default to white font color
-  markerColor = "#000000",
-  positiveUnitsNumber = 50,
-  negativeUnitsNumber = 50,
+  backgroundColor = "#292929",
 }) => {
-  const elementH = unitPixelSize * zoom;
+  const { major, minor } = useMemo(() => niceStep(zoom), [zoom]);
 
-  const elementStyle: React.CSSProperties = {
-    height: elementH,
-    textOrientation: "upright",
-    writingMode: "vertical-lr",
-    borderBottom: `1px solid white`,
-  };
+  // Visible range in scene coordinates
+  // screenY = zeroTopPosition - sceneY * zoom
+  // sceneY = (zeroTopPosition - screenY) / zoom
+  const sceneMin = Math.max(0, (zeroTopPosition - height) / zoom);
+  const sceneMax = Math.max(0, zeroTopPosition / zoom);
 
-  const elementClassName = `w-[8px] pb-[0.2em] text-[10px] tracking-[-2px] text-right text-white`;
+  const { ticksPath, labels } = useMemo(() => {
+    const start = Math.floor(sceneMin / minor) * minor;
+    const end = Math.ceil(sceneMax / minor) * minor;
+    let d = "";
+    const lbls: { sy: number; text: string }[] = [];
 
-  const insideElementsClassName = `h-[20%] w-full inline-block tracking-[-2px] text-right text-white`;
+    for (let val = start; val <= end; val += minor) {
+      const rv = Math.round(val * 1000) / 1000;
+      const sy = zeroTopPosition - rv * zoom;
+      if (sy < -20 || sy > height + 20) continue;
 
-  const insideElementsStyle: React.CSSProperties = {
-    textOrientation: "upright",
-    writingMode: "vertical-lr",
-  };
+      const isMajor = Math.abs(rv % major) < 0.001;
+      const tickW = isMajor ? 10 : 5;
+      d += `M${RULER_W} ${sy.toFixed(1)}H${RULER_W - tickW}`;
 
-  const rulerStyle: React.CSSProperties = {
-    backgroundColor: backgroundColor,
-    height: height,
-    color: "#fff",
-  };
-
-  const rulerClassName = `w-full text-white`;
-
-  const markerStyle: React.CSSProperties = {
-    top: zeroTopPosition - mouseY * zoom - 6.5,
-    borderLeft: `8px solid white`,
-  };
-
-  const markerClassName = `absolute left-2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent z-[9001]`;
-
-  const rulerContainerClassName = `absolute w-full grid gap-0 grid-cols-[100%] pl-[5px]`;
-
-  const rulerContainerStyle: React.CSSProperties = {
-    gridAutoRows: `${elementH}px`,
-  };
-
-  const positiveRulerContainerStyle: React.CSSProperties = {
-    ...rulerContainerStyle,
-    top: zeroTopPosition - positiveUnitsNumber * elementH,
-    height: positiveUnitsNumber * elementH,
-  };
-
-  const negativeRulerContainerStyle: React.CSSProperties = {
-    ...rulerContainerStyle,
-    top: zeroTopPosition + negativeUnitsNumber * elementH,
-    height: negativeUnitsNumber * elementH,
-  };
-
-  const positiveDomElements: JSX.Element[] = [];
-
-  if (elementH <= 200) {
-    for (let x = 1; x <= positiveUnitsNumber; x++) {
-      positiveDomElements.push(
-        <div
-          key={x}
-          className={elementClassName}
-          style={{ ...elementStyle, gridColumn: 1, gridRow: x }}
-        >
-          {elementH > 30 ? (positiveUnitsNumber - x) * 100 : ""}
-        </div>
-      );
+      if (isMajor) {
+        lbls.push({ sy, text: String(Math.round(rv)) });
+      }
     }
-  } else {
-    for (let x = 1; x <= positiveUnitsNumber; x++) {
-      const val = (positiveUnitsNumber - x) * 100;
-      positiveDomElements.push(
-        <div
-          key={x}
-          className={elementClassName}
-          style={{ ...elementStyle, gridColumn: 1, gridRow: x }}
-        >
-          <div className={insideElementsClassName} style={insideElementsStyle}>
-            {val + 80}
-          </div>
-          <div className={insideElementsClassName} style={insideElementsStyle}>
-            {val + 60}
-          </div>
-          <div className={insideElementsClassName} style={insideElementsStyle}>
-            {val + 40}
-          </div>
-          <div className={insideElementsClassName} style={insideElementsStyle}>
-            {val + 20}
-          </div>
-          <div className={insideElementsClassName} style={insideElementsStyle}>
-            {val}
-          </div>
-        </div>
-      );
-    }
-  }
+
+    return { ticksPath: d, labels: lbls };
+  }, [sceneMin, sceneMax, major, minor, zeroTopPosition, zoom, height]);
+
+  const markerY = zeroTopPosition - mouseY * zoom;
 
   return (
-    <div className={rulerClassName} style={rulerStyle}>
-      <div
-        id="verticalMarker"
-        className={markerClassName}
-        style={markerStyle}
-      ></div>
-      <div
-        id="negativeRuler"
-        className={rulerContainerClassName}
-        style={negativeRulerContainerStyle}
-      ></div>
-      <div
-        id="positiveRuler"
-        className={rulerContainerClassName}
-        style={positiveRulerContainerStyle}
-      >
-        {positiveDomElements}
-      </div>
-    </div>
+    <svg
+      width={RULER_W}
+      height={height}
+      style={{ backgroundColor, display: "block" }}
+    >
+      <path
+        d={ticksPath}
+        stroke="rgba(255,255,255,0.4)"
+        strokeWidth={1}
+        fill="none"
+      />
+      {labels.map((lbl) => (
+        <text
+          key={lbl.text}
+          x={4}
+          y={lbl.sy - 3}
+          fill="rgba(255,255,255,0.8)"
+          fontSize={9}
+          fontFamily="system-ui, sans-serif"
+          transform={`rotate(-90, 4, ${lbl.sy - 3})`}
+        >
+          {lbl.text}
+        </text>
+      ))}
+      <polygon
+        points={`1,${markerY - 4} 1,${markerY + 4} 7,${markerY}`}
+        fill="white"
+      />
+    </svg>
   );
 };
+
+export const RulerY = memo(RulerYInner);

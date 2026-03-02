@@ -3,6 +3,7 @@
 import React, { useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import SceneLighting from "./SceneLighting";
 import Grid3D from "./Grid3D";
 import LODUpdater from "./LODUpdater";
@@ -52,13 +53,16 @@ const Viewer3D: React.FC<Scene3DViewerProps> = ({ width, height }) => {
   );
 
   return (
-    <div className="saturate-[1.6] contrast-125" ref={canvasWrapper}>
+    <div ref={canvasWrapper}>
       <Canvas
         shadows
         gl={{
           antialias: true,
           preserveDrawingBuffer: true,
           logarithmicDepthBuffer: true,
+          toneMapping: ACESFilmicToneMapping,
+          toneMappingExposure: 1.2,
+          outputColorSpace: SRGBColorSpace
         }}
         style={{ width, height }}
         camera={{

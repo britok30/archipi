@@ -1,105 +1,71 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { usePlannerStore } from "../../store";
-import { useCatalogContext } from "../../context/ReactPlannerContext";
-import { ReactPlannerUtils } from "../../utils";
-import { Camera } from "lucide-react";
+import { Camera, Loader2, Check } from "lucide-react";
 import ToolbarButton from "./ToolbarButton";
-import {
-  MODE_IDLE,
-  MODE_2D_ZOOM_IN,
-  MODE_2D_ZOOM_OUT,
-  MODE_2D_PAN,
-  MODE_WAITING_DRAWING_LINE,
-  MODE_DRAGGING_LINE,
-  MODE_DRAGGING_VERTEX,
-  MODE_DRAGGING_ITEM,
-  MODE_DRAWING_LINE,
-  MODE_DRAWING_HOLE,
-  MODE_DRAWING_ITEM,
-  MODE_DRAGGING_HOLE,
-  MODE_ROTATING_ITEM,
-  MODE_3D_FIRST_PERSON,
-  MODE_3D_VIEW,
-} from "../../store/types";
+import { MODE_3D_FIRST_PERSON, MODE_3D_VIEW } from "../../store/types";
+import { saveSVGtoPngBase64 } from "../../utils/image";
+import { downloadDataURI } from "../../utils/browser";
 
-const { imageBrowserDownload } = ReactPlannerUtils.BrowserUtils;
-const { saveSVGtoPngFile } = ReactPlannerUtils.ImageUtils;
+type Status = "idle" | "capturing" | "done";
 
 export default function ScreenshotToolbarButton() {
-  const { translator } = useCatalogContext();
   const mode = usePlannerStore((state) => state.mode);
+  const [status, setStatus] = useState<Status>("idle");
 
-  const saveScreenshotToFile = (event: React.MouseEvent) => {
-    event.preventDefault();
-    const canvas = document.querySelector("canvas");
-    if (canvas) {
-      const imageData = canvas.toDataURL();
-      imageBrowserDownload(imageData);
-    } else {
-      console.error("Canvas element not found.");
-    }
-  };
+  const is3D = mode === MODE_3D_FIRST_PERSON || mode === MODE_3D_VIEW;
 
-  const saveSVGScreenshotToFile = (event: React.MouseEvent) => {
-    event.preventDefault();
-    const svgElements = Array.from(document.querySelectorAll("svg"));
+  const capture = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (status === "capturing") return;
 
-    if (svgElements.length > 0) {
-      const largestSVG = svgElements.reduce((largest, current) =>
-        current.width.baseVal.value > largest.width.baseVal.value
-          ? current
-          : largest
-      );
-      saveSVGtoPngFile(largestSVG);
-    } else {
-      console.error("SVG elements not found.");
-    }
-  };
+      setStatus("capturing");
 
-  const is3DMode = [MODE_3D_FIRST_PERSON, MODE_3D_VIEW].includes(mode);
-  const is2DMode = [
-    MODE_IDLE,
-    MODE_2D_ZOOM_IN,
-    MODE_2D_ZOOM_OUT,
-    MODE_2D_PAN,
-    MODE_WAITING_DRAWING_LINE,
-    MODE_DRAGGING_LINE,
-    MODE_DRAGGING_VERTEX,
-    MODE_DRAGGING_ITEM,
-    MODE_DRAWING_LINE,
-    MODE_DRAWING_HOLE,
-    MODE_DRAWING_ITEM,
-    MODE_DRAGGING_HOLE,
-    MODE_ROTATING_ITEM,
-  ].includes(mode);
+      try {
+        let dataUri: string | null = null;
 
-  const tooltip = translator?.t("Get Screenshot") || "Get Screenshot";
+        if (is3D) {
+          const canvas = document.querySelector("canvas");
+          if (!canvas) throw new Error("Canvas not found");
+          dataUri = canvas.toDataURL("image/png");
+        } else {
+          // Target the specific drawing SVG, not random page icons
+          const svgPaper = document.getElementById("svg-drawing-paper");
+          const svg = svgPaper?.closest("svg");
+          if (!svg) throw new Error("SVG drawing not found");
+          dataUri = await saveSVGtoPngBase64(svg, 2);
+        }
 
-  if (is3DMode) {
-    return (
-      <ToolbarButton
-        active={false}
-        tooltip={tooltip}
-        onClick={saveScreenshotToFile}
-      >
-        <Camera size={20} />
-      </ToolbarButton>
+        const timestamp = new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/[T:]/g, "-");
+        downloadDataURI(dataUri, `archipi-${timestamp}.png`);
+
+        setStatus("done");
+        setTimeout(() => setStatus("idle"), 1500);
+      } catch (err) {
+        console.error("Screenshot failed:", err);
+        setStatus("idle");
+      }
+    },
+    [is3D, status]
+  );
+
+  const icon =
+    status === "capturing" ? (
+      <Loader2 size={20} className="animate-spin" />
+    ) : status === "done" ? (
+      <Check size={20} />
+    ) : (
+      <Camera size={20} />
     );
-  }
 
-  if (is2DMode) {
-    return (
-      <ToolbarButton
-        active={false}
-        tooltip={tooltip}
-        onClick={saveSVGScreenshotToFile}
-      >
-        <Camera size={20} />
-      </ToolbarButton>
-    );
-  }
-
-  return null;
+  return (
+    <ToolbarButton active={false} tooltip="Screenshot" onClick={capture}>
+      {icon}
+    </ToolbarButton>
+  );
 }

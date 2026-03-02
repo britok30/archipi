@@ -12,6 +12,7 @@ interface ToolbarButtonProps {
   active: boolean;
   tooltip: string;
   children: ReactNode;
+  disabled?: boolean;
   onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -19,6 +20,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
   active,
   tooltip,
   children,
+  disabled = false,
   onClick,
 }) => {
   return (
@@ -27,9 +29,11 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
         <TooltipTrigger asChild>
           <button
             onClick={onClick}
+            disabled={disabled}
             className={`
               relative flex items-center justify-center w-10 h-10 rounded-lg
               transition-all duration-200 ease-out
+              disabled:opacity-30 disabled:pointer-events-none
               ${
                 active
                   ? "bg-[hsl(217_91%_60%/0.15)] text-primary after:absolute after:left-0 after:top-1/2 after:-translate-y-1/2 after:w-[3px] after:h-5 after:rounded-full after:bg-primary"

@@ -1,56 +1,52 @@
-import { imageBrowserDownload } from './browser';
-
 export const saveSVGtoBase64 = (svgElement: SVGElement): string => {
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgElement);
-
-    const base64Data = btoa(unescape(encodeURIComponent(svgString)));
-
-    return base64Data;
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(svgElement);
+  const encoded = new TextEncoder().encode(svgString);
+  let binary = "";
+  for (let i = 0; i < encoded.length; i++) {
+    binary += String.fromCharCode(encoded[i]);
+  }
+  return btoa(binary);
 };
 
-export const saveSVGtoFile = (svgElement: SVGElement): void => {
+export const saveSVGtoPngBase64 = (
+  svgElement: SVGElement,
+  scale = 2
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
     const base64Data = saveSVGtoBase64(svgElement);
-
     const dataURI = `data:image/svg+xml;base64,${base64Data}`;
 
-    imageBrowserDownload(dataURI, 'screenshot.svg');
-};
+    // Use the element's rendered dimensions for reliable sizing
+    const rect = svgElement.getBoundingClientRect();
+    const w = Math.round(rect.width * scale);
+    const h = Math.round(rect.height * scale);
 
-export const saveSVGtoPngBase64 = async (svgElement: SVGElement): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const base64Data = saveSVGtoBase64(svgElement);
-        const dataURI = `data:image/svg+xml;base64,${base64Data}`;
+    if (w === 0 || h === 0) {
+      reject(new Error("SVG has zero dimensions"));
+      return;
+    }
 
-        const image = new Image();
-        image.src = dataURI;
+    const image = new Image();
+    image.src = dataURI;
 
-        image.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = image.width;
-            canvas.height = image.height;
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
 
-            const context = canvas.getContext('2d');
-            context!.drawImage(image, 0, 0);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Could not create canvas context"));
+        return;
+      }
 
-            const pngDataURI = canvas.toDataURL('image/png');
-            const pngBase64Data = pngDataURI.replace(/^data:image\/(png|jpg);base64,/, '');
-            resolve(pngBase64Data);
-        };
+      ctx.drawImage(image, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/png"));
+    };
 
-        image.onerror = () => {
-            reject(new Error('Image loading or conversion failed'));
-        };
-    });
-};
-
-export const saveSVGtoPngFile = (svgElement: SVGElement): void => {
-    saveSVGtoPngBase64(svgElement)
-        .then((pngBase64Data: string) => {
-            const pngDataURI = `data:image/png;base64,${pngBase64Data}`;
-            imageBrowserDownload(pngDataURI, 'screenshot.png');
-        })
-        .catch((err: Error) => {
-            console.error(err);
-        });
+    image.onerror = () => {
+      reject(new Error("SVG to image conversion failed"));
+    };
+  });
 };

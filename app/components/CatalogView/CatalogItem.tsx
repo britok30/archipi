@@ -57,7 +57,7 @@ const CatalogItem = ({
 
       <CardContent className="space-y-4">
         {/* Image Container */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-gray-100">
+        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
           <Image
             className={`
               object-contain object-center

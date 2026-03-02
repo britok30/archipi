@@ -23,6 +23,7 @@ import {
 import TipsButton from "./TipsButton";
 import SettingsButton from "./SettingsButton";
 import CatalogButton from "./CatalogButton";
+import { useCanUndo, useCanRedo } from "../../store/usePlannerStore";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -48,8 +49,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const selectTool3DView = usePlannerStore((state) => state.selectTool3DView);
   const undo = usePlannerStore((state) => state.undo);
   const redo = usePlannerStore((state) => state.redo);
+  const canUndo = useCanUndo();
+  const canRedo = useCanRedo();
 
   const { open } = useSidebar();
+  const isMac =
+    typeof navigator !== "undefined" &&
+    /Mac|iPhone|iPad/.test(navigator.userAgent);
+  const mod = isMac ? "⌘" : "Ctrl+";
   const t = (text: string) => translator?.t(text) ?? text;
 
   return (
@@ -116,7 +123,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {/* History */}
       <ToolbarButton
         active={false}
-        tooltip="Undo (CTRL-Z)"
+        disabled={!canUndo}
+        tooltip={`Undo (${mod}Z)`}
         onClick={() => undo()}
       >
         <Undo size={20} />
@@ -124,7 +132,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <ToolbarButton
         active={false}
-        tooltip="Redo (CTRL-Y)"
+        disabled={!canRedo}
+        tooltip={`Redo (${mod}${isMac ? "⇧Z" : "Y"})`}
         onClick={() => redo()}
       >
         <Redo size={20} />
