@@ -2,18 +2,15 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const RADIUS = 15;
 const HEIGHT = 60;
 
-let gageImage: any;
-let labelImage: any;
+const gageImage = loadTexture("/images/textures/gage-image.png");
+const labelImage = loadTexture("/images/textures/label-image.png");
 
-if (typeof window !== "undefined") {
-  const textureLoader = new Three.TextureLoader();
-  gageImage = textureLoader.load("/images/textures/gage-image.png");
-  labelImage = textureLoader.load("/images/textures/label-image.png");
-
+if (labelImage) {
   labelImage.wrapS = Three.RepeatWrapping;
   labelImage.wrapT = Three.RepeatWrapping;
   labelImage.repeat.set(1, 1);
@@ -80,12 +77,10 @@ function makeObjectMaxLOD() {
   body.add(cylinder5);
 
   const geometry2 = new Three.PlaneGeometry(0.04, 0.04);
-  const material2 =
-    gageImage &&
-    new Three.MeshLambertMaterial({
-      map: gageImage,
-      transparent: true,
-    });
+  const material2 = new Three.MeshLambertMaterial({
+    ...(gageImage ? { map: gageImage } : {}),
+    transparent: true,
+  });
   const gage = new Three.Mesh(geometry2, material2);
   gage.position.set(-0.0255, 0.38, 0);
   gage.rotation.y = -Math.PI / 2;
@@ -109,8 +104,7 @@ function makeObjectMaxLOD() {
 
   const geometry = new Three.LatheGeometry(points, 200, 0, Math.PI);
 
-  const material =
-    labelImage && new Three.MeshLambertMaterial({ map: labelImage });
+  const material = new Three.MeshLambertMaterial({ ...(labelImage ? { map: labelImage } : {}) });
   const label = new Three.Mesh(geometry, material);
 
   label.rotation.y = 60;

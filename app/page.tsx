@@ -2,7 +2,7 @@
 
 import React, { Suspense } from "react";
 import MyCatalog from "./objCatalog/mycatalog";
-import "./styles/react-planner.css";
+
 import ReactPlanner from "./components/ReactPlanner";
 import { useWindowSize } from "./hooks/useWindowSize";
 import { SidebarProvider } from "@/components/ui/sidebar";

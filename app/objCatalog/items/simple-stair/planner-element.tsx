@@ -4,6 +4,7 @@ import * as Three from "three";
 
 import React from "react";
 import convert from "convert-units";
+import { loadTexture } from "../../utils/load-texture";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -128,7 +129,6 @@ export default {
   },
 
   render3D: function (element: any, layer: any, scene: any) {
-    let loader = new Three.TextureLoader();
     let whitePaintTextureRepeatFactor = 1 / 20; // In a 100x100 area i want to repeat this texture 5x5 times
 
     let newWidth = convert(element.properties?.width?.length)
@@ -161,17 +161,20 @@ export default {
     // Build planes for every step
     let stepPlaneGeometry = new Three.PlaneGeometry(stepWidth, stepHeight);
     assignUVs(stepPlaneGeometry);
+    let stepPlaneTexture = loadTexture("/images/textures/white-paint.jpg");
     let stepPlaneMaterial = new Three.MeshBasicMaterial({
       side: Three.FrontSide,
+      ...(stepPlaneTexture ? { map: stepPlaneTexture } : {}),
     });
-    stepPlaneMaterial.map = loader.load("/images/textures/white-paint.jpg");
     stepPlaneMaterial.needsUpdate = true;
-    stepPlaneMaterial.map.wrapS = Three.RepeatWrapping;
-    stepPlaneMaterial.map.wrapT = Three.RepeatWrapping;
-    stepPlaneMaterial.map.repeat.set(
-      stepWidth * whitePaintTextureRepeatFactor,
-      stepHeight * whitePaintTextureRepeatFactor
-    );
+    if (stepPlaneMaterial.map) {
+      stepPlaneMaterial.map.wrapS = Three.RepeatWrapping;
+      stepPlaneMaterial.map.wrapT = Three.RepeatWrapping;
+      stepPlaneMaterial.map.repeat.set(
+        stepWidth * whitePaintTextureRepeatFactor,
+        stepHeight * whitePaintTextureRepeatFactor
+      );
+    }
 
     // Build stair profile shape
     let starProfileShapePoints = [];
@@ -215,18 +218,20 @@ export default {
 
     let stairShapeProfileGeometry = new Three.ShapeGeometry(stairShapeProfile);
     assignUVs(stairShapeProfileGeometry);
+    let stairProfileTexture = loadTexture("/images/textures/white-paint.jpg");
     let stairProfileMaterial = new Three.MeshPhongMaterial({
       side: Three.FrontSide,
+      ...(stairProfileTexture ? { map: stairProfileTexture } : {}),
     });
-
-    stairProfileMaterial.map = loader.load("/images/textures/white-paint.jpg");
     stairProfileMaterial.needsUpdate = true;
-    stairProfileMaterial.map.wrapS = Three.RepeatWrapping;
-    stairProfileMaterial.map.wrapT = Three.RepeatWrapping;
-    stairProfileMaterial.map.repeat.set(
-      numberOfSteps * stepDepth * whitePaintTextureRepeatFactor,
-      numberOfSteps * stepHeight * whitePaintTextureRepeatFactor
-    );
+    if (stairProfileMaterial.map) {
+      stairProfileMaterial.map.wrapS = Three.RepeatWrapping;
+      stairProfileMaterial.map.wrapT = Three.RepeatWrapping;
+      stairProfileMaterial.map.repeat.set(
+        numberOfSteps * stepDepth * whitePaintTextureRepeatFactor,
+        numberOfSteps * stepHeight * whitePaintTextureRepeatFactor
+      );
+    }
 
     let stairProfile = new Three.Mesh(
       stairShapeProfileGeometry,
@@ -237,18 +242,20 @@ export default {
 
     stair.add(stairProfile);
 
+    let stairProfileTexture2 = loadTexture("/images/textures/white-paint.jpg");
     let stairProfileMaterial2 = new Three.MeshPhongMaterial({
       side: Three.BackSide,
+      ...(stairProfileTexture2 ? { map: stairProfileTexture2 } : {}),
     });
-
-    stairProfileMaterial2.map = loader.load("/images/textures/white-paint.jpg");
     stairProfileMaterial2.needsUpdate = true;
-    stairProfileMaterial2.map.wrapS = Three.RepeatWrapping;
-    stairProfileMaterial2.map.wrapT = Three.RepeatWrapping;
-    stairProfileMaterial2.map.repeat.set(
-      numberOfSteps * stepDepth * whitePaintTextureRepeatFactor,
-      numberOfSteps * stepHeight * whitePaintTextureRepeatFactor
-    );
+    if (stairProfileMaterial2.map) {
+      stairProfileMaterial2.map.wrapS = Three.RepeatWrapping;
+      stairProfileMaterial2.map.wrapT = Three.RepeatWrapping;
+      stairProfileMaterial2.map.repeat.set(
+        numberOfSteps * stepDepth * whitePaintTextureRepeatFactor,
+        numberOfSteps * stepHeight * whitePaintTextureRepeatFactor
+      );
+    }
 
     let stairProfile2 = new Three.Mesh(
       stairShapeProfileGeometry,
@@ -272,17 +279,20 @@ export default {
       stairClosure1Height
     );
 
+    let closure1Texture = loadTexture("/images/textures/white-paint.jpg");
     let closure1Material = new Three.MeshPhongMaterial({
       side: Three.BackSide,
+      ...(closure1Texture ? { map: closure1Texture } : {}),
     });
-    closure1Material.map = loader.load("/images/textures/white-paint.jpg");
     closure1Material.needsUpdate = true;
-    closure1Material.map.wrapS = Three.RepeatWrapping;
-    closure1Material.map.wrapT = Three.RepeatWrapping;
-    closure1Material.map.repeat.set(
-      stairClosure1Width * whitePaintTextureRepeatFactor,
-      stairClosure1Height * whitePaintTextureRepeatFactor
-    );
+    if (closure1Material.map) {
+      closure1Material.map.wrapS = Three.RepeatWrapping;
+      closure1Material.map.wrapT = Three.RepeatWrapping;
+      closure1Material.map.repeat.set(
+        stairClosure1Width * whitePaintTextureRepeatFactor,
+        stairClosure1Height * whitePaintTextureRepeatFactor
+      );
+    }
     let stairClosure1 = new Three.Mesh(stairClosure1Geometry, closure1Material);
     let pivotClosure1 = new Three.Object3D();
     stairClosure1.position.y += stairClosure1Height / 2;
@@ -379,8 +389,6 @@ function assignUVs(geometry: any) {
 }
 
 let buildStepCover = (width: any, height: any, depth: any) => {
-  let loader = new Three.TextureLoader();
-
   let stepCoverHeight = 2;
 
   let stepCoverLength = 2;
@@ -389,7 +397,11 @@ let buildStepCover = (width: any, height: any, depth: any) => {
     width + stepCoverLength * 2,
     depth + stepCoverHeight
   );
-  let planeMaterial = new Three.MeshBasicMaterial({ side: Three.FrontSide });
+  let marbleTexture = loadTexture("/images/textures/marble.jpg");
+  let planeMaterial = new Three.MeshBasicMaterial({
+    side: Three.FrontSide,
+    ...(marbleTexture ? { map: marbleTexture } : {}),
+  });
   assignUVs(planeGeometry);
 
   let planeGeometry2 = new Three.PlaneGeometry(
@@ -404,10 +416,11 @@ let buildStepCover = (width: any, height: any, depth: any) => {
   );
   assignUVs(planeGeometry3);
 
-  planeMaterial.map = loader.load("/images/textures/marble.jpg");
   planeMaterial.needsUpdate = true;
-  planeMaterial.map.wrapS = Three.RepeatWrapping;
-  planeMaterial.map.wrapT = Three.RepeatWrapping;
+  if (planeMaterial.map) {
+    planeMaterial.map.wrapS = Three.RepeatWrapping;
+    planeMaterial.map.wrapT = Three.RepeatWrapping;
+  }
 
   let plane = new Three.Mesh(planeGeometry, planeMaterial);
   plane.rotation.x = -Math.PI / 2;

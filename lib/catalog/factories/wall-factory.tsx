@@ -3,9 +3,9 @@
 import React from "react";
 import * as THREE from "three";
 import { buildWall, updatedWall } from "./wall-factory-3d";
-import * as Geometry from "../../utils/geometry";
-import Translator from "../../translator/translator";
-import * as SharedStyle from "../../styles/shared-style";
+import * as Geometry from "../../floorplan-utils/geometry";
+import Translator from "../../../app/translator/translator";
+import * as SharedStyle from "../../../app/styles/shared-style";
 import type { TextureConfig } from "./types";
 
 interface LengthMeasure {
@@ -68,7 +68,7 @@ interface WallElement {
   render3D: (
     element: Element,
     layer: Layer,
-    scene: THREE.Scene
+    scene: THREE.Scene,
   ) => THREE.Mesh | Promise<THREE.Group>;
   updateRender3D: (
     element: Element,
@@ -78,7 +78,7 @@ interface WallElement {
     oldElement: Element,
     differences: string[],
     selfDestroy: () => void,
-    selfBuild: () => Promise<THREE.Group<THREE.Object3DEventMap>>
+    selfBuild: () => Promise<THREE.Group<THREE.Object3DEventMap>>,
   ) => THREE.Mesh | Promise<THREE.Group>;
 }
 
@@ -102,7 +102,7 @@ const translator = new Translator();
 export default function WallFactory(
   name: string,
   info: unknown,
-  textures?: Record<string, TextureConfig>
+  textures?: Record<string, TextureConfig>,
 ): WallElement {
   const wallElement: WallElement = {
     name,
@@ -135,11 +135,12 @@ export default function WallFactory(
         vertex1.x,
         vertex1.y,
         vertex2.x,
-        vertex2.y
+        vertex2.y,
       );
       const length_5 = length / 5;
 
-      const thickness = (element.properties.thickness as { length: number })?.length || 20;
+      const thickness =
+        (element.properties.thickness as { length: number })?.length || 20;
       const half_thickness = thickness / 2;
       const half_thickness_eps = half_thickness + epsilon;
       const char_height = 11;
@@ -191,7 +192,7 @@ export default function WallFactory(
       oldElement,
       differences,
       selfDestroy,
-      selfBuild
+      selfBuild,
     ) => {
       return updatedWall(
         element,
@@ -202,7 +203,7 @@ export default function WallFactory(
         oldElement,
         differences,
         selfDestroy,
-        selfBuild
+        selfBuild,
       );
     },
   };

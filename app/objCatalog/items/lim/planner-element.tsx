@@ -2,6 +2,7 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 200;
 const DEPTH = 60;
@@ -167,12 +168,11 @@ export default {
       bevelSegments: 1,
     };
 
-    let textureLoader = new Three.TextureLoader();
-    let etichettaImage = textureLoader.load("/images/textures/example_lim.png");
+    let etichettaImage = loadTexture("/images/textures/example_lim.png");
 
     let geometryPlane = new Three.PlaneGeometry(4, 3);
     let material = new Three.MeshLambertMaterial({
-      map: etichettaImage,
+      ...(etichettaImage ? { map: etichettaImage } : {}),
       transparent: true,
     });
     let plane = new Three.Mesh(geometryPlane, material);

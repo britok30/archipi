@@ -1,6 +1,6 @@
 "use client";
 
-import { ElementsFactories } from "../../../catalog";
+import { ElementsFactories } from "../../../../lib/catalog";
 
 const info = {
   title: "wall",

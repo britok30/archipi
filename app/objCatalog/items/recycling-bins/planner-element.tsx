@@ -2,6 +2,7 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 40;
 const DEPTH = 40;
@@ -172,13 +173,11 @@ export default {
       etichetta.position.set(-0.1, 0.8, 0);
       plane1.add(etichetta);
 
-      var texture = new Three.TextureLoader().load(
-        "/images/textures/recycle.png"
-      );
+      var texture = loadTexture("/images/textures/recycle.png");
 
       var planeGeometry2 = new Three.PlaneGeometry(0.5, 0.5);
       var planeMaterial2 = new Three.MeshLambertMaterial({
-        map: texture,
+        ...(texture ? { map: texture } : {}),
         transparent: true,
       });
       var plane2 = new Three.Mesh(planeGeometry2, planeMaterial2);

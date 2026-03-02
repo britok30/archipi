@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import * as Geometry from "../../utils/geometry";
+import * as Geometry from "../../../lib/floorplan-utils/geometry";
 
 interface PointSnap {
   type: "point";
@@ -39,7 +39,11 @@ const STYLE: React.CSSProperties = {
   strokeWidth: "1px",
 };
 
-export const ActiveDrawingHelper: React.FC<ActiveDrawingHelperProps> = ({ snap, width, height }) => {
+export const ActiveDrawingHelper: React.FC<ActiveDrawingHelperProps> = ({
+  snap,
+  width,
+  height,
+}) => {
   switch (snap.type) {
     case "point": {
       const pointSnap = snap as PointSnap;
@@ -61,7 +65,7 @@ export const ActiveDrawingHelper: React.FC<ActiveDrawingHelperProps> = ({ snap, 
         lineSnap.c,
         h0.a,
         h0.b,
-        h0.c
+        h0.c,
       );
       let pointH1 = Geometry.twoLinesIntersection(
         lineSnap.a,
@@ -69,7 +73,7 @@ export const ActiveDrawingHelper: React.FC<ActiveDrawingHelperProps> = ({ snap, 
         lineSnap.c,
         h1.a,
         h1.b,
-        h1.c
+        h1.c,
       );
 
       let v0 = Geometry.verticalLine(0);
@@ -80,7 +84,7 @@ export const ActiveDrawingHelper: React.FC<ActiveDrawingHelperProps> = ({ snap, 
         lineSnap.c,
         v0.a,
         v0.b,
-        v0.c
+        v0.c,
       );
       let pointV1 = Geometry.twoLinesIntersection(
         lineSnap.a,
@@ -88,7 +92,7 @@ export const ActiveDrawingHelper: React.FC<ActiveDrawingHelperProps> = ({ snap, 
         lineSnap.c,
         v1.a,
         v1.b,
-        v1.c
+        v1.c,
       );
 
       if (pointH0 && pointH1)

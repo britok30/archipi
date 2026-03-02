@@ -2,14 +2,10 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
-let frameMaterial: any;
-
-if (typeof window !== "undefined") {
-  let textureLoader = new Three.TextureLoader();
-  let mat = textureLoader.load("/images/textures/copper.jpg");
-  frameMaterial = new Three.MeshLambertMaterial({ map: mat });
-}
+const copperTexture = loadTexture("/images/textures/copper.jpg");
+const frameMaterial = new Three.MeshLambertMaterial({ ...(copperTexture ? { map: copperTexture } : {}) });
 
 function makeObjectMaxLOD(RADIUS: any, HEIGHT: any) {
   let RADIUS_10 = RADIUS / 10;

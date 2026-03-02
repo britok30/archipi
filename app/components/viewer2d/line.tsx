@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { GeometryUtils } from "../../utils/export";
+import { GeometryUtils } from "../../../lib/floorplan-utils/export";
 import { Ruler } from "./ruler";
 import type {
   Line as LineType,
@@ -41,7 +41,9 @@ export const Line: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
     if (!hole) return null;
 
     const startAt = length * hole.offset;
-    const renderedHole = catalog?.getElement(hole.type)?.render2D?.(hole, layer, scene);
+    const renderedHole = catalog
+      ?.getElement(hole.type)
+      ?.render2D?.(hole, layer, scene);
 
     return (
       <g
@@ -58,10 +60,13 @@ export const Line: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
     );
   });
 
-  const thickness = (line.properties.thickness as { length: number })?.length || 10;
+  const thickness =
+    (line.properties.thickness as { length: number })?.length || 10;
   const half_thickness = thickness / 2;
 
-  const renderedLine = catalog?.getElement(line.type)?.render2D?.(line, layer, scene);
+  const renderedLine = catalog
+    ?.getElement(line.type)
+    ?.render2D?.(line, layer, scene);
   const renderedRuler = line.selected ? (
     <Ruler
       unit={scene.unit}

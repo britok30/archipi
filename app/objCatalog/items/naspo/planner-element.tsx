@@ -2,16 +2,12 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 50;
 const DEPTH = 30;
 const HEIGHT = 80;
-let frontTexture: any;
-
-if (typeof window !== "undefined") {
-  const textureLoader = new Three.TextureLoader();
-  frontTexture = textureLoader.load("/images/textures/naspofront.png");
-}
+const frontTexture = loadTexture("/images/textures/naspofront.png");
 
 const red = new Three.MeshPhongMaterial({ color: 0xaa0000 });
 const grey = new Three.MeshLambertMaterial({ color: 0xaaaaaa });
@@ -73,7 +69,7 @@ function makeObjectMaxLOD() {
   let geometryPlane = new Three.PlaneGeometry(0.6, 0.9);
   let mesh3 = new Three.Mesh(
     geometryPlane,
-    new Three.MeshPhongMaterial({ map: frontTexture, transparent: true })
+    new Three.MeshPhongMaterial({ ...(frontTexture ? { map: frontTexture } : {}), transparent: true })
   );
   mesh3.position.set(0.5, 1.7, 0.31);
   naspo.add(mesh3);
@@ -206,7 +202,7 @@ function makeObjectMiddleLOD() {
   let geometryPlane = new Three.PlaneGeometry(0.6, 0.9);
   let mesh3 = new Three.Mesh(
     geometryPlane,
-    new Three.MeshPhongMaterial({ map: frontTexture, transparent: true })
+    new Three.MeshPhongMaterial({ ...(frontTexture ? { map: frontTexture } : {}), transparent: true })
   );
   mesh3.position.set(0.5, 1.7, 0.31);
   naspo.add(mesh3);

@@ -2,29 +2,22 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
-let white: any;
-let whiteMaterial: any;
-let wood: any;
-let glassMaterial: any;
-
-if (typeof window !== "undefined") {
-  const textureLoader = new Three.TextureLoader();
-  white = textureLoader.load("/images/textures/white.jpg");
-  whiteMaterial = new Three.MeshLambertMaterial({ color: 0x000000 });
-  wood = textureLoader.load("/images/textures/wood.jpg");
-  glassMaterial = new Three.MeshLambertMaterial({
-    color: 0xc6c6c6,
-    transparent: true,
-    opacity: 0.5,
-  });
-}
+const white = loadTexture("/images/textures/white.jpg");
+const whiteMaterial = new Three.MeshLambertMaterial({ color: 0x000000 });
+const wood = loadTexture("/images/textures/wood.jpg");
+const glassMaterial = new Three.MeshLambertMaterial({
+  color: 0xc6c6c6,
+  transparent: true,
+  opacity: 0.5,
+});
 
 function makeMonitor(newDepth: any) {
   let monitor = new Three.Object3D();
 
   let cubeGeometryBase = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let whiteTexture = new Three.MeshLambertMaterial({ map: white });
+  let whiteTexture = new Three.MeshLambertMaterial({ ...(white ? { map: white } : {}) });
   let edge1 = new Three.Mesh(cubeGeometryBase, whiteTexture);
   edge1.position.set(0, 0.79, 0);
   edge1.rotation.x = Math.PI / 2;
@@ -99,7 +92,7 @@ function makeObjectMaxLOD(newWidthA: any, newWidthB: any, newHeight: any, newDep
   };
 
   let geometry = new Three.ExtrudeGeometry(rectShape, extrudeSettings);
-  let woodTexture = new Three.MeshLambertMaterial({ map: wood });
+  let woodTexture = new Three.MeshLambertMaterial({ ...(wood ? { map: wood } : {}) });
   let mesh = new Three.Mesh(geometry, woodTexture);
 
   mesh.rotation.x += Math.PI / 2;
@@ -368,7 +361,7 @@ function makeObjectMinLOD(newWidthA: any, newWidthB: any, newHeight: any, newDep
   };
 
   let geometry = new Three.ExtrudeGeometry(rectShape, extrudeSettings);
-  let woodTexture = new Three.MeshLambertMaterial({ map: wood });
+  let woodTexture = new Three.MeshLambertMaterial({ ...(wood ? { map: wood } : {}) });
   let mesh = new Three.Mesh(geometry, woodTexture);
 
   mesh.rotation.x += Math.PI / 2;

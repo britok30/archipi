@@ -71,17 +71,14 @@ function makeObjectMaxLOD() {
 
   let PanelGeometry = new Three.PlaneGeometry(0.5, 0.5);
 
-  let meshPanel: any;
-
   if (quadro) {
-    meshPanel = new Three.Mesh(
+    let meshPanel = new Three.Mesh(
       PanelGeometry,
       new Three.MeshPhongMaterial({ map: quadro, transparent: true })
     );
     meshPanel.position.set(0.5, 1.85, 0.31);
+    threePhasePanel.add(meshPanel);
   }
-
-  threePhasePanel.add(meshPanel);
 
   let geometry0 = new Three.ExtrudeGeometry(roundedRectShape, extrudeSettings);
   let mesh0 = new Three.Mesh(geometry0, grey);
@@ -346,13 +343,15 @@ function makeObjectMiddleLOD() {
   backSide.position.set(0.5, 1.5, 0.05);
   threePhasePanel.add(backSide);
 
-  let PanelGeometry = new Three.PlaneGeometry(0.5, 0.5);
-  let Panel = new Three.Mesh(
-    PanelGeometry,
-    new Three.MeshPhongMaterial({ map: quadro, transparent: true })
-  );
-  Panel.position.set(0.5, 1.85, 0.31);
-  threePhasePanel.add(Panel);
+  if (quadro) {
+    let PanelGeometry = new Three.PlaneGeometry(0.5, 0.5);
+    let Panel = new Three.Mesh(
+      PanelGeometry,
+      new Three.MeshPhongMaterial({ map: quadro, transparent: true })
+    );
+    Panel.position.set(0.5, 1.85, 0.31);
+    threePhasePanel.add(Panel);
+  }
 
   let geometry0 = new Three.ExtrudeGeometry(roundedRectShape, extrudeSettings);
   let mesh0 = new Three.Mesh(geometry0, grey);

@@ -4,7 +4,7 @@ import React from "react";
 import { usePlannerStore } from "../../store";
 import { useCatalogContext } from "../../context/ReactPlannerContext";
 import { MODE_DRAWING_ITEM, MODE_DRAWING_HOLE } from "../../store/types";
-import { GeometryUtils } from "../../utils/export";
+import { GeometryUtils } from "../../../lib/floorplan-utils/export";
 
 export const DrawingPreview: React.FC = () => {
   const { catalog } = useCatalogContext();
@@ -43,7 +43,11 @@ export const DrawingPreview: React.FC = () => {
     const rendered = catalogElement.render2D(mockElement, layer, scene);
 
     return (
-      <g transform={`translate(${px},${py})`} opacity={0.5} style={{ pointerEvents: "none" }}>
+      <g
+        transform={`translate(${px},${py})`}
+        opacity={0.5}
+        style={{ pointerEvents: "none" }}
+      >
         {rendered}
       </g>
     );
@@ -94,9 +98,9 @@ export const DrawingPreview: React.FC = () => {
   return null;
 };
 
-function buildDefaultProperties(
-  catalogElement: { properties: Record<string, { defaultValue: unknown }> }
-): Record<string, unknown> {
+function buildDefaultProperties(catalogElement: {
+  properties: Record<string, { defaultValue: unknown }>;
+}): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
   if (catalogElement.properties) {
     for (const [key, prop] of Object.entries(catalogElement.properties)) {

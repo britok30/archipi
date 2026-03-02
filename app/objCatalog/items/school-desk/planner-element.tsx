@@ -2,6 +2,7 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 70;
 const DEPTH = 50;
@@ -147,8 +148,8 @@ export default {
       p6.position.x += 0.4;
 
       // material = new Three.MeshLambertMaterial({color: 0x9b8c75});
-      let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
-      let materialTexture = new Three.MeshLambertMaterial({ map: texture });
+      let texture = loadTexture("/images/textures/wood.jpg");
+      let materialTexture = new Three.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
 
       let roundedRectShape = new Three.Shape();
 
@@ -289,8 +290,8 @@ export default {
     let grey = new Three.MeshLambertMaterial({ color: 0xd9d7d7 });
     let black = new Three.MeshLambertMaterial({ color: 0x000000 });
 
-    let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
-    let materialTexture = new Three.MeshLambertMaterial({ map: texture });
+    let texture = loadTexture("/images/textures/wood.jpg");
+    let materialTexture = new Three.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
 
     let newDepth = 0.5;
     let newWidth = 0.9;
@@ -306,12 +307,12 @@ export default {
     );
 
     let boxMaterials = [
-      new Three.MeshBasicMaterial({ map: texture }),
-      new Three.MeshBasicMaterial({ map: texture }),
+      new Three.MeshBasicMaterial({ ...(texture ? { map: texture } : {}) }),
+      new Three.MeshBasicMaterial({ ...(texture ? { map: texture } : {}) }),
       new Three.MeshBasicMaterial({ color: 0x669966 }), //top
-      new Three.MeshBasicMaterial({ map: texture }),
-      new Three.MeshBasicMaterial({ map: texture }),
-      new Three.MeshBasicMaterial({ map: texture }),
+      new Three.MeshBasicMaterial({ ...(texture ? { map: texture } : {}) }),
+      new Three.MeshBasicMaterial({ ...(texture ? { map: texture } : {}) }),
+      new Three.MeshBasicMaterial({ ...(texture ? { map: texture } : {}) }),
     ];
 
     let plane = new Three.Mesh(geometry, [...boxMaterials]);

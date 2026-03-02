@@ -2,14 +2,14 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const cubeMaterial = new Three.MeshLambertMaterial({ color: 0xf5f4f4 });
 
 function makeObjectMaxLOD(newWidth: any, newHeight: any, newDepth: any) {
   let electricalPanel = new Three.Mesh();
 
-  let textureLoader = new Three.TextureLoader();
-  let mat = textureLoader.load("/images/textures/texturePanel.png");
+  const mat = loadTexture("/images/textures/texturePanel.png");
 
   let cubeGeometryBase = new Three.BoxGeometry(newWidth, newHeight, newDepth);
 
@@ -19,7 +19,7 @@ function makeObjectMaxLOD(newWidth: any, newHeight: any, newDepth: any) {
 
   let planeGeometryBase = new Three.PlaneGeometry(newWidth, newHeight);
   let planeMaterial = new Three.MeshLambertMaterial({
-    map: mat,
+    ...(mat ? { map: mat } : {}),
   });
 
   let p2 = new Three.Mesh(planeGeometryBase, planeMaterial);

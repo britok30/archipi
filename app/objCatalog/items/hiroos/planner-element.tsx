@@ -2,13 +2,9 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
-let frontTexture1: any;
-
-if (typeof window !== "undefined") {
-  let textureLoader = new Three.TextureLoader();
-  frontTexture1 = textureLoader.load("/images/textures/hiroosTexture.jpg");
-}
+const frontTexture1 = loadTexture("/images/textures/hiroosTexture.jpg");
 
 const cubeMaterial = new Three.MeshStandardMaterial({ color: 0x65696c });
 
@@ -19,17 +15,6 @@ let newHeight = 195;
 function makeObjectMaxLOD(newWidth: any, newHeight: any, newDepth: any) {
   let rack = new Three.Mesh();
 
-  let frontTexture, backTexture;
-
-  // if((Math.floor(Math.random()*10)+1) % 2 === 0) {
-  //   backTexture  = backTexture1;
-  frontTexture = frontTexture1;
-  // }
-  // else {
-  //   backTexture = backTexture2;
-  //   frontTexture= frontTexture2;
-  // }
-
   //base
   let cubeGeometryBase = new Three.BoxGeometry(newWidth, newHeight, newDepth);
 
@@ -37,22 +22,22 @@ function makeObjectMaxLOD(newWidth: any, newHeight: any, newDepth: any) {
   p1.position.set(0, 1, 0);
   rack.add(p1);
 
-  let planeGeometryFront = new Three.PlaneGeometry(newWidth, newHeight);
-  let planeMaterialFront = new Three.MeshStandardMaterial({
-    map: frontTexture,
-  });
+  if (frontTexture1) {
+    let planeGeometryFront = new Three.PlaneGeometry(newWidth, newHeight);
+    let planeMaterialFront = new Three.MeshStandardMaterial({
+      map: frontTexture1,
+    });
+    let front = new Three.Mesh(planeGeometryFront, planeMaterialFront);
+    front.position.set(0, 1, newDepth / 1.95);
+    rack.add(front);
 
-  let front = new Three.Mesh(planeGeometryFront, planeMaterialFront);
-  front.position.set(0, 1, newDepth / 1.95);
-  rack.add(front);
-
-  let planeGeometryBack = new Three.PlaneGeometry(newWidth, newHeight);
-  let planeMaterialBack = new Three.MeshStandardMaterial({ map: backTexture });
-
-  let back = new Three.Mesh(planeGeometryBack, planeMaterialBack);
-  back.position.set(0, 1, -newDepth / 1.95);
-  back.rotation.y += Math.PI;
-  rack.add(back);
+    let planeGeometryBack = new Three.PlaneGeometry(newWidth, newHeight);
+    let planeMaterialBack = new Three.MeshStandardMaterial({ map: frontTexture1 });
+    let back = new Three.Mesh(planeGeometryBack, planeMaterialBack);
+    back.position.set(0, 1, -newDepth / 1.95);
+    back.rotation.y += Math.PI;
+    rack.add(back);
+  }
 
   return rack;
 }

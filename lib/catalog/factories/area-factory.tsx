@@ -1,7 +1,7 @@
 import React from "react";
 import { createArea, updatedArea } from "./area-factory-3d";
-import * as SharedStyle from "../../styles/shared-style";
-import Translator from "../../translator/translator";
+import * as SharedStyle from "../../../app/styles/shared-style";
+import Translator from "../../../app/translator/translator";
 import { Object3D, Mesh } from "three";
 import type { TextureConfig } from "./types";
 
@@ -54,7 +54,7 @@ interface AreaElement {
     oldElement: Element,
     differences: string[],
     selfDestroy: () => void,
-    selfBuild: () => Promise<Mesh>
+    selfBuild: () => Promise<Mesh>,
   ) => Promise<Object3D>;
 }
 
@@ -63,7 +63,7 @@ const translator = new Translator();
 export default function AreaFactory(
   name: string,
   info: AreaInfo,
-  textures?: Record<string, TextureConfig>
+  textures?: Record<string, TextureConfig>,
 ): AreaElement {
   const areaElement: AreaElement = {
     name,
@@ -132,7 +132,7 @@ export default function AreaFactory(
       oldElement: Element,
       differences: string[],
       selfDestroy: () => void,
-      selfBuild: () => Promise<Mesh>
+      selfBuild: () => Promise<Mesh>,
     ) => {
       return updatedArea(
         element,
@@ -143,7 +143,7 @@ export default function AreaFactory(
         oldElement,
         differences,
         selfDestroy,
-        selfBuild
+        selfBuild,
       );
     },
   };

@@ -2,13 +2,9 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
-let front: any;
-
-if (typeof window !== "undefined") {
-  const textureLoader = new Three.TextureLoader();
-  front = textureLoader.load("/images/textures/front.png");
-}
+const front = loadTexture("/images/textures/front.png");
 
 const blackMaterial = new Three.MeshLambertMaterial({ color: 0x3d3d3d });
 
@@ -26,7 +22,7 @@ function makeObjectMaxLOD(newWidth: any, newHeight: any, newDepth: any) {
     i += newHeight / 16
   ) {
     let planeGeometry = new Three.PlaneGeometry(newWidth, newHeight / 16);
-    let planeMaterial = new Three.MeshLambertMaterial({ map: front });
+    let planeMaterial = new Three.MeshLambertMaterial({ ...(front ? { map: front } : {}) });
     let plane_texture = new Three.Mesh(planeGeometry, planeMaterial);
     plane_texture.position.set(0, i, newDepth / 3 + newDepth / 5.9);
     body.add(plane_texture);

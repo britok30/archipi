@@ -2,7 +2,7 @@
 
 import React from "react";
 import { BoxGeometry, MeshBasicMaterial, Mesh, BoxHelper } from "three";
-import { ReactPlannerSharedStyle } from "../../../styles";
+import * as ReactPlannerSharedStyle from "../../../styles/shared-style";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {

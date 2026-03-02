@@ -1,6 +1,8 @@
 "use client";
 
 import * as THREE from "three";
+import { loadTexture } from "../../utils/load-texture";
+
 // Constants
 const PI_2 = Math.PI / 2;
 const TEXTURE_PATHS = {
@@ -39,45 +41,17 @@ interface Element3DProps extends Element2DProps {
   scene: THREE.Scene;
 }
 
-// Texture loader singleton
-class TextureLoaderSingleton {
-  private static instance: THREE.TextureLoader;
-  private static textures: globalThis.Map<string, THREE.Texture> = new globalThis.Map();
-
-  private constructor() {}
-
-  static getInstance(): THREE.TextureLoader {
-    if (!TextureLoaderSingleton.instance && typeof window !== "undefined") {
-      TextureLoaderSingleton.instance = new THREE.TextureLoader();
-      TextureLoaderSingleton.instance.setPath("./");
-    }
-    return TextureLoaderSingleton.instance;
-  }
-
-  static async loadTexture(path: string): Promise<THREE.Texture> {
-    if (this.textures.has(path)) {
-      return this.textures.get(path)!;
-    }
-
-    const texture = await this.getInstance().loadAsync(path);
-    this.textures.set(path, texture);
-    return texture;
-  }
-}
-
 // Material factory
-const createMaterial = async ({
+const createMaterial = ({
   width,
   height,
   textureKey,
   repeatX,
   repeatY,
-}: MaterialProps): Promise<THREE.Material> => {
-  const texture = await TextureLoaderSingleton.loadTexture(
-    TEXTURE_PATHS[textureKey]
-  );
+}: MaterialProps): THREE.Material => {
+  const texture = loadTexture(TEXTURE_PATHS[textureKey]);
 
-  if (repeatX || repeatY) {
+  if (texture && (repeatX || repeatY)) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.offset.set(0, 0);
     texture.repeat.set(
@@ -86,29 +60,26 @@ const createMaterial = async ({
     );
   }
 
-  return new THREE.MeshLambertMaterial({ map: texture });
+  return new THREE.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
 };
 
 // Balcony mesh factory
-const createBalconyMesh = async ({
+const createBalconyMesh = ({
   width,
   height,
   depth,
-}: BalconyProps): Promise<THREE.Object3D> => {
+}: BalconyProps): THREE.Object3D => {
   const balcony = new THREE.Object3D();
 
-  const [paintedMaterial, brickMaterial, brickRepeatMaterial] =
-    await Promise.all([
-      createMaterial({ width, height, textureKey: "painted" }),
-      createMaterial({ width, height, textureKey: "brick" }),
-      createMaterial({
-        width,
-        height,
-        textureKey: "brick",
-        repeatX: ~~(width / SCALE),
-        repeatY: ~~(height / SCALE),
-      }),
-    ]);
+  const paintedMaterial = createMaterial({ width, height, textureKey: "painted" });
+  const brickMaterial = createMaterial({ width, height, textureKey: "brick" });
+  const brickRepeatMaterial = createMaterial({
+    width,
+    height,
+    textureKey: "brick",
+    repeatX: ~~(width / SCALE),
+    repeatY: ~~(height / SCALE),
+  });
 
   // Geometries
   const baseGeometry = new THREE.BoxGeometry(width, height / 10, depth);
@@ -244,13 +215,13 @@ const BalconyElement = {
     );
   },
 
-  render3D: async (element: Element3DProps) => {
+  render3D: (element: Element3DProps) => {
     const width = element.properties?.width?.length;
     const depth = element.properties?.depth?.length;
     const height = element.properties?.height?.length;
     const altitude = element.properties?.altitude?.length;
 
-    const balcony = await createBalconyMesh({ width, height, depth });
+    const balcony = createBalconyMesh({ width, height, depth });
 
     if (element.selected) {
       const bbox = new THREE.BoxHelper(balcony, 0x99c3fb);
@@ -261,7 +232,7 @@ const BalconyElement = {
     }
 
     balcony.position.y += height / 10 + altitude;
-    return balcony;
+    return Promise.resolve(balcony);
   },
 };
 

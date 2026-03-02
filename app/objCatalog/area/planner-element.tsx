@@ -1,7 +1,7 @@
 "use client";
 
-import AreaFactory from "@/app/catalog/factories/area-factory";
-import type { TextureConfig } from "@/app/catalog/factories/types";
+import AreaFactory from "@/lib/catalog/factories/area-factory";
+import type { TextureConfig } from "@/lib/catalog/factories/types";
 
 interface AreaInfo {
   title: string;

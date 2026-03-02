@@ -2,24 +2,17 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 50;
 const DEPTH = 50;
 const HEIGHT = 50;
-let power: any;
-let black: any;
-let white: any;
-let keyboard: any;
+const power = loadTexture("/images/textures/pc-power.jpg");
+const black = loadTexture("/images/textures/pc-black.jpg");
+const white = loadTexture("/images/textures/pc-white.jpg");
+const keyboard = loadTexture("/images/textures/keyboard.jpg");
 
-if (typeof window !== "undefined") {
-  const textureLoader = new Three.TextureLoader();
-  power = textureLoader.load("/images/textures/pc-power.jpg");
-  black = textureLoader.load("/images/textures/pc-black.jpg");
-  white = textureLoader.load("/images/textures/pc-white.jpg");
-  keyboard = textureLoader.load("/images/textures/keyboard.jpg");
-}
-
-const blackMaterial = new Three.MeshBasicMaterial({ map: black });
+const blackMaterial = new Three.MeshBasicMaterial({ ...(black ? { map: black } : {}) });
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();
@@ -28,7 +21,7 @@ function makeObjectMaxLOD() {
   let monitorPC = new Three.Mesh();
 
   let cubeGeometryBase = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let whiteMaterial = new Three.MeshBasicMaterial({ map: white });
+  let whiteMaterial = new Three.MeshBasicMaterial({ ...(white ? { map: white } : {}) });
   let edge_p0 = new Three.Mesh(cubeGeometryBase, whiteMaterial);
   edge_p0.position.set(0, 0.79, 0);
   edge_p0.rotation.x = Math.PI / 2;
@@ -57,7 +50,7 @@ function makeObjectMaxLOD() {
   monitorPC.add(back);
 
   let powerGeometry = new Three.BoxGeometry(0.01, 0.02, 0.02);
-  let powerMaterial = new Three.MeshBasicMaterial({ map: power });
+  let powerMaterial = new Three.MeshBasicMaterial({ ...(power ? { map: power } : {}) });
   let powerButton = new Three.Mesh(powerGeometry, powerMaterial);
   powerButton.position.set(0.0155, 0.43, 0);
   monitorPC.add(powerButton);
@@ -68,7 +61,7 @@ function makeObjectMaxLOD() {
   monitorPC.add(base_p1);
 
   let geometry = new Three.CylinderGeometry(0.1, 0.1, 0.02, 32, 32);
-  let material = new Three.MeshBasicMaterial({ map: black });
+  let material = new Three.MeshBasicMaterial({ ...(black ? { map: black } : {}) });
   let base_p2 = new Three.Mesh(geometry, material);
   base_p2.scale.set(0.8, 1, 1);
   base_p2.position.set(0, 0.36, 0);
@@ -80,7 +73,7 @@ function makeObjectMaxLOD() {
   let boxMaterials = [
     new Three.MeshBasicMaterial({ color: 0x000000 }),
     new Three.MeshBasicMaterial({ color: 0x000000 }),
-    new Three.MeshBasicMaterial({ map: keyboard }),
+    new Three.MeshBasicMaterial({ ...(keyboard ? { map: keyboard } : { color: 0x000000 }) }),
     new Three.MeshBasicMaterial({ color: 0x000000 }),
     new Three.MeshBasicMaterial({ color: 0x000000 }),
     new Three.MeshBasicMaterial({ color: 0x000000 }),
@@ -98,7 +91,7 @@ function makeObjectMinLOD() {
   let monitorPC = new Three.Mesh();
 
   let cubeGeometryBase = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let whiteMaterial = new Three.MeshBasicMaterial({ map: white });
+  let whiteMaterial = new Three.MeshBasicMaterial({ ...(white ? { map: white } : {}) });
   let edge_p0 = new Three.Mesh(cubeGeometryBase, whiteMaterial);
   edge_p0.position.set(0, 0.79, 0);
   edge_p0.rotation.x = Math.PI / 2;
@@ -121,7 +114,7 @@ function makeObjectMinLOD() {
   monitorPC.add(edge_p4);
 
   let cubeGeometryBase5 = new Three.BoxGeometry(0.4, 0.4, 0.05);
-  let blackMaterial = new Three.MeshBasicMaterial({ map: black });
+  let blackMaterial = new Three.MeshBasicMaterial({ ...(black ? { map: black } : {}) });
   let back = new Three.Mesh(cubeGeometryBase5, blackMaterial);
   back.position.set(-0.02, 0.61, 0);
   back.rotation.y = Math.PI / 2;

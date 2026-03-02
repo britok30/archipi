@@ -1,4 +1,3 @@
-import React from "react";
 import Providers from "./components/Providers";
 import GoogleAdsense from "./components/GoogleAdsense";
 import GoogleAnalytics from "./components/GoogleAnalytics";
@@ -6,9 +5,13 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 import localFont from "next/font/local";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import type { Metadata, Viewport } from "next";
 
-export const metadata = {
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
+
+export const metadata: Metadata = {
   title: "ArchiPi - Free Online Floor Plan Design & 3D Visualization Tool",
   description:
     "Design your dream space with ArchiPi! Create detailed 2D floor plans and explore them in 3D. Our intuitive drag-and-drop interface and customizable objects make architectural design accessible to everyone. Start designing for free in your browser today!",
@@ -58,33 +61,32 @@ export const metadata = {
     follow: true,
     nocache: true,
   },
-  themeColor: "#ffffff",
 };
 
 const eudoxusSans = localFont({
   src: [
     {
-      path: "../app/fonts/EudoxusSans-Light.woff",
+      path: "./fonts/EudoxusSans-Light.woff",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../app/fonts/EudoxusSans-Regular.woff",
+      path: "./fonts/EudoxusSans-Regular.woff",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../app/fonts/EudoxusSans-Medium.woff",
+      path: "./fonts/EudoxusSans-Medium.woff",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../app/fonts/EudoxusSans-Bold.woff",
+      path: "./fonts/EudoxusSans-Bold.woff",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../app/fonts/EudoxusSans-ExtraBold.woff",
+      path: "./fonts/EudoxusSans-ExtraBold.woff",
       weight: "900",
       style: "normal",
     },
@@ -101,10 +103,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`bg-background text-foreground ${eudoxusSans.className} antialiased`}
       >
         <Providers>{children}</Providers>
+        <GoogleAdsense />
+        <GoogleAnalytics />
+        <Analytics />
       </body>
-      <GoogleAdsense />
-      <GoogleAnalytics />
-      <Analytics />
     </html>
   );
 }

@@ -5,8 +5,8 @@ import { usePlannerStore } from "../../store";
 import { Camera, Loader2, Check } from "lucide-react";
 import ToolbarButton from "./ToolbarButton";
 import { MODE_3D_FIRST_PERSON, MODE_3D_VIEW } from "../../store/types";
-import { saveSVGtoPngBase64 } from "../../utils/image";
-import { downloadDataURI } from "../../utils/browser";
+import { saveSVGtoPngBase64 } from "../../../lib/floorplan-utils/image";
+import { downloadDataURI } from "../../../lib/floorplan-utils/browser";
 
 type Status = "idle" | "capturing" | "done";
 
@@ -51,7 +51,7 @@ export default function ScreenshotToolbarButton() {
         setStatus("idle");
       }
     },
-    [is3D, status]
+    [is3D, status],
   );
 
   const icon =

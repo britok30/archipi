@@ -10,8 +10,8 @@ import {
   DoubleSide,
   BufferAttribute,
 } from "three";
-import * as SharedStyle from "../../styles/shared-style";
-import type { Vertex } from "../../store/types";
+import * as SharedStyle from "../../../app/styles/shared-style";
+import type { Vertex } from "../../../app/store/types";
 import { applyTexture, HALF_PI } from "./texture-utils";
 import type { TextureConfig } from "./types";
 
@@ -50,7 +50,7 @@ export function createArea(
   element: any,
   layer: any,
   scene: any,
-  textures: Record<string, TextureConfig>
+  textures: Record<string, TextureConfig>,
 ): Promise<Mesh> {
   let vertices: Vertex[] = [];
 
@@ -91,7 +91,7 @@ export function createArea(
   assignUVs(shapeGeometry);
 
   let boundingBox = new Box3().setFromObject(
-    new Mesh(shapeGeometry, new MeshBasicMaterial())
+    new Mesh(shapeGeometry, new MeshBasicMaterial()),
   );
 
   let width = boundingBox.max.x - boundingBox.min.x;
@@ -118,7 +118,7 @@ export function updatedArea(
   oldElement: any,
   differences: string[],
   selfDestroy: () => void,
-  selfBuild: () => Promise<Object3D>
+  selfBuild: () => Promise<Object3D>,
 ): Promise<Object3D> {
   let noPerf = () => {
     selfDestroy();

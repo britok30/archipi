@@ -2,21 +2,15 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 150;
 const DEPTH = 50;
 const HEIGHT = 50;
 const RADIUS = 10;
-let grey: any;
-let black: any;
-let woodTexture: any;
-
-if (typeof window !== "undefined") {
-  grey = new Three.MeshLambertMaterial({ color: 0xc0c0c0 });
-  black = new Three.MeshLambertMaterial({ color: 0x00000 });
-  const textureLoader = new Three.TextureLoader();
-  woodTexture = textureLoader.load("/images/textures/wood.jpg");
-}
+const grey = new Three.MeshLambertMaterial({ color: 0xc0c0c0 });
+const black = new Three.MeshLambertMaterial({ color: 0x00000 });
+const woodTexture = loadTexture("/images/textures/wood.jpg");
 
 let objectMaxLOD = function makeObjectMaxLOD() {
   let bench = new Three.Mesh();
@@ -57,7 +51,7 @@ let objectMaxLOD = function makeObjectMaxLOD() {
   for (let z = 0; z <= 3; z += 0.75) {
     let woodAxis = new Three.Mesh(
       new Three.BoxGeometry(12, 0.25, 0.5),
-      new Three.MeshPhongMaterial({ map: woodTexture })
+      new Three.MeshPhongMaterial({ ...(woodTexture ? { map: woodTexture } : {}) })
     );
     woodAxis.position.set(0, 0.5, z);
     bench.add(woodAxis);
@@ -110,7 +104,7 @@ let objectMinLOD = function makeObjectMinLOD() {
   for (let z = 0; z <= 3; z += 0.75) {
     let woodAxis = new Three.Mesh(
       new Three.BoxGeometry(12, 0.25, 0.5),
-      new Three.MeshPhongMaterial({ map: woodTexture })
+      new Three.MeshPhongMaterial({ ...(woodTexture ? { map: woodTexture } : {}) })
     );
     woodAxis.position.set(0, 0.5, z);
     bench.add(woodAxis);

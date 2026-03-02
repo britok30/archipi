@@ -1,7 +1,10 @@
-import { calculateInnerCycles, isClockWiseOrder } from '../utils/graph-inner-cycles';
-import { ContainsPoint } from '../utils/geometry';
-import { Layer, Area } from './types';
-import { generateId, generateName } from './usePlannerStore';
+import {
+  calculateInnerCycles,
+  isClockWiseOrder,
+} from "../../lib/floorplan-utils/graph-inner-cycles";
+import { ContainsPoint } from "../../lib/floorplan-utils/geometry";
+import { Layer, Area } from "./types";
+import { generateId, generateName } from "./usePlannerStore";
 
 // Compare two arrays as sets (order-independent)
 function sameSet(arr1: string[], arr2: string[]): boolean {
@@ -21,7 +24,10 @@ interface AreaDetectionResult {
 
 export function detectAndUpdateAreas(
   layer: Layer,
-  catalogElements: Record<string, { properties: Record<string, { defaultValue: unknown }> }>
+  catalogElements: Record<
+    string,
+    { properties: Record<string, { defaultValue: unknown }> }
+  >,
 ): AreaDetectionResult {
   const verticesArray: number[][] = [];
   const vertexID_to_verticesArrayIndex: Record<string, number> = {};
@@ -38,32 +44,39 @@ export function detectAndUpdateAreas(
   // Build edges array from lines
   const linesArray: number[][] = Object.values(layer.lines)
     .map((line) =>
-      line.vertices.map((vertexID) => vertexID_to_verticesArrayIndex[vertexID])
+      line.vertices.map((vertexID) => vertexID_to_verticesArrayIndex[vertexID]),
     )
-    .filter((arr) => arr.length === 2 && arr[0] !== undefined && arr[1] !== undefined);
+    .filter(
+      (arr) => arr.length === 2 && arr[0] !== undefined && arr[1] !== undefined,
+    );
 
   // Calculate inner cycles (closed polygons)
   const innerCyclesByVerticesArrayIndex = calculateInnerCycles(
     verticesArray,
-    linesArray
+    linesArray,
   );
 
   // Convert array indices back to vertex IDs
   let innerCyclesByVerticesID: string[][] = innerCyclesByVerticesArrayIndex.map(
-    (cycle) => cycle.map((vertexIndex) => verticesArrayIndex_to_vertexID[vertexIndex])
+    (cycle) =>
+      cycle.map((vertexIndex) => verticesArrayIndex_to_vertexID[vertexIndex]),
   );
 
   // All area vertices should be ordered in counterclockwise order
   innerCyclesByVerticesID = innerCyclesByVerticesID.map((areaVertexIds) => {
-    const coords = areaVertexIds.map((vertexID) => layer.vertices[vertexID]).filter(Boolean);
+    const coords = areaVertexIds
+      .map((vertexID) => layer.vertices[vertexID])
+      .filter(Boolean);
     if (coords.length === 0) return areaVertexIds;
-    return isClockWiseOrder(coords) ? [...areaVertexIds].reverse() : areaVertexIds;
+    return isClockWiseOrder(coords)
+      ? [...areaVertexIds].reverse()
+      : areaVertexIds;
   });
 
   // Remove areas that are no longer valid cycles
   Object.values(layer.areas).forEach((area) => {
     const areaInUse = innerCyclesByVerticesID.some((vertices) =>
-      sameSet(vertices, area.vertices)
+      sameSet(vertices, area.vertices),
     );
     if (!areaInUse) {
       // Remove area
@@ -85,7 +98,7 @@ export function detectAndUpdateAreas(
   innerCyclesByVerticesID.forEach((cycle, ind) => {
     // Check if this cycle already exists as an area
     const existingArea = Object.values(layer.areas).find((area) =>
-      sameSet(area.vertices, cycle)
+      sameSet(area.vertices, cycle),
     );
 
     if (existingArea) {
@@ -98,7 +111,7 @@ export function detectAndUpdateAreas(
       areaIDs[ind] = areaId;
 
       // Get default properties from catalog
-      const catalogElement = catalogElements['area'];
+      const catalogElement = catalogElements["area"];
       const properties: Record<string, unknown> = {};
       if (catalogElement) {
         Object.entries(catalogElement.properties).forEach(([key, prop]) => {
@@ -108,9 +121,9 @@ export function detectAndUpdateAreas(
 
       const newArea: Area = {
         id: areaId,
-        type: 'area',
-        prototype: 'areas',
-        name: generateName('areas', 'area'),
+        type: "area",
+        prototype: "areas",
+        name: generateName("areas", "area"),
         vertices: cycle,
         holes: [],
         misc: {},
@@ -156,7 +169,7 @@ export function detectAndUpdateAreas(
         const isHole = ContainsPoint(
           areaVerticesList,
           verticesCoordsForArea[j].vertices[0][0],
-          verticesCoordsForArea[j].vertices[0][1]
+          verticesCoordsForArea[j].vertices[0][1],
         );
         if (isHole) {
           holesList.push(verticesCoordsForArea[j].id);

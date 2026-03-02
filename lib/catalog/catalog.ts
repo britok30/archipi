@@ -8,9 +8,9 @@ import {
   PropertyCheckbox,
   PropertyHidden,
   PropertyReadOnly,
-} from "../components/properties/export";
+} from "../../app/components/properties/export";
 
-import { UNIT_CENTIMETER } from "../utils/constants";
+import { UNIT_CENTIMETER } from "../floorplan-utils/constants";
 
 interface PropertyConfig {
   type: string;
@@ -62,8 +62,16 @@ interface Element {
   prototype: string;
   info: ElementInfo;
   properties: { [key: string]: PropertyConfig };
-  render2D: (element: RenderableElement, layer: RenderLayer, scene: RenderScene) => React.ReactElement;
-  render3D: (element: RenderableElement, layer: RenderLayer, scene: RenderScene) => Promise<unknown>;
+  render2D: (
+    element: RenderableElement,
+    layer: RenderLayer,
+    scene: RenderScene,
+  ) => React.ReactElement;
+  render3D: (
+    element: RenderableElement,
+    layer: RenderLayer,
+    scene: RenderScene,
+  ) => Promise<unknown>;
   [key: string]: unknown;
 }
 
@@ -155,7 +163,7 @@ export default class Catalog {
   registerPropertyType(
     type: string,
     Viewer: React.ComponentType<any>,
-    Editor: React.ComponentType<any>
+    Editor: React.ComponentType<any>,
   ): void {
     this.propertyTypes[type] = { type, Viewer, Editor };
   }
@@ -164,8 +172,8 @@ export default class Catalog {
     propertyTypeArray: [
       string,
       React.ComponentType<any>,
-      React.ComponentType<any>
-    ][]
+      React.ComponentType<any>,
+    ][],
   ): void {
     propertyTypeArray.forEach((el) => this.registerPropertyType(...el));
   }
@@ -197,11 +205,11 @@ export default class Catalog {
       const propertyConfigs = json.properties[propertyName];
       if (!propertyConfigs.hasOwnProperty("type"))
         throw new Error(
-          `Element ${name}, Property ${propertyName} doesn't have type`
+          `Element ${name}, Property ${propertyName} doesn't have type`,
         );
       if (!propertyConfigs.hasOwnProperty("defaultValue"))
         throw new Error(
-          `Element ${name}, Property ${propertyName} doesn't have defaultValue`
+          `Element ${name}, Property ${propertyName} doesn't have defaultValue`,
         );
     }
 
@@ -215,7 +223,7 @@ export default class Catalog {
   registerCategory(
     name: string,
     label: string,
-    childs?: Element[]
+    childs?: Element[],
   ): Category | null {
     if (this.validateCategory(name, label)) {
       this.categories[name] = { name, label, categories: [], elements: [] };
@@ -235,13 +243,13 @@ export default class Catalog {
       this.categories[name].elements.push(child as Element);
       this.categories.root.elements.splice(
         this.categories.root.elements.indexOf(child as Element),
-        1
+        1,
       );
     } else if (this.hasCategory(child.name)) {
       this.categories[name].categories.push(child as Category);
       this.categories.root.categories.splice(
         this.categories.root.categories.indexOf(child as Category),
-        1
+        1,
       );
     } else {
       throw new Error(`child ${child.name} is neither category nor element`);
@@ -252,7 +260,7 @@ export default class Catalog {
     return (
       this.hasCategory(categoryName) &&
       this.categories[categoryName].elements.some(
-        (el) => el.name === elementName
+        (el) => el.name === elementName,
       )
     );
   }

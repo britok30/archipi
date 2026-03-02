@@ -2,23 +2,15 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 80;
 const DEPTH = 80;
 const HEIGHT = 200;
-let woodMaterial: any;
-let bookTexture1: any;
-let bookTexture2: any;
-let bookTexture3: any;
-
-if (typeof window !== "undefined") {
-  let textureLoader = new Three.TextureLoader();
-  woodMaterial = textureLoader.load("/images/textures/wood.jpg");
-
-  bookTexture1 = textureLoader.load("/images/textures/bookTexture1.jpg");
-  bookTexture2 = textureLoader.load("/images/textures/bookTexture2.jpg");
-  bookTexture3 = textureLoader.load("/images/textures/bookTexture3.jpg");
-}
+const woodMaterial = loadTexture("/images/textures/wood.jpg");
+const bookTexture1 = loadTexture("/images/textures/bookTexture1.jpg");
+const bookTexture2 = loadTexture("/images/textures/bookTexture2.jpg");
+const bookTexture3 = loadTexture("/images/textures/bookTexture3.jpg");
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();
@@ -28,7 +20,9 @@ function makeObjectMaxLOD() {
 
   //Bookcase
   let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
-  let wood = new Three.MeshStandardMaterial({ map: woodMaterial });
+  let wood = woodMaterial
+    ? new Three.MeshStandardMaterial({ map: woodMaterial })
+    : new Three.MeshStandardMaterial({ color: 0x8b6914 });
   let backside = new Three.Mesh(backGeometry, wood);
   backside.position.set(0, 1, 0);
   bookcase.add(backside);
@@ -76,30 +70,14 @@ function makeObjectMaxLOD() {
     ];
   }
 
-  let book1 =
-    bookMaterial && new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
-  book1?.position.set(0.15, 0.59, 0);
-  bookcase.add(book1);
-
-  let book2 =
-    bookMaterial && new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
-  book2?.position.set(0.15, 0.99, 0);
-  bookcase.add(book2);
-
-  let book3 =
-    bookMaterial && new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
-  book3?.position.set(0.15, 0.19, 0);
-  bookcase.add(book3);
-
-  let book4 =
-    bookMaterial && new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
-  book4?.position.set(0.15, 1.39, 0);
-  bookcase.add(book4);
-
-  let book5 =
-    bookMaterial && new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
-  book5?.position.set(0.15, 1.79, 0);
-  bookcase.add(book5);
+  if (bookMaterial) {
+    const bookPositions = [0.19, 0.59, 0.99, 1.39, 1.79];
+    for (const yPos of bookPositions) {
+      let book = new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
+      book.position.set(0.15, yPos, 0);
+      bookcase.add(book);
+    }
+  }
 
   return bookcase;
 }
@@ -109,8 +87,9 @@ function makeObjectMinLOD() {
 
   //Bookcase
   let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
-  let wood =
-    woodMaterial && new Three.MeshStandardMaterial({ map: woodMaterial });
+  let wood = woodMaterial
+    ? new Three.MeshStandardMaterial({ map: woodMaterial })
+    : new Three.MeshStandardMaterial({ color: 0x8b6914 });
   let backside = new Three.Mesh(backGeometry, wood);
   backside.position.set(0, 1, 0);
   bookcase.add(backside);

@@ -2,6 +2,7 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 140;
 const DEPTH = 70;
@@ -146,8 +147,8 @@ export default {
       p6.position.z += (0.5 * 3) / 2;
       p6.position.x += 0.4;
 
-      let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
-      let materialTexture = new Three.MeshLambertMaterial({ map: texture });
+      let texture = loadTexture("/images/textures/wood.jpg");
+      let materialTexture = new Three.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
 
       let roundedRectShape = new Three.Shape();
 
@@ -276,8 +277,8 @@ export default {
 
     let newAltitude = element.properties?.altitude?.length;
 
-    let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
-    let materialTexture = new Three.MeshLambertMaterial({ map: texture });
+    let texture = loadTexture("/images/textures/wood.jpg");
+    let materialTexture = new Three.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
     let green = new Three.MeshBasicMaterial({ color: 0x669966 });
 
     let cattedra = new Three.Object3D();

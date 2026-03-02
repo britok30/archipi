@@ -1,14 +1,8 @@
-import {
-  Mesh,
-  BoxGeometry,
-  MeshStandardMaterial,
-  Group,
-  Scene,
-} from "three";
+import { Mesh, BoxGeometry, MeshStandardMaterial, Group, Scene } from "three";
 
 import { CSG } from "three-csg-ts";
-import { verticesDistance } from "../../utils/geometry";
-import * as SharedStyle from "../../styles/shared-style";
+import { verticesDistance } from "../../floorplan-utils/geometry";
+import * as SharedStyle from "../../../app/styles/shared-style";
 import { Element, Layer } from "./wall-factory";
 import { applyTexture, HALF_PI } from "./texture-utils";
 import type { TextureConfig } from "./types";
@@ -17,7 +11,7 @@ export function buildWall(
   element: Element,
   layer: Layer,
   scene: Scene,
-  textures: Record<string, TextureConfig>
+  textures: Record<string, TextureConfig>,
 ): Promise<Group> {
   let vertex0 = layer.vertices[element.vertices[0]];
   let vertex1 = layer.vertices[element.vertices[1]];
@@ -32,8 +26,10 @@ export function buildWall(
     inverted = true;
   }
 
-  const height = (element.properties.height as { length: number })?.length || 300;
-  const thickness = (element.properties.thickness as { length: number })?.length || 20;
+  const height =
+    (element.properties.height as { length: number })?.length || 300;
+  const thickness =
+    (element.properties.thickness as { length: number })?.length || 20;
   const halfThickness = thickness / 2;
   const faceThickness = 0.2;
   const faceDistance = 1;
@@ -46,7 +42,7 @@ export function buildWall(
   });
   let soul = new Mesh(
     new BoxGeometry(distance, height, thickness),
-    soulMaterial
+    soulMaterial,
   );
 
   const alpha = Math.asin((vertex1.y - vertex0.y) / distance);
@@ -62,9 +58,12 @@ export function buildWall(
     const holeData = layer.holes[holeID];
     if (!holeData) return;
 
-    const holeWidth = (holeData.properties.width as { length: number })?.length || 80;
-    const holeHeight = (holeData.properties.height as { length: number })?.length || 200;
-    const holeAltitude = (holeData.properties.altitude as { length: number })?.length || 0;
+    const holeWidth =
+      (holeData.properties.width as { length: number })?.length || 80;
+    const holeHeight =
+      (holeData.properties.height as { length: number })?.length || 200;
+    const holeAltitude =
+      (holeData.properties.altitude as { length: number })?.length || 0;
     const offset = inverted ? 1 - holeData.offset : holeData.offset;
     const holeDistance = offset * distance;
 
@@ -97,13 +96,13 @@ export function buildWall(
     frontMaterial,
     textures[(element.properties.textureB as string) || "none"],
     distance,
-    height
+    height,
   );
   applyTexture(
     backMaterial,
     textures[(element.properties.textureA as string) || "none"],
     distance,
-    height
+    height,
   );
 
   const scaleFactor = faceThickness / thickness;
@@ -138,7 +137,7 @@ export function updatedWall(
   oldElement: Element,
   differences: string[],
   selfDestroy: () => void,
-  selfBuild: () => Promise<Group>
+  selfBuild: () => Promise<Group>,
 ): Promise<Group> {
   const noPerf = () => {
     selfDestroy();
@@ -161,8 +160,10 @@ export function updatedWall(
     differences[0] === "properties" &&
     differences[1] === "thickness"
   ) {
-    const newThickness = (element.properties.thickness as { length: number })?.length || 20;
-    const oldThickness = (oldElement.properties.thickness as { length: number })?.length || 20;
+    const newThickness =
+      (element.properties.thickness as { length: number })?.length || 20;
+    const oldThickness =
+      (oldElement.properties.thickness as { length: number })?.length || 20;
     const halfNewThickness = newThickness / 2;
     const texturedFaceDistance = halfNewThickness + 1;
     const originalThickness = oldThickness / soul.scale.z;

@@ -2,26 +2,18 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const newWidth = 90;
 const newDepth = 90;
 const newHeight = 220;
 
-let display1: any;
-let display2: any;
-let grey: any;
-let darkGrey: any;
-let red: any;
+const display1 = loadTexture("/images/textures/display1.png");
+const display2 = loadTexture("/images/textures/display2.png");
 
-if (typeof window !== "undefined") {
-  let textureLoader = new Three.TextureLoader();
-  display1 = textureLoader.load("/images/textures/display1.png");
-  display2 = textureLoader.load("/images/textures/display2.png");
-
-  grey = new Three.MeshLambertMaterial({ color: 0xa6a9ad });
-  darkGrey = new Three.MeshLambertMaterial({ color: 0x3f454f });
-  red = new Three.MeshLambertMaterial({ color: 0xff0000 });
-}
+const grey = new Three.MeshLambertMaterial({ color: 0xa6a9ad });
+const darkGrey = new Three.MeshLambertMaterial({ color: 0x3f454f });
+const red = new Three.MeshLambertMaterial({ color: 0xff0000 });
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();
@@ -93,7 +85,7 @@ function makeObjectMaxLOD() {
 
   let planeDisplay1 = new Three.PlaneGeometry(0.15, 0.15);
   let planeMaterial1 = new Three.MeshLambertMaterial({
-    map: display1,
+    ...(display1 ? { map: display1 } : {}),
     transparent: true,
   });
   let plane1 = new Three.Mesh(planeDisplay1, planeMaterial1);
@@ -101,7 +93,7 @@ function makeObjectMaxLOD() {
 
   let planeDisplay2 = new Three.PlaneGeometry(0.25, 0.15);
   let planeMaterial2 = new Three.MeshLambertMaterial({
-    map: display2,
+    ...(display2 ? { map: display2 } : {}),
     transparent: true,
   });
   let plane2 = new Three.Mesh(planeDisplay2, planeMaterial2);

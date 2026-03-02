@@ -2,6 +2,7 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 200;
 const DEPTH = 20;
@@ -108,8 +109,8 @@ export default {
     let newHeight = 0.1;
     let radius = 0.0125;
 
-    let texture = new Three.TextureLoader().load("/images/textures/wood.jpg");
-    let materialTexture = new Three.MeshLambertMaterial({ map: texture });
+    let texture = loadTexture("/images/textures/wood.jpg");
+    let materialTexture = new Three.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
 
     let geometry = new Three.BoxGeometry(newWidth, 1.5 * newHeight, newDepth);
     //let material = new Three.MeshLambertMaterial( {color: 0x9b8c75} );

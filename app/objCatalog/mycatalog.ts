@@ -1,6 +1,6 @@
 "use client";
 
-import { Catalog } from "../catalog";
+import { Catalog } from "../../lib/catalog";
 import * as Areas from "./area";
 import * as Lines from "./lines";
 import * as Holes from "./holes";

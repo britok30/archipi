@@ -2,17 +2,13 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 const WIDTH = 30;
 const DEPTH = 40;
 const HEIGHT = 70;
-let material: any;
-
-if (typeof window !== "undefined") {
-  const textureLoader = new Three.TextureLoader();
-  const Image = textureLoader.load("/images/textures/bronze-texture.jpg");
-  material = new Three.MeshLambertMaterial({ map: Image });
-}
+const bronzeTexture = loadTexture("/images/textures/bronze-texture.jpg");
+const material = new Three.MeshLambertMaterial({ ...(bronzeTexture ? { map: bronzeTexture } : {}) });
 
 const objectMaxLOD = makeObjectMaxLOD();
 const objectMinLOD = makeObjectMinLOD();

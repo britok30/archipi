@@ -2,6 +2,7 @@
 
 import * as Three from "three";
 import React from "react";
+import { loadTexture } from "../../utils/load-texture";
 
 //color
 let grey = new Three.MeshLambertMaterial({ color: 0xd3d3d3 });
@@ -11,12 +12,7 @@ let black = new Three.MeshLambertMaterial({ color: 0x000000 });
 let boxMaterials = [grey, darkGrey, grey, grey, grey, grey];
 let boxMaterials2 = [grey, grey, grey, grey, grey, darkGrey];
 let boxMaterials3 = [grey, grey, grey, grey, darkGrey, grey];
-let lcdTexture: any;
-
-if (typeof window !== "undefined") {
-  let textureLoader = new Three.TextureLoader();
-  lcdTexture = textureLoader.load("/images/textures/monitor.png");
-}
+const lcdTexture = loadTexture("/images/textures/monitor.png");
 
 //dimensions
 let width = 258;
@@ -123,7 +119,7 @@ function makeObjectMaxLOD() {
 
   let planeGeometryFront = new Three.PlaneGeometry(width / 16, height / 12);
   let planeMaterialFront = new Three.MeshLambertMaterial({
-    map: lcdTexture,
+    ...(lcdTexture ? { map: lcdTexture } : {}),
     transparent: true,
     // overdraw: true,
   });
@@ -245,7 +241,7 @@ function makeObjectMinLOD() {
 
   let planeGeometryFront = new Three.PlaneGeometry(width / 16, height / 12);
   let planeMaterialFront = new Three.MeshLambertMaterial({
-    map: lcdTexture,
+    ...(lcdTexture ? { map: lcdTexture } : {}),
     transparent: true,
     // overdraw: true,
   });

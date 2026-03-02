@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { usePlannerStore } from "../../store";
 import { useCatalogContext } from "../../context/ReactPlannerContext";
-import { browserDownloadWithName } from "../../utils/browser";
+import { browserDownloadWithName } from "../../../lib/floorplan-utils/browser";
 import { OBJExporter } from "./OBJExporter";
 import { parseData } from "../viewer3d/scene-creator";
 import * as Three from "three";
@@ -103,7 +103,14 @@ export default function ToolbarSaveButton() {
             </button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Save ({typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘" : "Ctrl+"}S)</p>
+            <p>
+              Save (
+              {typeof navigator !== "undefined" &&
+              /Mac|iPhone|iPad/.test(navigator.userAgent)
+                ? "⌘"
+                : "Ctrl+"}
+              S)
+            </p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

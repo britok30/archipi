@@ -3,9 +3,12 @@
 import React from "react";
 import { Map } from "immutable";
 import convert from "convert-units";
-import { UNITS_LENGTH, UNIT_CENTIMETER } from "../../utils/constants";
+import {
+  UNITS_LENGTH,
+  UNIT_CENTIMETER,
+} from "../../../lib/floorplan-utils/constants";
 import { FormNumberInput } from "../FormNumberInput";
-import { toFixedFloat } from "../../utils/math";
+import { toFixedFloat } from "../../../lib/floorplan-utils/math";
 
 import { Label } from "@/components/ui/label";
 import {
@@ -34,7 +37,7 @@ interface PropertyLengthMeasureProps {
       value: LengthValue,
       sourceElement?: object,
       internalState?: object,
-      state?: object
+      state?: object,
     ) => Promise<LengthValue>;
     label: string;
     [key: string]: any;
@@ -80,10 +83,7 @@ const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
   };
 
   return (
-    <div
-      className="property-length-measure flex flex-col gap-2 mb-2"
-
-    >
+    <div className="property-length-measure flex flex-col gap-2 mb-2">
       <div className="flex flex-col">
         <Label className="text-xs mb-2 capitalize">{label}</Label>
 
