@@ -1,81 +1,19 @@
 import {
   Shape,
-  MeshPhongMaterial,
   ShapeGeometry,
   Box3,
-  TextureLoader,
-  BackSide,
-  FrontSide,
   Object3D,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
-  RepeatWrapping,
   Vector2,
   DoubleSide,
   BufferAttribute,
 } from "three";
-import type { Material, Texture } from "three";
 import * as SharedStyle from "../../styles/shared-style";
-import type { Area, Layer, Scene, Vertex } from "../../store/types";
-
-interface TextureConfig {
-  uri: string;
-  lengthRepeatScale: number;
-  heightRepeatScale: number;
-  normal?: {
-    uri: string;
-    normalScaleX: number;
-    normalScaleY: number;
-    lengthRepeatScale: number;
-    heightRepeatScale: number;
-  };
-}
-
-/**
- * Apply a texture to a wall face
- * @param material: The material of the face
- * @param texture: The texture to load
- * @param length: The length of the face
- * @param height: The height of the face
- */
-const applyTexture = (
-  material: MeshPhongMaterial,
-  texture: TextureConfig | undefined,
-  length: number,
-  height: number
-): void => {
-  let loader = new TextureLoader();
-
-  if (texture) {
-    loader.load(texture.uri, (loadedTexture: Texture) => {
-      material.map = loadedTexture;
-      material.needsUpdate = true;
-      material.map.wrapS = RepeatWrapping;
-      material.map.wrapT = RepeatWrapping;
-      material.map.repeat.set(
-        length * texture.lengthRepeatScale,
-        height * texture.heightRepeatScale
-      );
-    });
-
-    if (texture.normal) {
-      loader.load(texture.normal.uri, (loadedTexture: Texture) => {
-        material.normalMap = loadedTexture;
-        material.normalScale = new Vector2(
-          texture.normal!.normalScaleX,
-          texture.normal!.normalScaleY
-        );
-        material.normalMap!.wrapS = RepeatWrapping;
-        material.normalMap!.wrapT = RepeatWrapping;
-        material.normalMap!.repeat.set(
-          length * texture.normal!.lengthRepeatScale,
-          height * texture.normal!.heightRepeatScale
-        );
-      });
-    }
-  }
-};
+import type { Vertex } from "../../store/types";
+import { applyTexture, HALF_PI } from "./texture-utils";
+import type { TextureConfig } from "./types";
 
 /**
  * Function that assign UV coordinates to a geometry
@@ -135,7 +73,7 @@ export function createArea(
     shape.lineTo(vertices[i].x, vertices[i].y);
   }
 
-  let areaMaterial = new MeshPhongMaterial({ side: DoubleSide, color });
+  let areaMaterial = new MeshStandardMaterial({ side: DoubleSide, color });
 
   /* Create holes for the area */
   element.holes.forEach((holeID: string) => {
@@ -165,7 +103,7 @@ export function createArea(
 
   let area = new Mesh(shapeGeometry, areaMaterial);
 
-  area.rotation.x -= Math.PI / 2;
+  area.rotation.x -= HALF_PI;
   area.name = "floor";
 
   return Promise.resolve(area);
@@ -194,7 +132,7 @@ export function updatedArea(
       : (element.properties?.patternColor as string) ||
         SharedStyle.AREA_MESH_COLOR.unselected;
     if (floor) {
-      (floor.material as MeshPhongMaterial).color.set(color);
+      (floor.material as MeshStandardMaterial).color.set(color);
     }
   } else if (differences[0] === "properties") {
     if (differences[1] === "texture") {

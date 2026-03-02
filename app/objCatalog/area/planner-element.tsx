@@ -1,19 +1,13 @@
 "use client";
 
-import AreaFactory from "@/app/catalog/factories/AreaFactory";
+import AreaFactory from "@/app/catalog/factories/area-factory";
+import type { TextureConfig } from "@/app/catalog/factories/types";
 
 interface AreaInfo {
   title: string;
   tag: string[];
   description: string;
   image: string;
-}
-
-interface TextureDefinition {
-  name: string;
-  uri: string;
-  lengthRepeatScale: number;
-  heightRepeatScale: number;
 }
 
 const info: AreaInfo = {
@@ -23,7 +17,7 @@ const info: AreaInfo = {
   image: "",
 };
 
-const textures: Record<string, TextureDefinition> = {
+const textures: Record<string, TextureConfig> = {
   parquet: {
     name: "Parquet",
     uri: "/images/textures/parquet.jpg",

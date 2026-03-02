@@ -6,6 +6,7 @@ import { buildWall, updatedWall } from "./wall-factory-3d";
 import * as Geometry from "../../utils/geometry";
 import Translator from "../../translator/translator";
 import * as SharedStyle from "../../styles/shared-style";
+import type { TextureConfig } from "./types";
 
 interface LengthMeasure {
   length: number;
@@ -58,20 +59,6 @@ export interface Element {
   selected: boolean;
 }
 
-export interface TextureData {
-  name: string;
-  uri: string;
-  lengthRepeatScale: number;
-  heightRepeatScale: number;
-  normal?: {
-    uri: string;
-    normalScaleX: number;
-    normalScaleY: number;
-    lengthRepeatScale: number;
-    heightRepeatScale: number;
-  };
-}
-
 interface WallElement {
   name: string;
   prototype: "lines";
@@ -115,7 +102,7 @@ const translator = new Translator();
 export default function WallFactory(
   name: string,
   info: unknown,
-  textures?: Record<string, TextureData>
+  textures?: Record<string, TextureConfig>
 ): WallElement {
   const wallElement: WallElement = {
     name,

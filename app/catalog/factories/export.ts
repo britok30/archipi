@@ -1,5 +1,5 @@
-import WallFactory from "./WallFactory";
-import AreaFactory from "./AreaFactory";
+import WallFactory from "./wall-factory";
+import AreaFactory from "./area-factory";
 
 export { WallFactory, AreaFactory };
 

@@ -3,20 +3,7 @@ import { createArea, updatedArea } from "./area-factory-3d";
 import * as SharedStyle from "../../styles/shared-style";
 import Translator from "../../translator/translator";
 import { Object3D, Mesh } from "three";
-
-interface TextureDefinition {
-  name: string;
-  uri: string;
-  lengthRepeatScale: number;
-  heightRepeatScale: number;
-  normal?: {
-    uri: string;
-    normalScaleX: number;
-    normalScaleY: number;
-    lengthRepeatScale: number;
-    heightRepeatScale: number;
-  };
-}
+import type { TextureConfig } from "./types";
 
 interface Vertex {
   x: number;
@@ -76,7 +63,7 @@ const translator = new Translator();
 export default function AreaFactory(
   name: string,
   info: AreaInfo,
-  textures?: Record<string, TextureDefinition>
+  textures?: Record<string, TextureConfig>
 ): AreaElement {
   const areaElement: AreaElement = {
     name,

@@ -1,68 +1,23 @@
 import {
-  TextureLoader,
   Mesh,
-  RepeatWrapping,
-  Vector2,
   BoxGeometry,
   MeshStandardMaterial,
   Group,
   Scene,
-  Texture,
 } from "three";
 
 import { CSG } from "three-csg-ts";
 import { verticesDistance } from "../../utils/geometry";
 import * as SharedStyle from "../../styles/shared-style";
-import { Element, Layer, TextureData } from "./WallFactory";
-
-const halfPI = Math.PI / 2;
-
-const applyTexture = (
-  material: MeshStandardMaterial,
-  texture: TextureData | undefined,
-  length: number,
-  height: number
-): void => {
-  const loader = new TextureLoader();
-
-  if (texture) {
-    loader.load(texture.uri, (loadedTexture: Texture) => {
-      material.map = loadedTexture;
-      material.needsUpdate = true;
-      material.map.wrapS = RepeatWrapping;
-      material.map.wrapT = RepeatWrapping;
-      material.map.repeat.set(
-        length * texture.lengthRepeatScale,
-        height * texture.heightRepeatScale
-      );
-    });
-
-    if (texture.normal) {
-      const normal = texture.normal;
-      loader.load(normal.uri, (loadedNormalMap: Texture) => {
-        if (!loadedNormalMap) return;
-
-        material.normalMap = loadedNormalMap;
-        material.normalScale = new Vector2(
-          normal.normalScaleX,
-          normal.normalScaleY
-        );
-        material.normalMap.wrapS = RepeatWrapping;
-        material.normalMap.wrapT = RepeatWrapping;
-        material.normalMap.repeat.set(
-          length * normal.lengthRepeatScale,
-          height * normal.heightRepeatScale
-        );
-      });
-    }
-  }
-};
+import { Element, Layer } from "./wall-factory";
+import { applyTexture, HALF_PI } from "./texture-utils";
+import type { TextureConfig } from "./types";
 
 export function buildWall(
   element: Element,
   layer: Layer,
   scene: Scene,
-  textures: Record<string, TextureData>
+  textures: Record<string, TextureConfig>
 ): Promise<Group> {
   let vertex0 = layer.vertices[element.vertices[0]];
   let vertex1 = layer.vertices[element.vertices[1]];
@@ -157,15 +112,15 @@ export function buildWall(
   const frontFace = soul.clone();
   frontFace.material = frontMaterial;
   frontFace.scale.set(1, 1, scaleFactor);
-  frontFace.position.x += texturedFaceDistance * Math.cos(alpha - halfPI);
-  frontFace.position.z -= texturedFaceDistance * Math.sin(alpha - halfPI);
+  frontFace.position.x += texturedFaceDistance * Math.cos(alpha - HALF_PI);
+  frontFace.position.z -= texturedFaceDistance * Math.sin(alpha - HALF_PI);
   frontFace.name = "frontFace";
 
   const backFace = soul.clone();
   backFace.material = backMaterial;
   backFace.scale.set(1, 1, scaleFactor);
-  backFace.position.x += texturedFaceDistance * Math.cos(alpha + halfPI);
-  backFace.position.z -= texturedFaceDistance * Math.sin(alpha + halfPI);
+  backFace.position.x += texturedFaceDistance * Math.cos(alpha + HALF_PI);
+  backFace.position.z -= texturedFaceDistance * Math.sin(alpha + HALF_PI);
   backFace.name = "backFace";
 
   const merged = new Group();
@@ -178,7 +133,7 @@ export function updatedWall(
   element: Element,
   layer: Layer,
   scene: Scene,
-  textures: Record<string, TextureData>,
+  textures: Record<string, TextureConfig>,
   mesh: Group | Mesh,
   oldElement: Element,
   differences: string[],
@@ -213,8 +168,8 @@ export function updatedWall(
     const originalThickness = oldThickness / soul.scale.z;
     const alpha = soul.rotation.y;
 
-    const xTemp = texturedFaceDistance * Math.cos(alpha - halfPI);
-    const zTemp = texturedFaceDistance * Math.sin(alpha - halfPI);
+    const xTemp = texturedFaceDistance * Math.cos(alpha - HALF_PI);
+    const zTemp = texturedFaceDistance * Math.sin(alpha - HALF_PI);
 
     soul.scale.set(1, 1, newThickness / originalThickness);
 
