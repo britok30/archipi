@@ -4,13 +4,9 @@ import React from "react";
 import { Map } from "immutable";
 import convert from "convert-units";
 import { UNITS_LENGTH, UNIT_CENTIMETER } from "../../utils/constants";
-import {
-  FormLabel,
-  FormNumberInput,
-  FormSelect,
-} from "../../components/style/export";
+import { FormNumberInput } from "../FormNumberInput";
 import { toFixedFloat } from "../../utils/math";
-import PropertyStyle from "./shared-property-style";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -86,7 +82,7 @@ const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
   return (
     <div
       className="property-length-measure flex flex-col gap-2 mb-2"
-      style={PropertyStyle.containerStyle}
+
     >
       <div className="flex flex-col">
         <Label className="text-xs mb-2 capitalize">{label}</Label>

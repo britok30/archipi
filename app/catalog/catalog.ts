@@ -8,7 +8,7 @@ import {
   PropertyCheckbox,
   PropertyHidden,
   PropertyReadOnly,
-} from "./properties/export";
+} from "../components/properties/export";
 
 import { UNIT_CENTIMETER } from "../utils/constants";
 

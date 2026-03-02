@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Input } from "@/components/ui/input"; // Adjust the import path as needed
+import { Input } from "@/components/ui/input";
 
 interface FormNumberInputProps {
   /**
@@ -181,4 +181,5 @@ const FormNumberInput: React.FC<FormNumberInputProps> = ({
   );
 };
 
+export { FormNumberInput };
 export default FormNumberInput;

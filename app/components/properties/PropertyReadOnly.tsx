@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Copy } from "lucide-react";
 
 interface PropertyReadOnlyConfig {
   label: string;
@@ -60,7 +61,7 @@ const PropertyReadOnly = ({
               className="ml-2 text-muted-foreground hover:text-foreground"
               title="Copy to clipboard"
             >
-              <CopyIcon className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
               <span className="sr-only">Copy to clipboard</span>
             </button>
           )}
@@ -132,7 +133,7 @@ const EnhancedPropertyReadOnly = ({
               className="ml-2 text-muted-foreground hover:text-foreground"
               title="Copy to clipboard"
             >
-              <CopyIcon className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
               <span className="sr-only">Copy to clipboard</span>
             </button>
           )}
@@ -146,22 +147,5 @@ const EnhancedPropertyReadOnly = ({
     </div>
   );
 };
-
-// Copy icon component
-const CopyIcon = ({ className = "" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-  </svg>
-);
 
 export { PropertyReadOnly as default, EnhancedPropertyReadOnly };

@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-import { FormLabel } from "../../components/style/export";
-import PropertyStyle from "./shared-property-style";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface PropertyCheckboxConfigs {
   label: string;
@@ -44,22 +43,9 @@ export default function PropertyCheckbox({
   };
 
   return (
-    <table className="PropertyCheckbox" style={PropertyStyle.tableStyle}>
-      <tbody>
-        <tr>
-          <td style={PropertyStyle.firstTdStyle}>
-            <FormLabel>{configs.label}</FormLabel>
-          </td>
-          <td>
-            <input
-              style={{ margin: 0 }}
-              type="checkbox"
-              checked={value}
-              onChange={(e) => update(!value)}
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+      <Label className="text-xs capitalize">{configs.label}</Label>
+      <Switch checked={value} onCheckedChange={update} />
+    </div>
   );
 }

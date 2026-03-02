@@ -3,8 +3,8 @@
 import React, { useContext } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormNumberInput } from "../style/export"; // Ensure this component is already converted to TypeScript
-import { PropertyLengthMeasure } from "../../catalog/properties/export";
+import { FormNumberInput } from "../FormNumberInput";
+import { PropertyLengthMeasure } from "../properties/export";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { Map as ImmutableMap } from "immutable";
 

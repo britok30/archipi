@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext } from "react";
-import { FormNumberInput } from "../style/export";
+import { FormNumberInput } from "../FormNumberInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ReactPlannerContext from "../../context/ReactPlannerContext";

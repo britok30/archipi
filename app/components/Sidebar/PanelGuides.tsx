@@ -3,7 +3,7 @@
 import React, { useState, useContext } from "react";
 import Panel from "./Panel";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
-import { FormNumberInput } from "../style/export";
+import { FormNumberInput } from "../FormNumberInput";
 import { Button } from "@/components/ui/button";
 import { Ruler, Trash, X } from "lucide-react";
 import { Tabs, TabsList } from "@/components/ui/tabs";

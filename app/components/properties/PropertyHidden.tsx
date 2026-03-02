@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 interface PropertyHiddenProps {
   value: any;
   onUpdate: (val: any) => void;

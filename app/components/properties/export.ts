@@ -1,11 +1,11 @@
 import PropertyColor from "./PropertyColor";
 import PropertyEnum from "./PropertyEnum";
 import PropertyString from "./PropertyString";
-import PropertyNumber from "./property-number";
+import PropertyNumber from "./PropertyNumber";
 import PropertyLengthMeasure from "./PropertyLengthMeasure";
 import PropertyToggle from "./PropertyToggle";
-import PropertyCheckbox from "./property-checkbox";
-import PropertyHidden from "./property-hidden";
+import PropertyCheckbox from "./PropertyCheckbox";
+import PropertyHidden from "./PropertyHidden";
 import PropertyReadOnly from "./PropertyReadOnly";
 
 export {

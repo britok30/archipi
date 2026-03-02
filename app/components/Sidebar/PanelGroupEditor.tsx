@@ -2,7 +2,8 @@
 
 import React, { useContext } from "react";
 import Panel from "./Panel";
-import { FormNumberInput, FormTextInput } from "../style/export";
+import { FormNumberInput } from "../FormNumberInput";
+import { Input } from "@/components/ui/input";
 import { FolderOpen, Unlink } from "lucide-react";
 import ReactPlannerContext from "../../context/ReactPlannerContext";
 import { usePlannerStore } from "../../store";
@@ -55,7 +56,7 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
         <div className="space-y-3 px-2">
           <div className="flex items-center gap-3">
             <span className="w-16 text-muted-foreground text-sm shrink-0">{translator?.t("Name") ?? "Name"}</span>
-            <FormTextInput
+            <Input
               value={group.name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setGroupProperties(groupID, { name: e.target.value })
