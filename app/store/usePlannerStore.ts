@@ -1139,7 +1139,59 @@ export const usePlannerStore = create<PlannerStore>()(
 
       updateDrawingHole: (layerId, x, y) =>
         set((state) => {
-          // Preview logic would go here
+          const layer = state.scene.layers[layerId];
+          if (!layer) return;
+
+          let bestDist = Infinity;
+          let bestLineId: string | null = null;
+          let bestOffset = 0.5;
+          let bestX1 = 0, bestY1 = 0, bestX2 = 0, bestY2 = 0;
+
+          for (const [lineId, line] of Object.entries(layer.lines)) {
+            const v0 = layer.vertices[line.vertices[0]];
+            const v1 = layer.vertices[line.vertices[1]];
+            if (!v0 || !v1) continue;
+
+            const dist = Math.abs(
+              (v1.y - v0.y) * x - (v1.x - v0.x) * y + v1.x * v0.y - v1.y * v0.x
+            ) / Math.sqrt((v1.y - v0.y) ** 2 + (v1.x - v0.x) ** 2);
+
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestLineId = lineId;
+
+              // Order vertices left-to-right for consistent angle
+              let lx1 = v0.x, ly1 = v0.y, lx2 = v1.x, ly2 = v1.y;
+              if (lx1 > lx2) {
+                lx1 = v1.x; ly1 = v1.y; lx2 = v0.x; ly2 = v0.y;
+              }
+              bestX1 = lx1; bestY1 = ly1; bestX2 = lx2; bestY2 = ly2;
+
+              // Project cursor onto line to get offset (0-1)
+              const dx = lx2 - lx1;
+              const dy = ly2 - ly1;
+              const lenSq = dx * dx + dy * dy;
+              bestOffset = lenSq > 0
+                ? Math.max(0, Math.min(1, ((x - lx1) * dx + (y - ly1) * dy) / lenSq))
+                : 0.5;
+            }
+          }
+
+          if (bestLineId && bestDist < 30) {
+            state.drawingSupport.previewLineId = bestLineId;
+            state.drawingSupport.previewOffset = bestOffset;
+            state.drawingSupport.previewX1 = bestX1;
+            state.drawingSupport.previewY1 = bestY1;
+            state.drawingSupport.previewX2 = bestX2;
+            state.drawingSupport.previewY2 = bestY2;
+          } else {
+            state.drawingSupport.previewLineId = undefined;
+            state.drawingSupport.previewOffset = undefined;
+            state.drawingSupport.previewX1 = undefined;
+            state.drawingSupport.previewY1 = undefined;
+            state.drawingSupport.previewX2 = undefined;
+            state.drawingSupport.previewY2 = undefined;
+          }
         }),
 
       endDrawingHole: (layerId, x, y) =>
@@ -1288,7 +1340,8 @@ export const usePlannerStore = create<PlannerStore>()(
 
       updateDrawingItem: (layerId, x, y) =>
         set((state) => {
-          // Preview logic
+          state.drawingSupport.previewX = Math.round(x);
+          state.drawingSupport.previewY = Math.round(y);
         }),
 
       endDrawingItem: (layerId, x, y) =>

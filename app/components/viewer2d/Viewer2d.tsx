@@ -81,6 +81,8 @@ const mode2Cursor = (mode: Mode): React.CSSProperties => {
       return { cursor: "ew-resize" };
     case MODE_WAITING_DRAWING_LINE:
     case MODE_DRAWING_LINE:
+    case MODE_DRAWING_ITEM:
+    case MODE_DRAWING_HOLE:
       return { cursor: "crosshair" };
     default:
       return { cursor: "default" };

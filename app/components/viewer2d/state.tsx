@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Scene as SceneComponent } from "./scene";
+import { DrawingPreview } from "./DrawingPreview";
 import * as SharedStyle from "../../styles/shared-style";
 import type { Scene, RuntimeCatalog } from "../../store/types";
 
@@ -32,6 +33,7 @@ export const State: React.FC<StateProps> = ({ scene, catalog }) => {
         id="svg-drawing-paper"
       >
         <SceneComponent scene={scene} catalog={catalog} />
+        <DrawingPreview />
         {/* Horizontal guides */}
         {Object.entries(guides.horizontal).map(([key, guide]) => (
           <line
