@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Map } from "immutable";
 import convert from "convert-units";
 import {
   UNITS_LENGTH,
@@ -14,18 +13,16 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SelectTrigger } from "@radix-ui/react-select";
-import { Input } from "@/components/ui/input";
 
-interface LengthValue extends Map<string, any> {
-  get(key: "length"): number;
-  get(key: "_length"): number;
-  get(key: "_unit"): string;
-  merge(obj: object): LengthValue;
+interface LengthValue {
+  length: number;
+  _length?: number;
+  _unit?: string;
+  [key: string]: any;
 }
 
 interface PropertyLengthMeasureProps {
@@ -56,47 +53,65 @@ const PropertyLengthMeasure: React.FC<PropertyLengthMeasureProps> = ({
   internalState,
   state,
 }) => {
-  const length = value.get("length") || 0;
-  const _length = value.get("_length") || length;
-  const _unit = value.get("_unit") || UNIT_CENTIMETER;
-  const { hook, label, ...configRest } = configs;
+  const length = value?.length || 0;
+  const _length = value?._length ?? length;
+  const _unit = value?._unit || UNIT_CENTIMETER;
+  const { hook, label } = configs;
 
-  const update = async (lengthInput: number, unitInput: string) => {
-    const newLength = toFixedFloat(lengthInput);
-    const merged = value.merge({
-      length:
-        unitInput !== UNIT_CENTIMETER
-          ? convert(newLength)
-              .from(unitInput as typeof UNIT_CENTIMETER)
-              .to(UNIT_CENTIMETER)
-          : newLength,
-      _length: lengthInput,
-      _unit: unitInput,
-    });
-
+  const emit = async (merged: LengthValue) => {
     if (hook) {
       const val = await hook(merged, sourceElement, internalState, state);
       return onUpdate(val);
     }
-
     return onUpdate(merged);
   };
 
+  // The user typed a new displayed length in the current unit: convert to cm.
+  const updateLength = (lengthInput: number) => {
+    const newLength = toFixedFloat(lengthInput);
+    return emit({
+      ...value,
+      length:
+        _unit !== UNIT_CENTIMETER
+          ? convert(newLength)
+              .from(_unit as typeof UNIT_CENTIMETER)
+              .to(UNIT_CENTIMETER)
+          : newLength,
+      _length: lengthInput,
+      _unit,
+    });
+  };
+
+  // The user switched units: keep the stored cm value fixed and only
+  // recompute the displayed length in the new unit.
+  const updateUnit = (unitInput: string) => {
+    return emit({
+      ...value,
+      length,
+      _length: toFixedFloat(
+        convert(length)
+          .from(UNIT_CENTIMETER)
+          .to(unitInput as typeof UNIT_CENTIMETER),
+      ),
+      _unit: unitInput,
+    });
+  };
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
       <Label className="text-xs text-muted-foreground capitalize">{label}</Label>
       <div className="flex gap-2">
         <FormNumberInput
-          className="flex-1"
+          className="flex-1 min-w-0"
           value={_length}
-          onChange={(value: number) => update(value, _unit)}
+          onChange={(value: number) => updateLength(value)}
         />
-        <Select
-          value={_unit}
-          onValueChange={(value) => update(_length, value)}
-        >
-          <SelectTrigger className="w-[50px] border rounded-lg">
-            <SelectValue placeholder="Choose a unit" />
+        <Select value={_unit} onValueChange={(value) => updateUnit(value)}>
+          <SelectTrigger
+            className="h-9 w-[4.25rem] shrink-0"
+            aria-label={`${label} unit`}
+          >
+            <SelectValue placeholder="Unit" />
           </SelectTrigger>
           <SelectContent>
             {UNITS_LENGTH.map((el) => (

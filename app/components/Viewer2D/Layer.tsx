@@ -18,7 +18,7 @@ interface LayerProps {
   catalog: RuntimeCatalog | null;
 }
 
-export const Layer: React.FC<LayerProps> = ({ layer, scene, catalog }) => {
+const LayerComponent: React.FC<LayerProps> = ({ layer, scene, catalog }) => {
   const { unit, groups } = scene;
   const {
     lines = {},
@@ -87,5 +87,7 @@ export const Layer: React.FC<LayerProps> = ({ layer, scene, catalog }) => {
     </g>
   );
 };
+
+export const Layer = React.memo(LayerComponent);
 
 export default Layer;

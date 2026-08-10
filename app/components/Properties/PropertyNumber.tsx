@@ -52,7 +52,7 @@ export default function PropertyNumber({
     return onUpdate(number);
   };
   return (
-    <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+    <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
       <Label className="text-xs text-muted-foreground capitalize">{configs.label}</Label>
       <FormNumberInput
         value={value}

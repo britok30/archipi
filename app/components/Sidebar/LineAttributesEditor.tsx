@@ -1,16 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormNumberInput } from "../FormNumberInput";
 import { PropertyLengthMeasure } from "../Properties";
-import { Map as ImmutableMap } from "immutable";
 
 interface LineAttributesEditorProps {
-  element: ImmutableMap<string, any> | { [key: string]: any };
+  element: { [key: string]: any };
   onUpdate: (attributeName: string, value: any) => void;
-  attributeFormData: ImmutableMap<string, any>;
+  attributeFormData: Record<string, any>;
   onValid?: (valid: boolean) => void;
   className?: string;
 }
@@ -21,31 +20,19 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
   attributeFormData,
   className = "",
 }) => {
-  const getElementValue = (key: string) => {
-    if (ImmutableMap.isMap(element)) {
-      return (element as ImmutableMap<string, any>).get(key);
-    }
-    return (element as any)[key];
+  const name = attributeFormData.name ?? element.name ?? "";
+  const vertexOne = attributeFormData.vertexOne ?? {};
+  const vertexTwo = attributeFormData.vertexTwo ?? {};
+  const lineLength = attributeFormData.lineLength;
+
+  const [nameDraft, setNameDraft] = useState<string>(name);
+  useEffect(() => {
+    setNameDraft(name);
+  }, [name]);
+
+  const commitName = () => {
+    if (nameDraft !== name) onUpdate("name", nameDraft);
   };
-
-  const name = attributeFormData.has("name")
-    ? attributeFormData.get("name")
-    : getElementValue("name");
-
-  const rawVertexOne = attributeFormData.has("vertexOne")
-    ? attributeFormData.get("vertexOne")
-    : {};
-
-  const rawVertexTwo = attributeFormData.has("vertexTwo")
-    ? attributeFormData.get("vertexTwo")
-    : {};
-
-  const vertexOne = ImmutableMap.isMap(rawVertexOne) ? rawVertexOne : ImmutableMap(rawVertexOne as any);
-  const vertexTwo = ImmutableMap.isMap(rawVertexTwo) ? rawVertexTwo : ImmutableMap(rawVertexTwo as any);
-
-  const lineLength = attributeFormData.has("lineLength")
-    ? attributeFormData.get("lineLength")
-    : ImmutableMap<string, any>();
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -55,10 +42,14 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
         </Label>
         <Input
           id="line-name"
-          value={name}
+          value={nameDraft}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            onUpdate("name", event.target.value)
+            setNameDraft(event.target.value)
           }
+          onBlur={commitName}
+          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === "Enter") commitName();
+          }}
           placeholder="Enter name"
         />
       </div>
@@ -70,7 +61,7 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
             <span className="text-xs text-muted-foreground shrink-0">X</span>
             <FormNumberInput
               id="vertex-one-x"
-              value={vertexOne.get("x") ?? ""}
+              value={vertexOne.x ?? ""}
               onChange={(value: number) => onUpdate("vertexOne", { x: value })}
               precision={2}
               min={-Infinity}
@@ -81,7 +72,7 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
             <span className="text-xs text-muted-foreground shrink-0">Y</span>
             <FormNumberInput
               id="vertex-one-y"
-              value={vertexOne.get("y") ?? ""}
+              value={vertexOne.y ?? ""}
               onChange={(value: number) => onUpdate("vertexOne", { y: value })}
               precision={2}
               min={-Infinity}
@@ -98,7 +89,7 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
             <span className="text-xs text-muted-foreground shrink-0">X</span>
             <FormNumberInput
               id="vertex-two-x"
-              value={vertexTwo.get("x") ?? ""}
+              value={vertexTwo.x ?? ""}
               onChange={(value: number) => onUpdate("vertexTwo", { x: value })}
               precision={2}
               min={-Infinity}
@@ -109,7 +100,7 @@ const LineAttributesEditor: React.FC<LineAttributesEditorProps> = ({
             <span className="text-xs text-muted-foreground shrink-0">Y</span>
             <FormNumberInput
               id="vertex-two-y"
-              value={vertexTwo.get("y") ?? ""}
+              value={vertexTwo.y ?? ""}
               onChange={(value: number) => onUpdate("vertexTwo", { y: value })}
               precision={2}
               min={-Infinity}

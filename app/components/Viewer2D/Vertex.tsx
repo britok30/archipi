@@ -10,12 +10,13 @@ interface VertexProps {
 }
 
 const STYLE: React.CSSProperties = {
-  fill: "#0096fd",
-  stroke: SharedStyle.COLORS.white,
+  fill: SharedStyle.CANVAS.accent,
+  stroke: SharedStyle.CANVAS.handleStroke,
+  strokeWidth: 1.5,
   cursor: "move",
 };
 
-export const Vertex: React.FC<VertexProps> = ({ vertex, layer }) => {
+const VertexComponent: React.FC<VertexProps> = ({ vertex, layer }) => {
   let { x, y } = vertex;
 
   return (
@@ -31,3 +32,5 @@ export const Vertex: React.FC<VertexProps> = ({ vertex, layer }) => {
     </g>
   );
 };
+
+export const Vertex = React.memo(VertexComponent);

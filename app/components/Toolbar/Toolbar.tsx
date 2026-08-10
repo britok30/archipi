@@ -77,6 +77,25 @@ const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <>
       <div className="fixed flex flex-col h-fit top-4 left-4 z-50 toolbar-glass rounded-xl p-1.5 space-y-1">
+        {/* Brand */}
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <div
+              aria-label="ArchiPi"
+              className="flex items-center justify-center w-10 h-10 select-none"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[hsl(230_80%_55%)] text-sm font-bold text-primary-foreground shadow-[0_2px_8px_hsl(217_91%_60%/0.4)]">
+                A
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p className="text-xs font-medium">ArchiPi — Floor Plan Editor</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Separator className="bg-border/40" />
+
         {/* Navigation */}
         <Tooltip delayDuration={0} defaultOpen={false}>
           <TooltipTrigger asChild>

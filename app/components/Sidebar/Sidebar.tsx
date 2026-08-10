@@ -51,12 +51,13 @@ const VISIBLE_MODES = [
 
 const Sidebar: React.FC = () => {
   const mode = usePlannerStore((state) => state.mode);
-  const scene = usePlannerStore((state) => state.scene);
+  const selectedLayerId = usePlannerStore((state) => state.scene.selectedLayer);
+  const layers = usePlannerStore((state) => state.scene.layers);
+  const groups = usePlannerStore((state) => state.scene.groups);
 
   const isVisible = VISIBLE_MODES.includes(mode);
 
-  const selectedLayerId = scene.selectedLayer;
-  const selectedLayer = selectedLayerId ? scene.layers[selectedLayerId] : null;
+  const selectedLayer = selectedLayerId ? layers[selectedLayerId] : null;
 
   const multiselected = useMemo(() => {
     if (!selectedLayer) return false;
@@ -76,14 +77,13 @@ const Sidebar: React.FC = () => {
   }, [selectedLayer]);
 
   const selectedGroupId = useMemo(() => {
-    const groups = scene.groups;
     for (const [groupId, group] of Object.entries(groups)) {
       if (group.selected) {
         return groupId;
       }
     }
     return null;
-  }, [scene.groups]);
+  }, [groups]);
 
   if (!isVisible) return null;
 

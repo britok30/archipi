@@ -24,27 +24,40 @@ const HoleElement3D: React.FC<HoleElement3DProps> = ({
   const [position, setPosition] = useState<[number, number, number] | null>(null);
   const [rotation, setRotation] = useState<number>(0);
 
+  // The line (or its vertices) may transiently disappear (e.g. during undo);
+  // all hooks must still run before any early return.
   const line = layer.lines[hole.line];
-  if (!line) return null;
-
-  let vertex0: Vertex = layer.vertices[line.vertices[0]];
-  let vertex1: Vertex = layer.vertices[line.vertices[1]];
+  let vertex0: Vertex | undefined = line
+    ? layer.vertices[line.vertices[0]]
+    : undefined;
+  let vertex1: Vertex | undefined = line
+    ? layer.vertices[line.vertices[1]]
+    : undefined;
   let offset = hole.offset;
 
-  if (vertex0.x > vertex1.x) {
+  if (vertex0 && vertex1 && vertex0.x > vertex1.x) {
     const tmp = vertex0;
     vertex0 = vertex1;
     vertex1 = tmp;
     offset = 1 - offset;
   }
 
-  const distance = Math.sqrt(
-    Math.pow(vertex0.x - vertex1.x, 2) + Math.pow(vertex0.y - vertex1.y, 2)
-  );
-  const alpha = Math.asin((vertex1.y - vertex0.y) / distance);
+  const distance =
+    vertex0 && vertex1
+      ? Math.sqrt(
+          Math.pow(vertex0.x - vertex1.x, 2) +
+            Math.pow(vertex0.y - vertex1.y, 2)
+        )
+      : 0;
+  const alpha =
+    vertex0 && vertex1 && distance > 0
+      ? Math.asin((vertex1.y - vertex0.y) / distance)
+      : 0;
 
   const onLoaded = useCallback(
     (object3D: Three.Object3D) => {
+      if (!vertex0) return;
+
       // Wrap in a temp pivot to compute bounding box
       const pivot = new Three.Object3D();
       pivot.add(object3D);
@@ -79,6 +92,8 @@ const HoleElement3D: React.FC<HoleElement3DProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [hole.id, hole.offset, hole.line]
   );
+
+  if (!line || !vertex0 || !vertex1) return null;
 
   const opacity = hole.selected ? 1 : layer.opacity;
 

@@ -49,14 +49,47 @@ export const SECONDARY_COLOR: Record<string, string> = {
   border: '1px solid #FFF'
 };
 
-export const MESH_SELECTED: string = '#99C3FB';
+export const MESH_SELECTED: string = '#7FA8F0';
 
 export const AREA_MESH_COLOR: Record<string, string> = {
-  selected: MESH_SELECTED,
-  unselected: '#F5F4F4'
+  selected: '#C7DAF8',
+  unselected: '#E9E7E2'
 };
 
 export const LINE_MESH_COLOR: Record<string, string> = {
-  selected: MESH_SELECTED,
-  unselected: '#8E9BA2'
+  selected: '#3B82F6',
+  unselected: '#565E6C'
+};
+
+/**
+ * 2D drafting canvas palette — a light "paper" surface framed by the dark
+ * app chrome. Single source of truth for the Viewer2D components and the
+ * catalog factories' 2D renders.
+ */
+export const CANVAS: Record<string, string> = {
+  // Surfaces
+  paper: '#F6F7F9',
+  chrome: '#16181D',
+
+  // Grid
+  gridMajor: '#D5D9E0',
+  gridMinor: '#E8EAEF',
+
+  // Walls
+  wallFill: '#343A46',
+  wallStroke: '#4A5160',
+  wallFillSelected: '#3D4657',
+  wallStrokeSelected: '#3B82F6',
+
+  // Selection / handles
+  accent: '#3B82F6',
+  handleStroke: '#FFFFFF',
+
+  // Labels
+  label: '#7C8494',
+  labelStrong: '#565E6C',
+
+  // Rulers
+  rulerText: '#8A93A6',
+  rulerMarker: '#3B82F6'
 };

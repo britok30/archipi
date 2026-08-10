@@ -27,9 +27,19 @@ const GridsInner: React.FC<GridsProps> = ({ scene }) => {
 
     const step = props?.step ?? 20;
     const colors = props?.colors ?? [props?.color ?? "#808080"];
-    const majorColor = colors[0] ?? "#808080";
-    const minorColor = colors[1] ?? "#ddd";
     const majorEvery = colors.length || 5;
+
+    // Presentation-layer palette: legacy scenes store harsh greys
+    // ("#808080"/"#ddd"), so map those to the softer drafting palette
+    // while still honouring genuinely custom grid colors.
+    const storedMajor = colors[0] ?? "#808080";
+    const storedMinor = colors[1] ?? "#ddd";
+    const majorColor =
+      storedMajor.toLowerCase() === "#808080" ? "#D5D9E0" : storedMajor;
+    const minorColor =
+      storedMinor.toLowerCase() === "#ddd" || storedMinor.toLowerCase() === "#dddddd"
+        ? "#E8EAEF"
+        : storedMinor;
 
     return { step, majorColor, minorColor, majorStep: step * majorEvery };
   }, [grids]);

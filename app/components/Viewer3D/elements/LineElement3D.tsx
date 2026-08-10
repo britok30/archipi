@@ -23,6 +23,8 @@ const LineElement3D: React.FC<LineElement3DProps> = ({
   let vertex0: Vertex = layer.vertices[line.vertices[0]];
   let vertex1: Vertex = layer.vertices[line.vertices[1]];
 
+  if (!vertex0 || !vertex1) return null;
+
   if (vertex0.x > vertex1.x) {
     const tmp = vertex0;
     vertex0 = vertex1;

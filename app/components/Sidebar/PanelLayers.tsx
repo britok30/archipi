@@ -68,7 +68,8 @@ interface EditingLayer {
 
 const PanelLayers: React.FC = () => {
   const mode = usePlannerStore((state) => state.mode);
-  const scene = usePlannerStore((state) => state.scene);
+  const layers = usePlannerStore((state) => state.scene.layers);
+  const selectedLayerId = usePlannerStore((state) => state.scene.selectedLayer);
   const selectLayerAction = usePlannerStore((state) => state.selectLayer);
   const setLayerPropertiesAction = usePlannerStore((state) => state.setLayerProperties);
   const addLayerAction = usePlannerStore((state) => state.addLayer);
@@ -77,8 +78,6 @@ const PanelLayers: React.FC = () => {
   const [editingLayer, setEditingLayer] = useState<EditingLayer | null>(null);
   const [newLayerName, setNewLayerName] = useState("");
 
-  const layers = scene.layers;
-  const selectedLayerId = scene.selectedLayer;
   const layerEntries = Object.entries(layers);
 
   const handleAddSubmit = (e: React.FormEvent) => {

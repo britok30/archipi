@@ -18,6 +18,7 @@ type Scene3DViewerProps = {
 
 const Viewer3D: React.FC<Scene3DViewerProps> = ({ width, height }) => {
   const canvasWrapper = useRef<HTMLDivElement>(null);
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const { catalog } = useCatalogContext();
   const scene = usePlannerStore((state) => state.scene);
   const unselectAll = usePlannerStore((state) => state.unselectAll);
@@ -53,9 +54,14 @@ const Viewer3D: React.FC<Scene3DViewerProps> = ({ width, height }) => {
   );
 
   return (
-    <div ref={canvasWrapper}>
+    <div
+      ref={canvasWrapper}
+      onPointerDown={(e) => {
+        pointerDownPos.current = { x: e.clientX, y: e.clientY };
+      }}
+    >
       <Canvas
-        shadows
+        shadows="percentage"
         gl={{
           antialias: true,
           preserveDrawingBuffer: true,
@@ -72,7 +78,21 @@ const Viewer3D: React.FC<Scene3DViewerProps> = ({ width, height }) => {
           position: cameraPosition,
           up: [0, 1, 0],
         }}
-        onPointerMissed={() => unselectAll()}
+        onCreated={({ camera }) => {
+          // Orient toward the scene on mount; OrbitControls only applies its
+          // target after the first user interaction, leaving the initial
+          // frame pointed at empty space otherwise.
+          camera.lookAt(centerX, 0, centerZ);
+        }}
+        onPointerMissed={(e) => {
+          // Orbit drags end with a pointer-missed event; only unselect on a
+          // genuine click (pointer barely moved since pointer-down)
+          const down = pointerDownPos.current;
+          if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) {
+            return;
+          }
+          unselectAll();
+        }}
       >
         <SceneLighting />
         <Grid3D scene={scene} />

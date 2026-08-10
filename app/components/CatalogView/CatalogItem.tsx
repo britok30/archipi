@@ -1,23 +1,47 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Armchair, DoorOpen, Minus } from "lucide-react";
 import type { CatalogElement } from "../../store/types";
 
 type CatalogItemProps = {
   element: CatalogElement;
   onSelect?: (element: CatalogElement) => void;
+  /** Show the prototype badge (useful in mixed search results). */
+  showType?: boolean;
   className?: string;
   disabled?: boolean;
+};
+
+const PROTOTYPE_LABEL: Record<string, string> = {
+  lines: "Wall",
+  holes: "Opening",
+  items: "Item",
+};
+
+/** Catalog data uses lowercase names ("bar stool") — title-case for display. */
+const titleCase = (value: string) =>
+  value.replace(/\b\w/g, (char) => char.toUpperCase());
+
+const FallbackIcon = ({ prototype }: { prototype: string }) => {
+  const Icon =
+    prototype === "lines" ? Minus : prototype === "holes" ? DoorOpen : Armchair;
+  return <Icon className="size-8 text-zinc-400" strokeWidth={1.5} />;
 };
 
 const CatalogItem = ({
   element,
   onSelect,
+  showType = false,
   className = "",
   disabled = false,
 }: CatalogItemProps) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const image = element.info?.image;
+  const title = element.info?.title || element.name;
+
   const handleSelect = () => {
     if (!disabled && onSelect) {
       onSelect(element);
@@ -32,78 +56,64 @@ const CatalogItem = ({
   };
 
   return (
-    <Card
+    <div
       onClick={handleSelect}
       onKeyDown={handleKeyDown}
-      className={`
-        group relative
-        ${
-          disabled
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-pointer hover:shadow-lg"
-        }
-        transition-all duration-200
-        ${className}
-      `}
       tabIndex={disabled ? -1 : 0}
       role="button"
       aria-disabled={disabled}
+      aria-label={`Add ${title}`}
+      title={element.info?.description || title}
+      className={`
+        group relative flex flex-col overflow-hidden rounded-lg border border-border/60
+        bg-card text-left outline-none transition-all duration-150
+        ${
+          disabled
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer hover:border-primary/50 hover:shadow-[0_0_0_1px_hsl(217_91%_60%/0.35),0_8px_24px_-12px_rgb(0_0_0/0.6)] focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
+        }
+        ${className}
+      `}
     >
-      <CardHeader className="pb-2">
-        <CardTitle className="line-clamp-1 text-lg">
-          {element.info.title || element.name}
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Image Container */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+      {/* Thumbnail — light neutral ground so white/transparent PNGs read.
+          Capped at 96 CSS px so the ~200px sources stay crisp on 2x displays;
+          `unoptimized` serves the tiny (~3KB) originals byte-for-byte instead
+          of recompressing them. */}
+      <div className="relative h-24 w-full bg-[#EEEFF1] flex items-center justify-center">
+        {image && !imageFailed ? (
           <Image
-            className={`
-              object-contain object-center
-              ${!disabled && "group-hover:scale-105"}
-              transition-transform duration-200
-            `}
-            src={element.info.image}
+            className={`object-contain object-center p-1.5 ${
+              !disabled ? "transition-transform duration-200 group-hover:scale-[1.06]" : ""
+            }`}
+            src={image}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized
             priority={false}
-            alt={`Preview of ${element.info.title || element.name}`}
+            alt=""
+            onError={() => setImageFailed(true)}
           />
-        </div>
-
-        {/* Tags */}
-        {element.info.tag && (Array.isArray(element.info.tag) ? element.info.tag.length > 0 : element.info.tag) && (
-          <div className="flex flex-wrap gap-1.5">
-            {(Array.isArray(element.info.tag) ? element.info.tag : [element.info.tag]).map((tag) => (
-              <Badge
-                key={`${element.name}-${tag}`}
-                variant="secondary"
-                className="text-xs"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
+        ) : (
+          <FallbackIcon prototype={element.prototype} />
         )}
 
-        {/* Description */}
-        {element.info.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {element.info.description}
-          </p>
+        {showType && (
+          <Badge
+            variant="secondary"
+            className="absolute right-1.5 top-1.5 px-1.5 py-0 text-[10px] font-medium"
+          >
+            {PROTOTYPE_LABEL[element.prototype] ?? element.prototype}
+          </Badge>
         )}
+      </div>
 
-        {/* Element Type Indicator */}
-        <Badge
-          variant="outline"
-          className="absolute top-2 right-2 text-xs capitalize"
-        >
-          {element.prototype}
-        </Badge>
-      </CardContent>
-    </Card>
+      {/* Single title line */}
+      <div className="px-1.5 py-1">
+        <p className="truncate text-[11px] font-medium text-foreground">
+          {titleCase(title)}
+        </p>
+      </div>
+    </div>
   );
 };
 
-export default CatalogItem
+export default CatalogItem;

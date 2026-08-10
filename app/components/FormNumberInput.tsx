@@ -113,7 +113,6 @@ const FormNumberInput: React.FC<FormNumberInputProps> = ({
 
     if (isValid) {
       onValid && onValid();
-      onInvalid && onInvalid(); // Optionally, you can adjust when to call onInvalid
     } else {
       onInvalid && onInvalid();
     }

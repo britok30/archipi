@@ -30,6 +30,61 @@ function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Dense grid shared by folders, sections and search results: ~8 columns
+ *  in the 64rem dialog with the compact 96px thumbnails. */
+const GRID_CLASS =
+  "grid grid-cols-[repeat(auto-fill,minmax(6.75rem,1fr))] gap-2";
+
+/** Display order of catalog sections (derived from element tags). */
+const SECTION_ORDER = [
+  "Walls & Structure",
+  "Doors & Openings",
+  "Windows",
+  "Stairs",
+  "Kitchen",
+  "Bathroom",
+  "Bedroom",
+  "Living Room",
+  "Office",
+  "Decor",
+  "Other",
+];
+
+const ROOM_TAG_TO_SECTION: Record<string, string> = {
+  kitchen: "Kitchen",
+  bathroom: "Bathroom",
+  bedroom: "Bedroom",
+  living: "Living Room",
+  office: "Office",
+  decor: "Decor",
+  stair: "Stairs",
+  structure: "Walls & Structure",
+};
+
+/** Map an element to its section using prototype + info.tag. Room-tagged
+ *  items use their first (primary) room tag; untagged ones land in Other. */
+function sectionFor(element: CatalogElement): string {
+  const rawTag = element.info.tag;
+  const tags = (Array.isArray(rawTag) ? rawTag : rawTag ? [rawTag] : []).map(
+    (t: string) => t.toLowerCase()
+  );
+  if (element.prototype === "lines" || tags.includes("wall"))
+    return "Walls & Structure";
+  if (element.prototype === "holes") {
+    return tags.some((t) => t === "window" || t === "finestre")
+      ? "Windows"
+      : "Doors & Openings";
+  }
+  for (const tag of tags) {
+    const section = ROOM_TAG_TO_SECTION[tag];
+    if (section) return section;
+  }
+  return "Other";
+}
+
+const elementTitle = (element: CatalogElement) =>
+  element.info.title || element.name;
+
 const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
   const { catalog } = useCatalogContext();
 
@@ -135,6 +190,26 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
 
   const isSearching = searchQuery.length > 0;
 
+  // Group the flat element list into room/purpose sections (alphabetical
+  // within each). Falls back to a single flat grid when everything shares
+  // one section (e.g. inside the Windows/Doors folders).
+  const sections = useMemo(() => {
+    const bySection = new Map<string, CatalogElement[]>();
+    for (const element of elementsToDisplay) {
+      const name = sectionFor(element);
+      const bucket = bySection.get(name);
+      if (bucket) bucket.push(element);
+      else bySection.set(name, [element]);
+    }
+    for (const bucket of bySection.values()) {
+      bucket.sort((a, b) => elementTitle(a).localeCompare(elementTitle(b)));
+    }
+    return SECTION_ORDER.filter((name) => bySection.has(name)).map((name) => ({
+      name,
+      elements: bySection.get(name)!,
+    }));
+  }, [elementsToDisplay]);
+
   return (
     <div className="space-y-4">
       {/* Breadcrumb */}
@@ -147,10 +222,11 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search elements..."
+          placeholder="Search walls, doors, furniture..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
+          autoFocus
+          className="h-10 pl-9 bg-muted/40 border-border/60 focus-visible:ring-primary/40"
         />
       </div>
 
@@ -165,9 +241,11 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
               <button
                 key={element.name}
                 onClick={() => handleElementSelect(element)}
-                className="px-3 py-1.5 text-sm rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                className="px-3 py-1.5 text-xs rounded-full border border-border/60 bg-secondary text-secondary-foreground hover:border-primary/50 hover:text-foreground transition-colors"
               >
-                {element.info.title || element.name}
+                {(element.info.title || element.name).replace(/\b\w/g, (c) =>
+                  c.toUpperCase()
+                )}
               </button>
             ))}
           </div>
@@ -177,11 +255,12 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
       {/* Grid */}
       {isSearching ? (
         matchedElements.length > 0 ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
+          <div className={GRID_CLASS}>
             {matchedElements.map((elem) => (
               <CatalogItem
                 key={elem.name}
                 element={elem}
+                showType
                 onSelect={handleElementSelect}
               />
             ))}
@@ -195,23 +274,51 @@ const CatalogList: React.FC<CatalogListProps> = ({ onClose }) => {
           </div>
         )
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
-          {catalogState.path.length > 0 && <CatalogTurnBackPageItem />}
-          {categoriesToDisplay.map((cat) => (
-            <CatalogPageItem
-              key={cat.name}
-              page={cat}
-              oldPage={currentCategory}
-            />
-          ))}
-          {elementsToDisplay.map((elem) => (
-            <CatalogItem
-              key={elem.name}
-              element={elem}
-              onSelect={handleElementSelect}
-            />
-          ))}
-        </div>
+        <>
+          {(catalogState.path.length > 0 || categoriesToDisplay.length > 0) && (
+            <div className={GRID_CLASS}>
+              {catalogState.path.length > 0 && <CatalogTurnBackPageItem />}
+              {categoriesToDisplay.map((cat) => (
+                <CatalogPageItem
+                  key={cat.name}
+                  page={cat}
+                  oldPage={currentCategory}
+                />
+              ))}
+            </div>
+          )}
+          {sections.length > 1 ? (
+            sections.map((section) => (
+              <section key={section.name} className="space-y-2">
+                <h3 className="sticky top-0 z-10 -mx-1 bg-background/95 px-1 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur-sm">
+                  {section.name}
+                  <span className="ml-1.5 font-normal text-muted-foreground/60">
+                    {section.elements.length}
+                  </span>
+                </h3>
+                <div className={GRID_CLASS}>
+                  {section.elements.map((elem) => (
+                    <CatalogItem
+                      key={elem.name}
+                      element={elem}
+                      onSelect={handleElementSelect}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <div className={GRID_CLASS}>
+              {(sections[0]?.elements ?? []).map((elem) => (
+                <CatalogItem
+                  key={elem.name}
+                  element={elem}
+                  onSelect={handleElementSelect}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

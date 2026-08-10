@@ -131,6 +131,22 @@ const extractElementData = (node: HTMLElement): ElementData | null => {
   };
 };
 
+// Tiny wrappers so that only the rulers re-render on idle mousemove; the
+// rest of the SVG tree does not subscribe to state.mouse.
+const ConnectedRulerX: React.FC<
+  Omit<React.ComponentProps<typeof RulerX>, "mouseX">
+> = (props) => {
+  const mouseX = usePlannerStore((state) => state.mouse.x);
+  return <RulerX {...props} mouseX={mouseX || 0} />;
+};
+
+const ConnectedRulerY: React.FC<
+  Omit<React.ComponentProps<typeof RulerY>, "mouseY">
+> = (props) => {
+  const mouseY = usePlannerStore((state) => state.mouse.y);
+  return <RulerY {...props} mouseY={mouseY || 0} />;
+};
+
 export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
   const { catalog } = useCatalogContext();
 
@@ -139,7 +155,6 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
   const scene = usePlannerStore((state) => state.scene);
   const viewer2D = usePlannerStore((state) => state.viewer2D);
   const zoom = usePlannerStore((state) => state.zoom);
-  const mouse = usePlannerStore((state) => state.mouse);
 
   // Get actions from Zustand
   const updateCameraView = usePlannerStore((state) => state.updateCameraView);
@@ -156,6 +171,7 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
   const beginDrawingLine = usePlannerStore((state) => state.beginDrawingLine);
   const updateDrawingLine = usePlannerStore((state) => state.updateDrawingLine);
   const endDrawingLine = usePlannerStore((state) => state.endDrawingLine);
+  const stopDrawingLine = usePlannerStore((state) => state.stopDrawingLine);
   const beginDraggingLine = usePlannerStore((state) => state.beginDraggingLine);
   const updateDraggingLine = usePlannerStore((state) => state.updateDraggingLine);
   const endDraggingLine = usePlannerStore((state) => state.endDraggingLine);
@@ -389,6 +405,18 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
     ]
   );
 
+  // Finish drawing walls on double click/tap (Escape is otherwise the only
+  // way to stop, which traps touch/pointer-only users).
+  const onDoubleClick = useCallback(
+    (viewerEvent: ViewerMouseEvent<any>) => {
+      if (mode === MODE_DRAWING_LINE) {
+        stopDrawingLine();
+        viewerEvent.originalEvent.stopPropagation();
+      }
+    },
+    [mode, stopDrawingLine]
+  );
+
   const onChangeValue = useCallback(
     (value: Value) => {
       updateZoomScale(value.a);
@@ -426,9 +454,9 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
   // Ruler properties
   const rulerSize = 15;
   const rulerUnitPixelSize = 100;
-  const rulerBgColor = "#292929";
-  const rulerFnColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
-  const rulerMkColor = SharedStyle.MATERIAL_COLORS["500"].indigo;
+  const rulerBgColor = SharedStyle.CANVAS.chrome;
+  const rulerFnColor = SharedStyle.CANVAS.rulerText;
+  const rulerMkColor = SharedStyle.CANVAS.rulerMarker;
   const sceneZoom = zoom || 1;
   const rulerXElements = Math.ceil(sceneWidth / rulerUnitPixelSize) + 1;
   const rulerYElements = Math.ceil(sceneHeight / rulerUnitPixelSize) + 1;
@@ -452,11 +480,10 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
         className="grid-rows-1 grid-cols-2 relative overflow-hidden"
         id="rulerX"
       >
-        {sceneWidth && (
-          <RulerX
+        {sceneWidth > 0 && (
+          <ConnectedRulerX
             unitPixelSize={rulerUnitPixelSize}
             zoom={sceneZoom}
-            mouseX={mouse.x || 0}
             width={width - rulerSize}
             zeroLeftPosition={viewer2D.e || 0}
             backgroundColor={rulerBgColor}
@@ -471,11 +498,10 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
         className="grid-rows-1 grid-cols-2 relative overflow-hidden"
         id="rulerY"
       >
-        {sceneHeight && (
-          <RulerY
+        {sceneHeight > 0 && (
+          <ConnectedRulerY
             unitPixelSize={rulerUnitPixelSize}
             zoom={sceneZoom}
-            mouseY={mouse.y || 0}
             height={height - rulerSize}
             zeroTopPosition={sceneHeight * sceneZoom + (viewer2D.f || 0)}
             backgroundColor={rulerBgColor}
@@ -498,10 +524,13 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
+        onDoubleClick={onDoubleClick}
         toolbarProps={{ position: "none" }}
+        background={SharedStyle.CANVAS.chrome}
+        SVGBackground={SharedStyle.CANVAS.paper}
         miniatureProps={{
           position: "none",
-          background: "#616264",
+          background: SharedStyle.CANVAS.chrome,
           width: 100,
           height: 80,
         }}
@@ -513,12 +542,18 @@ export const Viewer2D: React.FC<Viewer2DProps> = ({ width, height }) => {
               patternUnits="userSpaceOnUse"
               width="4"
               height="4"
-              fill="#FFF"
+              fill={SharedStyle.CANVAS.paper}
             >
-              <rect x="0" y="0" width="4" height="4" fill="#FFF" />
+              <rect
+                x="0"
+                y="0"
+                width="4"
+                height="4"
+                fill={SharedStyle.CANVAS.paper}
+              />
               <path
                 d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2"
-                style={{ stroke: "#8E9BA2", strokeWidth: 1 }}
+                style={{ stroke: SharedStyle.CANVAS.wallStroke, strokeWidth: 1 }}
               />
             </pattern>
           </defs>

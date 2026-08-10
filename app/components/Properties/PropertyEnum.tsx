@@ -65,7 +65,7 @@ const PropertyEnum = ({
 
   return (
     <div className={`space-y-2 ${className} mb-2`}>
-      <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+      <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
         <Label
           htmlFor={`enum-${configs.label}`}
           className="text-xs text-muted-foreground capitalize"
@@ -130,7 +130,7 @@ const EnhancedPropertyEnum = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+      <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
         <Label
           htmlFor={`enum-${configs.label}`}
           className={`

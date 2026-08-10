@@ -61,7 +61,7 @@ export default function ToolbarSaveButton() {
     toast.success(`Saved as ${name}.json`);
   };
 
-  const saveProjectToObjFile = () => {
+  const saveProjectToObjFile = async () => {
     if (!catalog) return;
 
     const objExporter = new OBJExporter();
@@ -75,19 +75,23 @@ export default function ToolbarSaveButton() {
       selectArea: usePlannerStore.getState().selectArea,
     };
 
-    const planData = parseData(currentScene, actions, catalog);
-    setTimeout(() => {
+    try {
+      const planData = await parseData(currentScene, actions, catalog);
       const plan = planData.plan;
       plan.position.set(plan.position.x, 0.1, plan.position.z);
       const scene3D = new Three.Scene();
       scene3D.add(planData.plan);
+      scene3D.updateMatrixWorld(true);
       const name = filename.trim() || "archipi-project";
       browserDownloadWithName(objExporter.parse(scene3D), name, "obj");
       filenameRef.current = name;
       markClean();
       setIsOpen(false);
       toast.success(`Exported as ${name}.obj`);
-    });
+    } catch (err) {
+      console.error("OBJ export failed:", err);
+      toast.error("Failed to export OBJ file");
+    }
   };
 
   return (

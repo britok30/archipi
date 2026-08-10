@@ -27,7 +27,9 @@ export const DrawingPreview: React.FC = () => {
     const py = drawingSupport.previewY as number | undefined;
     if (px == null || py == null) return null;
 
-    const catalogElement = catalog.getElement(type);
+    const catalogElement = catalog.hasElement(type)
+      ? catalog.getElement(type)
+      : null;
     if (!catalogElement?.render2D) return null;
 
     const mockElement = {
@@ -64,7 +66,9 @@ export const DrawingPreview: React.FC = () => {
     const x2 = drawingSupport.previewX2 as number;
     const y2 = drawingSupport.previewY2 as number;
 
-    const catalogElement = catalog.getElement(type);
+    const catalogElement = catalog.hasElement(type)
+      ? catalog.getElement(type)
+      : null;
     if (!catalogElement?.render2D) return null;
 
     const mockElement = {

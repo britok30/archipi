@@ -17,7 +17,7 @@ interface LineProps {
   catalog: RuntimeCatalog | null;
 }
 
-export const Line: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
+const LineComponent: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
   const vertex0 = layer.vertices[line.vertices[0]];
   const vertex1 = layer.vertices[line.vertices[1]];
 
@@ -41,9 +41,9 @@ export const Line: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
     if (!hole) return null;
 
     const startAt = length * hole.offset;
-    const renderedHole = catalog
-      ?.getElement(hole.type)
-      ?.render2D?.(hole, layer, scene);
+    const holeElement =
+      catalog?.hasElement(hole.type) ? catalog.getElement(hole.type) : null;
+    const renderedHole = holeElement?.render2D?.(hole, layer, scene);
 
     return (
       <g
@@ -64,9 +64,9 @@ export const Line: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
     (line.properties.thickness as { length: number })?.length || 10;
   const half_thickness = thickness / 2;
 
-  const renderedLine = catalog
-    ?.getElement(line.type)
-    ?.render2D?.(line, layer, scene);
+  const lineElement =
+    catalog?.hasElement(line.type) ? catalog.getElement(line.type) : null;
+  const renderedLine = lineElement?.render2D?.(line, layer, scene);
   const renderedRuler = line.selected ? (
     <Ruler
       unit={scene.unit}
@@ -91,5 +91,7 @@ export const Line: React.FC<LineProps> = ({ line, layer, scene, catalog }) => {
     </g>
   );
 };
+
+export const Line = React.memo(LineComponent);
 
 export default Line;

@@ -9,6 +9,7 @@ import { usePlannerStore } from "../../store";
 import type { Layer } from "../../store/types";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { displayNameFor } from "../utils/element-display";
 
 type ElementCollection = 'lines' | 'holes' | 'items' | 'areas';
 
@@ -117,6 +118,17 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                       return ids.map((elementID: string) => {
                         const element =
                           getLayerElement(scene.layers, layerID, elementPrototype, elementID);
+                        const layer = scene.layers[layerID];
+                        const collection = layer?.[
+                          elementPrototype as ElementCollection
+                        ] as Record<string, { id: string; name?: string; type?: string }> | undefined;
+                        const friendlyName =
+                          element && collection
+                            ? displayNameFor(
+                                { id: elementID, ...element },
+                                collection,
+                              )
+                            : element?.name || elementID;
                         return (
                           <div key={elementID} className="grid grid-cols-4 gap-2 text-xs items-center py-1 px-1 rounded-md hover:bg-muted/50 transition duration-200 ease-in-out">
                             <div>
@@ -137,9 +149,16 @@ const PanelGroupEditor: React.FC<PanelGroupEditorProps> = ({ groupID }) => {
                                 <Unlink className="h-3.5 w-3.5" />
                               </Button>
                             </div>
-                            <div className="text-center truncate">{layerID}</div>
+                            <div className="text-center truncate" title={layerID}>
+                              {scene.layers[layerID]?.name || layerID}
+                            </div>
                             <div className="text-center capitalize">{elementPrototype}</div>
-                            <div className="text-center truncate">{element?.name || elementID}</div>
+                            <div
+                              className="text-center truncate"
+                              title={element?.name || elementID}
+                            >
+                              {friendlyName}
+                            </div>
                           </div>
                         );
                       });

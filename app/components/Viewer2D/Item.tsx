@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePlannerStore } from "../../store";
 import type { Item as ItemType, Layer, Scene, RuntimeCatalog } from "../../store/types";
 
 interface ItemProps {
@@ -10,27 +11,32 @@ interface ItemProps {
   catalog: RuntimeCatalog | null;
 }
 
-const STYLE_LINE: React.CSSProperties = {
-  fill: "#0096fd",
-  stroke: "#0096fd",
-};
-
 const STYLE_CIRCLE: React.CSSProperties = {
-  fill: "#0096fd",
-  stroke: "#0096fd",
+  fill: "#3B82F6",
+  stroke: "#FFFFFF",
+  strokeWidth: 1.5,
   cursor: "ew-resize",
 };
 
 const STYLE_CIRCLE2: React.CSSProperties = {
   fill: "none",
-  stroke: "#0096fd",
+  stroke: "#3B82F6",
+  strokeDasharray: "4 4",
+  opacity: 0.6,
   cursor: "ew-resize",
 };
 
-export const Item: React.FC<ItemProps> = ({ layer, item, scene, catalog }) => {
+const ItemComponent: React.FC<ItemProps> = ({ layer, item, scene, catalog }) => {
+  const zoom = usePlannerStore((state) => state.zoom) || 1;
   let { x, y, rotation } = item;
 
-  let renderedItem = catalog?.getElement(item.type).render2D?.(item, layer, scene);
+  const catalogElement =
+    catalog?.hasElement(item.type) ? catalog.getElement(item.type) : null;
+  const renderedItem = catalogElement?.render2D?.(item, layer, scene);
+
+  // Keep the rotation controls roughly constant-size on screen.
+  const knobRadius = 10 / zoom;
+  const guideRadius = 150 / zoom;
 
   return (
     <g
@@ -52,10 +58,12 @@ export const Item: React.FC<ItemProps> = ({ layer, item, scene, catalog }) => {
           data-layer={layer.id}
           data-part="rotation-anchor"
         >
-          <circle cx="0" cy="150" r="10" style={STYLE_CIRCLE} />
-          <circle cx="0" cy="0" r="150" style={STYLE_CIRCLE2} />
+          <circle cx="0" cy={guideRadius} r={knobRadius} style={STYLE_CIRCLE} />
+          <circle cx="0" cy="0" r={guideRadius} style={STYLE_CIRCLE2} />
         </g>
       )}
     </g>
   );
 };
+
+export const Item = React.memo(ItemComponent);

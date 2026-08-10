@@ -24,10 +24,12 @@ import {
 import { Boxes, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { usePlannerStore } from "../../store";
+import { buildDisplayNames } from "../utils/element-display";
 
 interface ElementType {
   id: string;
   name: string;
+  type?: string;
   selected: boolean;
 }
 
@@ -57,13 +59,17 @@ const VISIBILITY_MODE = new Set([
   MODE_ROTATING_ITEM,
 ]);
 
+const escapeRegex = (str: string): string =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const filterElements = (
   elements: Record<string, ElementType>,
+  displayNames: Record<string, string>,
   regexp: RegExp,
 ): Record<string, ElementType> => {
   const result: Record<string, ElementType> = {};
   for (const [key, el] of Object.entries(elements)) {
-    if (regexp.test(el.name)) {
+    if (regexp.test(el.name) || regexp.test(displayNames[key] ?? "")) {
       result[key] = el;
     }
   }
@@ -73,28 +79,49 @@ const filterElements = (
 interface ElementSectionProps {
   label: string;
   entries: [string, ElementType][];
+  displayNames: Record<string, string>;
   onSelect: (elementId: string) => void;
 }
 
-const ElementSection: React.FC<ElementSectionProps> = ({ label, entries, onSelect }) => {
+const ElementSection: React.FC<ElementSectionProps> = ({
+  label,
+  entries,
+  displayNames,
+  onSelect,
+}) => {
   if (entries.length === 0) return null;
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="text-xs text-muted-foreground">({entries.length})</span>
+      <div className="flex items-center gap-1.5 mb-1 px-2">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+        <span className="text-[11px] tabular-nums text-muted-foreground/70">
+          {entries.length}
+        </span>
       </div>
       <div className="space-y-0.5">
         {entries.map(([id, element]) => (
           <div
             key={id}
             onClick={() => onSelect(element.id)}
-            className={`text-sm truncate cursor-pointer px-2 py-1.5 rounded-md transition duration-200 ease-in-out hover:bg-muted/50 ${
-              element.selected ? "bg-primary/10 text-foreground" : "text-foreground"
+            title={element.name}
+            className={`group flex items-center gap-2 text-sm cursor-pointer px-2 py-1.5 rounded-md transition duration-200 ease-in-out hover:bg-muted/50 ${
+              element.selected
+                ? "bg-primary/10 text-foreground"
+                : "text-foreground"
             }`}
           >
-            {element.name}
+            <span
+              className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors ${
+                element.selected ? "bg-primary" : "bg-muted-foreground/30"
+              }`}
+              aria-hidden
+            />
+            <span className="truncate">{displayNames[id] ?? element.name}</span>
+            {/* Raw internal name for power users (and accessible search) */}
+            <span className="sr-only">{element.name}</span>
           </div>
         ))}
       </div>
@@ -104,13 +131,11 @@ const ElementSection: React.FC<ElementSectionProps> = ({ label, entries, onSelec
 
 const PanelLayerElement: React.FC = () => {
   const mode = usePlannerStore((state) => state.mode);
-  const scene = usePlannerStore((state) => state.scene);
+  const layers = usePlannerStore((state) => state.scene.layers);
+  const selectedLayer = usePlannerStore((state) => state.scene.selectedLayer);
   const selectItem = usePlannerStore((state) => state.selectItem);
   const selectLine = usePlannerStore((state) => state.selectLine);
   const selectHole = usePlannerStore((state) => state.selectHole);
-
-  const layers = scene.layers;
-  const selectedLayer = scene.selectedLayer;
 
   const [matchString, setMatchString] = useState<string>("");
 
@@ -125,15 +150,26 @@ const PanelLayerElement: React.FC = () => {
     };
   }, [layers, selectedLayer]);
 
+  // Friendly display names ("Wall 1", "Chair 2") computed from the full
+  // collections so ordinals stay stable while filtering.
+  const displayNames = useMemo(
+    () => ({
+      lines: buildDisplayNames(elements.lines),
+      holes: buildDisplayNames(elements.holes),
+      items: buildDisplayNames(elements.items),
+    }),
+    [elements],
+  );
+
   const matchedElements: ElementsType = useMemo(() => {
     if (matchString === "") return elements;
-    const regexp = new RegExp(matchString, "i");
+    const regexp = new RegExp(escapeRegex(matchString), "i");
     return {
-      lines: filterElements(elements.lines, regexp),
-      holes: filterElements(elements.holes, regexp),
-      items: filterElements(elements.items, regexp),
+      lines: filterElements(elements.lines, displayNames.lines, regexp),
+      holes: filterElements(elements.holes, displayNames.holes, regexp),
+      items: filterElements(elements.items, displayNames.items, regexp),
     };
-  }, [elements, matchString]);
+  }, [elements, displayNames, matchString]);
 
   if (!VISIBILITY_MODE.has(mode)) return null;
   if (!selectedLayer) return null;
@@ -171,18 +207,21 @@ const PanelLayerElement: React.FC = () => {
         ) : (
           <>
             <ElementSection
-              label="Lines"
+              label="Walls"
               entries={lineEntries}
+              displayNames={displayNames.lines}
               onSelect={(id) => selectLine(layer.id, id)}
             />
             <ElementSection
-              label="Holes"
+              label="Doors & Windows"
               entries={holeEntries}
+              displayNames={displayNames.holes}
               onSelect={(id) => selectHole(layer.id, id)}
             />
             <ElementSection
-              label="Items"
+              label="Furniture"
               entries={itemEntries}
+              displayNames={displayNames.items}
               onSelect={(id) => selectItem(layer.id, id)}
             />
           </>

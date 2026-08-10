@@ -9,16 +9,17 @@ interface RulerProps {
 }
 
 const STYLE: React.CSSProperties = {
-  stroke: "#0096fd",
+  stroke: "#3B82F6",
   strokeWidth: "1px",
 };
 
 const STYLE_TEXT: React.CSSProperties = {
   textAnchor: "middle",
-  fontSize: "12px",
-  fontFamily: "'Courier New', Courier, monospace",
+  fontSize: "11px",
+  fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+  fill: "#3B82F6",
   pointerEvents: "none",
-  fontWeight: "bold",
+  fontWeight: 600,
 
   //http://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting-using-css
   WebkitTouchCallout: "none" /* iOS Safari */,

@@ -10,7 +10,7 @@ interface SceneProps {
   catalog: RuntimeCatalog | null;
 }
 
-export const Scene: React.FC<SceneProps> = ({ scene, catalog }) => {
+const SceneComponent: React.FC<SceneProps> = ({ scene, catalog }) => {
   const { layers, selectedLayer: selectedLayerId } = scene;
 
   const selectedLayer = selectedLayerId ? layers[selectedLayerId] : null;
@@ -46,5 +46,7 @@ export const Scene: React.FC<SceneProps> = ({ scene, catalog }) => {
     </g>
   );
 };
+
+export const Scene = React.memo(SceneComponent);
 
 export default Scene;

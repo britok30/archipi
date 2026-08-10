@@ -7,6 +7,7 @@ import { MODE_VIEWING_CATALOG } from "../../store/types";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,9 +32,12 @@ const CatalogButton: React.FC = () => {
           </ToolbarButton>
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-[80vw] h-[80vh] flex flex-col text-foreground">
+      <DialogContent className="sm:max-w-[64rem] w-[92vw] h-[82vh] flex flex-col text-foreground">
         <DialogHeader>
           <DialogTitle>Catalog</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Pick an element, then click the canvas to place it.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto min-h-0 scrollbar scrollbar-thumb-zinc-700 scrollbar-track-transparent">
           <CatalogList onClose={() => setIsOpen(false)} />

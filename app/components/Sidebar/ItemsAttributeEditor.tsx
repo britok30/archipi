@@ -1,15 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FormNumberInput } from "../FormNumberInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Map as ImmutableMap } from "immutable";
 
 interface ItemAttributesEditorProps {
-  element: ImmutableMap<string, any> | { [key: string]: any };
+  element: { [key: string]: any };
   onUpdate: (attributeName: string, value: any) => void;
-  attributeFormData: ImmutableMap<string, any>;
+  attributeFormData: Record<string, any>;
   onValid?: (valid: boolean) => void;
   className?: string;
 }
@@ -20,25 +19,19 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
   attributeFormData,
   className = "",
 }) => {
-  const getElementValue = (key: string) => {
-    if (ImmutableMap.isMap(element)) {
-      return (element as ImmutableMap<string, any>).get(key);
-    }
-    return (element as any)[key];
-  };
+  const name = attributeFormData.name ?? element.name ?? "";
+  const renderedX = attributeFormData.x ?? element.x;
+  const renderedY = attributeFormData.y ?? element.y;
+  const renderedR = attributeFormData.rotation ?? element.rotation;
 
-  const name = attributeFormData.has("name")
-    ? attributeFormData.get("name")
-    : getElementValue("name");
-  const renderedX = attributeFormData.has("x")
-    ? attributeFormData.get("x")
-    : getElementValue("x");
-  const renderedY = attributeFormData.has("y")
-    ? attributeFormData.get("y")
-    : getElementValue("y");
-  const renderedR = attributeFormData.has("rotation")
-    ? attributeFormData.get("rotation")
-    : getElementValue("rotation");
+  const [nameDraft, setNameDraft] = useState<string>(name);
+  useEffect(() => {
+    setNameDraft(name);
+  }, [name]);
+
+  const commitName = () => {
+    if (nameDraft !== name) onUpdate("name", nameDraft);
+  };
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -48,8 +41,12 @@ const ItemAttributesEditor: React.FC<ItemAttributesEditorProps> = ({
         </Label>
         <Input
           id="item-name"
-          value={name ?? ""}
-          onChange={(event) => onUpdate("name", event.target.value)}
+          value={nameDraft}
+          onChange={(event) => setNameDraft(event.target.value)}
+          onBlur={commitName}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commitName();
+          }}
           placeholder="Enter name"
         />
       </div>

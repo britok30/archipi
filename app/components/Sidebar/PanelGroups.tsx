@@ -59,7 +59,8 @@ const countGroupElements = (elements: Group["elements"]): number => {
 
 const PanelGroups: React.FC = () => {
   const mode = usePlannerStore((state) => state.mode);
-  const scene = usePlannerStore((state) => state.scene);
+  const groups = usePlannerStore((state) => state.scene.groups) || {};
+  const layers = usePlannerStore((state) => state.scene.layers) || {};
   const selectGroup = usePlannerStore((state) => state.selectGroup);
   const setGroupProperties = usePlannerStore((state) => state.setGroupProperties);
   const addToGroup = usePlannerStore((state) => state.addToGroup);
@@ -67,9 +68,6 @@ const PanelGroups: React.FC = () => {
   const removeGroupAndDeleteElements = usePlannerStore((state) => state.removeGroupAndDeleteElements);
   const addGroup = usePlannerStore((state) => state.addGroup);
   const addGroupFromSelected = usePlannerStore((state) => state.addGroupFromSelected);
-
-  const groups = scene.groups || {};
-  const layers = scene.layers || {};
 
   if (!VISIBILITY_MODES.includes(mode)) return null;
 

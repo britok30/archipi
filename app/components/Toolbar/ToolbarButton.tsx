@@ -30,6 +30,8 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
           <button
             onClick={onClick}
             disabled={disabled}
+            aria-label={tooltip}
+            aria-pressed={active}
             className={`
               relative flex items-center justify-center w-10 h-10 rounded-lg
               transition-all duration-200 ease-out

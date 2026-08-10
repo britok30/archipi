@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,8 +42,17 @@ const PropertyColor = ({
   state,
   className = "",
 }: PropertyColorProps) => {
-  const handleUpdate = useCallback(
+  // Keep edits local for live preview; only commit to the store (and undo
+  // history) on blur/Enter or when a swatch is picked.
+  const [draft, setDraft] = useState<string>(value ?? "");
+
+  useEffect(() => {
+    setDraft(value ?? "");
+  }, [value]);
+
+  const commit = useCallback(
     async (newValue: string) => {
+      if (newValue === value) return;
       try {
         if (configs.hook) {
           const processedValue = await configs.hook(
@@ -60,7 +69,7 @@ const PropertyColor = ({
         console.error("Error updating color property:", error);
       }
     },
-    [configs, onUpdate, sourceElement, internalState, state]
+    [configs, onUpdate, sourceElement, internalState, state, value]
   );
 
   // Don't render in 3D view mode
@@ -68,7 +77,7 @@ const PropertyColor = ({
 
   return (
     <div className={`space-y-2 ${className} mb-2`}>
-      <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+      <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
         <Label
           htmlFor={`color-${configs.label}`}
           className="text-xs text-muted-foreground capitalize"
@@ -77,67 +86,76 @@ const PropertyColor = ({
         </Label>
 
         <div className="flex items-center gap-2">
-          <Input
-            id={`color-${configs.label}`}
-            type="text"
-            value={value}
-            onChange={(e) => handleUpdate(e.target.value)}
-            className="h-9 font-mono"
-            placeholder="#000000"
-            pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
-          />
-
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-9 h-9 p-0"
+                className="h-9 w-9 shrink-0 p-1"
                 aria-label={`Pick color for ${configs.label}`}
               >
-                <div
-                  className="w-full h-full rounded-sm"
-                  style={{ backgroundColor: value }}
+                <span
+                  className="block h-full w-full rounded-[4px] border border-black/20"
+                  style={{ backgroundColor: draft }}
                 />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64">
-              <div className="grid gap-2">
-                <div className="grid grid-cols-5 gap-2">
+            <PopoverContent className="w-56 p-3" align="start">
+              <div className="grid gap-3">
+                <div className="grid grid-cols-6 gap-1.5">
                   {[
-                    "#ff0000",
-                    "#00ff00",
-                    "#0000ff",
-                    "#ffff00",
-                    "#ff00ff",
-                    "#00ffff",
-                    "#000000",
-                    "#666666",
-                    "#cccccc",
-                    "#ffffff",
+                    "#F5F4F0", "#E4E1DA", "#CBCDD2", "#9AA0AB", "#565E6C", "#22262E",
+                    "#B4C7E7", "#7FA8F0", "#3B82F6", "#8CC8B5", "#4E9B7F", "#2F6B57",
+                    "#E9D8A6", "#D9A45B", "#B5651D", "#D98E8E", "#B33A3A", "#6B4E9B",
                   ].map((color) => (
-                    <Button
+                    <button
                       key={color}
-                      variant="outline"
-                      className="w-8 h-8 p-0"
-                      onClick={() => handleUpdate(color)}
+                      type="button"
+                      className={`h-7 w-7 rounded-md border transition-transform hover:scale-110 ${
+                        draft.toLowerCase() === color.toLowerCase()
+                          ? "border-primary ring-1 ring-primary"
+                          : "border-border"
+                      }`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => {
+                        setDraft(color);
+                        commit(color);
+                      }}
                     >
-                      <div
-                        className="w-full h-full rounded-sm"
-                        style={{ backgroundColor: color }}
-                      />
                       <span className="sr-only">Choose {color}</span>
-                    </Button>
+                    </button>
                   ))}
                 </div>
-                <Input
-                  type="color"
-                  value={value}
-                  onChange={(e) => handleUpdate(e.target.value)}
-                  className="w-full h-8"
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="color"
+                    value={/^#([A-Fa-f0-9]{6})$/.test(draft) ? draft : "#888888"}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={(e) => commit(e.target.value)}
+                    aria-label="Custom color"
+                    className="h-8 w-10 shrink-0 cursor-pointer p-1"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Custom color
+                  </span>
+                </div>
               </div>
             </PopoverContent>
           </Popover>
+
+          <Input
+            id={`color-${configs.label}`}
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={() => commit(draft)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commit(draft);
+            }}
+            className="h-9 min-w-0 font-mono uppercase"
+            placeholder="#000000"
+            spellCheck={false}
+            pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+          />
         </div>
       </div>
     </div>

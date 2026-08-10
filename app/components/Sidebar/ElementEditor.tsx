@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Map, fromJS } from "immutable";
 import AttributesEditor from "./AttributesEditor";
 import { GeometryUtils, MathUtils } from "../../../lib/floorplan-utils/export";
 import convert, { Unit } from "convert-units";
@@ -12,9 +11,11 @@ import type { Line, Hole, Item, Area, Layer } from "../../store/types";
 
 type SceneElement = Line | Hole | Item | Area;
 
-interface AttributeValue extends Map<string, any> {
-  merge: (value: any) => AttributeValue;
-}
+type AttributesFormData = Record<string, any> | null;
+type PropertiesFormData = Record<
+  string,
+  { currentValue: any; configs: Record<string, any> }
+>;
 
 const PRECISION = 2;
 
@@ -41,30 +42,38 @@ const ElementEditor = ({
   );
   const copyProperties = usePlannerStore((state) => state.copyProperties);
   const pasteProperties = usePlannerStore((state) => state.pasteProperties);
-  const initAttrData = (element: SceneElement, layer: Layer) => {
+  const initAttrData = (
+    element: SceneElement,
+    layer: Layer,
+  ): AttributesFormData => {
     switch (element.prototype) {
       case "items": {
-        return Map(element);
+        return { ...element };
       }
       case "lines": {
         let v_a = layer.vertices[element.vertices[0]];
         let v_b = layer.vertices[element.vertices[1]];
+        if (!v_a || !v_b) return null;
         let distance = GeometryUtils.pointsDistance(v_a.x, v_a.y, v_b.x, v_b.y);
         let _unit =
           (element.misc as Record<string, any>)?._unitLength || catalog?.unit;
         let _length = convert(distance)
           .from(catalog?.unit as Unit)
           .to(_unit as Unit);
-        return Map({
+        return {
           vertexOne: v_a,
           vertexTwo: v_b,
-          lineLength: Map({ length: distance, _length, _unit }),
-        });
+          lineLength: { length: distance, _length, _unit },
+        };
       }
       case "holes": {
         let line = layer.lines[element.line];
-        let { x: x0, y: y0 } = layer.vertices[line.vertices[0]];
-        let { x: x1, y: y1 } = layer.vertices[line.vertices[1]];
+        if (!line) return null;
+        let v0 = layer.vertices[line.vertices[0]];
+        let v1 = layer.vertices[line.vertices[1]];
+        if (!v0 || !v1) return null;
+        let { x: x0, y: y0 } = v0;
+        let { x: x1, y: y1 } = v1;
         let lineLength = GeometryUtils.pointsDistance(x0, y0, x1, y1);
         let widthLength =
           (element.properties as Record<string, any>)?.width?.length || 0;
@@ -80,40 +89,41 @@ const ElementEditor = ({
         let _lengthB = convert(endAt)
           .from(catalog?.unit as Unit)
           .to(_unitB as Unit);
-        return Map({
+        return {
           offset: element.offset,
-          offsetA: Map({
+          offsetA: {
             length: MathUtils.toFixedFloat(startAt, PRECISION),
             _length: MathUtils.toFixedFloat(_lengthA, PRECISION),
             _unit: _unitA,
-          }),
-          offsetB: Map({
+          },
+          offsetB: {
             length: MathUtils.toFixedFloat(endAt, PRECISION),
             _length: MathUtils.toFixedFloat(_lengthB, PRECISION),
             _unit: _unitB,
-          }),
-        });
+          },
+        };
       }
       case "areas": {
-        return Map({});
+        return {};
       }
       default:
         return null;
     }
   };
-  const initPropData = (element: SceneElement) => {
-    let catalogElement = catalog?.getElement(element.type);
-    let mapped: Record<string, Map<string, any>> = {};
+  const initPropData = (element: SceneElement): PropertiesFormData => {
+    let catalogElement =
+      catalog?.hasElement(element.type) ? catalog.getElement(element.type) : null;
+    let mapped: PropertiesFormData = {};
     for (let name in catalogElement?.properties || {}) {
-      mapped[name] = Map({
+      mapped[name] = {
         currentValue:
           name in (element.properties || {})
-            ? fromJS(element.properties[name])
-            : fromJS(catalogElement!.properties[name].defaultValue),
+            ? element.properties[name]
+            : catalogElement!.properties[name].defaultValue,
         configs: catalogElement!.properties[name],
-      });
+      };
     }
-    return Map(mapped);
+    return mapped;
   };
   const [attributesFormData, setAttributesFormData] = useState(
     initAttrData(element, layer),
@@ -126,20 +136,21 @@ const ElementEditor = ({
     setPropertiesFormData(initPropData(element));
   }, [element, layer, catalog]);
 
-  const updateAttribute = (attributeName: string, value: Map<string, any>) => {
-    let _attributesFormData: any = attributesFormData;
+  const updateAttribute = (attributeName: string, value: any) => {
+    if (!attributesFormData) return;
+    let _attributesFormData: Record<string, any> = { ...attributesFormData };
 
     switch (element.prototype) {
       case "items": {
-        _attributesFormData = _attributesFormData?.set(attributeName, value);
+        _attributesFormData[attributeName] = value;
         break;
       }
 
       case "lines": {
         switch (attributeName) {
           case "lineLength": {
-            const v_0 = _attributesFormData?.get("vertexOne") as any;
-            const v_1 = _attributesFormData?.get("vertexTwo") as any;
+            const v_0 = _attributesFormData.vertexOne;
+            const v_1 = _attributesFormData.vertexTwo;
             const [v_a, v_b] = GeometryUtils.orderVertices([v_0, v_1]);
 
             const v_b_new = GeometryUtils.extendLine(
@@ -147,53 +158,41 @@ const ElementEditor = ({
               v_a.y,
               v_b.x,
               v_b.y,
-              value.get("length"),
+              (value as { length: number }).length,
               PRECISION,
             );
 
-            _attributesFormData = _attributesFormData?.withMutations(
-              (attr: any) => {
-                attr.set(
-                  v_0 === v_a ? "vertexTwo" : "vertexOne",
-                  v_b.merge(v_b_new),
-                );
-                attr.set("lineLength", value);
-              },
-            );
+            _attributesFormData[v_0 === v_a ? "vertexTwo" : "vertexOne"] = {
+              ...v_b,
+              ...v_b_new,
+            };
+            _attributesFormData.lineLength = value;
             break;
           }
 
           case "vertexOne":
           case "vertexTwo": {
-            _attributesFormData = _attributesFormData?.withMutations(
-              (attr: any) => {
-                const currentAttr = attr.get(attributeName) as AttributeValue;
-                attr.set(attributeName, currentAttr.merge(value));
+            const currentAttr = _attributesFormData[attributeName];
+            _attributesFormData[attributeName] = { ...currentAttr, ...value };
 
-                const newDistance = GeometryUtils.verticesDistance(
-                  attr.get("vertexOne") as any,
-                  attr.get("vertexTwo") as any,
-                );
-
-                attr.mergeIn(
-                  ["lineLength"],
-                  (attr.get("lineLength") as any).merge({
-                    length: newDistance,
-                    _length: convert(newDistance)
-                      .from(catalog?.unit as Unit)
-                      .to((attr.get("lineLength") as any).get("_unit") as Unit),
-                  }),
-                );
-              },
+            const newDistance = GeometryUtils.verticesDistance(
+              _attributesFormData.vertexOne,
+              _attributesFormData.vertexTwo,
             );
+
+            const lineLength = _attributesFormData.lineLength || {};
+            _attributesFormData.lineLength = {
+              ...lineLength,
+              length: newDistance,
+              _length: convert(newDistance)
+                .from(catalog?.unit as Unit)
+                .to((lineLength._unit || catalog?.unit) as Unit),
+            };
             break;
           }
 
           default: {
-            _attributesFormData = _attributesFormData?.set(
-              attributeName,
-              value,
-            );
+            _attributesFormData[attributeName] = value;
             break;
           }
         }
@@ -218,7 +217,7 @@ const ElementEditor = ({
             const widthLength =
               (element.properties as Record<string, any>)?.width?.length || 0;
             const halfWidthLength = widthLength / 2;
-            let lengthValue = value.get("length");
+            let lengthValue = (value as { length: number }).length;
 
             lengthValue = Math.max(
               0,
@@ -255,42 +254,38 @@ const ElementEditor = ({
                   PRECISION,
                 );
 
-            const otherOffsetUnit = _attributesFormData?.getIn([
-              isOffsetA ? "offsetB" : "offsetA",
-              "_unit",
-            ]);
+            const otherOffsetUnit =
+              _attributesFormData[isOffsetA ? "offsetB" : "offsetA"]?._unit ||
+              catalog?.unit;
 
-            const otherOffsetMap = Map({
+            const otherOffsetValue = {
               length: otherOffset,
               _length: convert(otherOffset)
                 .from(catalog?.unit as Unit)
                 .to(otherOffsetUnit as Unit),
               _unit: otherOffsetUnit,
-            });
+            };
 
-            const offsetAttribute = Map({
+            const offsetAttribute = {
               length: MathUtils.toFixedFloat(lengthValue, PRECISION),
-              _unit: value.get("_unit"),
+              _unit: value._unit,
               _length: MathUtils.toFixedFloat(
                 convert(lengthValue)
                   .from(catalog?.unit as Unit)
-                  .to(value.get("_unit") as Unit),
+                  .to(value._unit as Unit),
                 PRECISION,
               ),
-            });
+            };
 
-            _attributesFormData = _attributesFormData
-              ?.set(isOffsetA ? "offsetB" : "offsetA", otherOffsetMap)
-              ?.set("offset", offset)
-              ?.set(attributeName, offsetAttribute);
+            _attributesFormData[isOffsetA ? "offsetB" : "offsetA"] =
+              otherOffsetValue;
+            _attributesFormData.offset = offset;
+            _attributesFormData[attributeName] = offsetAttribute;
             break;
           }
 
           default: {
-            _attributesFormData = _attributesFormData?.set(
-              attributeName,
-              value,
-            );
+            _attributesFormData[attributeName] = value;
             break;
           }
         }
@@ -303,11 +298,13 @@ const ElementEditor = ({
   };
 
   const updateProperty = (propertyName: string, value: any) => {
-    let _propertiesFormData = propertiesFormData;
-    _propertiesFormData = _propertiesFormData.setIn(
-      [propertyName, "currentValue"],
-      value,
-    );
+    const _propertiesFormData: PropertiesFormData = {
+      ...propertiesFormData,
+      [propertyName]: {
+        ...propertiesFormData[propertyName],
+        currentValue: value,
+      },
+    };
     setPropertiesFormData(_propertiesFormData);
     save({ propertiesFormData: _propertiesFormData });
   };
@@ -315,27 +312,28 @@ const ElementEditor = ({
     propertiesFormData: propsData,
     attributesFormData: attrsData,
   }: {
-    propertiesFormData?: Map<string, any> | Map<unknown, unknown>;
-    attributesFormData?: Map<string, any> | Map<unknown, unknown>;
+    propertiesFormData?: PropertiesFormData;
+    attributesFormData?: Record<string, any>;
   }) => {
     if (propsData) {
-      let properties = propsData.map((data: any) => {
-        return data.get("currentValue");
-      });
-      setProperties(properties.toJS());
+      const properties: Record<string, any> = {};
+      for (const name in propsData) {
+        properties[name] = propsData[name].currentValue;
+      }
+      setProperties(properties);
     }
     if (attrsData) {
       switch (element.prototype) {
         case "items": {
-          setItemsAttributes(attrsData.toJS());
+          setItemsAttributes(attrsData);
           break;
         }
         case "lines": {
-          setLinesAttributes(attrsData.toJS());
+          setLinesAttributes(attrsData);
           break;
         }
         case "holes": {
-          setHolesAttributes(attrsData.toJS());
+          setHolesAttributes(attrsData);
           break;
         }
       }
@@ -350,20 +348,30 @@ const ElementEditor = ({
   const handlePasteProperties = () => {
     pasteProperties();
   };
+  if (!attributesFormData) return null;
+  // Areas have no editable attributes — skip the empty section.
+  const hasAttributes = element.prototype !== "areas";
+
   return (
     <div className="space-y-3">
-      <div>
-        <p className="text-xs text-muted-foreground mb-2">Attributes</p>
-        <AttributesEditor
-          element={element}
-          onUpdate={updateAttribute}
-          attributeFormData={attributesFormData}
-        />
-      </div>
+      {hasAttributes && (
+        <section className="rounded-lg border border-border/50 bg-muted/20 p-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
+            Attributes
+          </p>
+          <AttributesEditor
+            element={element}
+            onUpdate={updateAttribute}
+            attributeFormData={attributesFormData}
+          />
+        </section>
+      )}
 
-      <div className="pt-3 border-t border-border/40">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-muted-foreground">Properties</p>
+      <section className="rounded-lg border border-border/50 bg-muted/20 p-3">
+        <div className="flex items-center justify-between mb-2.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Properties
+          </p>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -390,29 +398,25 @@ const ElementEditor = ({
         </div>
 
         <div className="space-y-2">
-          {(propertiesFormData as any)
-            ?.entrySeq()
-            .map(([propertyName, data]: [any, any]) => {
-              let currentValue = data.get("currentValue"),
-                configs = data.get("configs");
-              let { Editor } = catalog?.getPropertyType(configs.type) ?? {};
-              if (!Editor) return null;
-              const EditorComponent = Editor as React.ComponentType<any>;
-              return (
-                <EditorComponent
-                  key={propertyName}
-                  propertyName={propertyName}
-                  value={currentValue}
-                  configs={configs}
-                  onUpdate={(value: any) => updateProperty(propertyName, value)}
-                  sourceElement={element}
-                  internalState={{ attributesFormData, propertiesFormData }}
-                />
-              );
-            })
-            .toArray()}
+          {Object.entries(propertiesFormData).map(([propertyName, data]) => {
+            const { currentValue, configs } = data;
+            let { Editor } = catalog?.getPropertyType(configs.type) ?? {};
+            if (!Editor) return null;
+            const EditorComponent = Editor as React.ComponentType<any>;
+            return (
+              <EditorComponent
+                key={propertyName}
+                propertyName={propertyName}
+                value={currentValue}
+                configs={configs}
+                onUpdate={(value: any) => updateProperty(propertyName, value)}
+                sourceElement={element}
+                internalState={{ attributesFormData, propertiesFormData }}
+              />
+            );
+          })}
         </div>
-      </div>
+      </section>
     </div>
   );
 };

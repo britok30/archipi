@@ -63,7 +63,7 @@ const PropertyToggle = ({
   if (configs.actionName) {
     return (
       <div className={`space-y-2 ${className}`}>
-        <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+        <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
           <Label
             htmlFor={`toggle-${configs.label}`}
             className={`
@@ -95,7 +95,7 @@ const PropertyToggle = ({
   // Default render with Switch
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+      <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
         <Label
           htmlFor={`toggle-${configs.label}`}
           className={`
@@ -174,7 +174,7 @@ const EnhancedPropertyToggle = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="grid grid-cols-[8rem_1fr] items-center gap-4">
+      <div className="grid grid-cols-[6.5rem_1fr] items-center gap-4">
         <Label
           htmlFor={`toggle-${configs.label}`}
           className={`
