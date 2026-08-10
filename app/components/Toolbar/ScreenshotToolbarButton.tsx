@@ -52,8 +52,11 @@ export default function ScreenshotToolbarButton() {
         downloadDataURI(dataUri, `archipi-${timestamp}.png`);
 
         toast.success("Screenshot saved", {
-          description:
-            "Want it photorealistic? Render this plan with ArchitectGPT's AI.",
+          // The 3D shot renders the exact scene; a flat plan feeds
+          // ArchitectGPT's floorplan-to-render feature directly.
+          description: is3D
+            ? "Nice angle? ArchitectGPT can render this exact view photorealistic."
+            : "ArchitectGPT can turn this flat plan into a photorealistic interior.",
           action: {
             label: "Render with AI",
             onClick: () => window.open(RENDER_URL, "_blank", "noopener"),
