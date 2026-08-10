@@ -1,42 +1,63 @@
-"use client";
+import React from "react";
+import PlannerApp from "./components/PlannerApp";
+import LandingContent, {
+  ARCHITECTGPT_URL,
+  FAQ_ITEMS,
+} from "./components/LandingContent";
 
-import React, { Suspense } from "react";
-import MyCatalog from "./objCatalog/mycatalog";
+const SITE_URL = "https://www.archipi.io";
 
-import ReactPlanner from "./components/ReactPlanner";
-import { useWindowSize } from "./hooks/useWindowSize";
-import { SidebarProvider } from "@/components/ui/sidebar";
+const webApplicationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "ArchiPi",
+  url: SITE_URL,
+  description:
+    "Free online floor plan creator. Draw 2D floor plans, furnish them from a built-in catalog, view them in 3D, and export to OBJ — no signup required.",
+  applicationCategory: "DesignApplication",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "ArchitectGPT",
+    url: ARCHITECTGPT_URL,
+  },
+};
+
+// FAQPage markup must match the FAQ content rendered on the page exactly,
+// so it is generated from the same data as <LandingContent />.
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_ITEMS.map(({ question, answer }) => ({
+    "@type": "Question",
+    name: question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: answer,
+    },
+  })),
+};
 
 export default function Home() {
-  const { windowSize, isMobile } = useWindowSize();
-  const height = windowSize.height;
-  const width = windowSize.width;
-
-  if (!height || !width) return <></>;
-
-  if (isMobile) {
-    return (
-      <div className="w-full min-h-screen flex items-center flex-col justify-center text-center px-4">
-        <h2>Please use a desktop browser</h2>
-        <p className="font-light text-sm">
-          For the best possible experience, please use a desktop browser to
-          access ArchiPi
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full min-h-screen overflow-hidden">
-      <SidebarProvider>
-        <Suspense fallback="Loading...">
-          <ReactPlanner
-            catalog={MyCatalog as any}
-            width={width}
-            height={height}
-          />
-        </Suspense>
-      </SidebarProvider>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webApplicationJsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <PlannerApp />
+      <LandingContent />
+    </>
   );
 }

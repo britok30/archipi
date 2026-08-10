@@ -36,15 +36,17 @@ function Providers({ children }: ProvidersProps) {
 
   // Warn before closing tab if there are unsaved changes
   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
     const unsubscribe = usePlannerStore.subscribe(
       (state) => state.isDirty,
       (isDirty) => {
         if (isDirty) {
-          window.onbeforeunload = (e: BeforeUnloadEvent) => {
-            e.preventDefault();
-          };
+          window.addEventListener("beforeunload", handleBeforeUnload);
         } else {
-          window.onbeforeunload = null;
+          window.removeEventListener("beforeunload", handleBeforeUnload);
         }
       },
       { fireImmediately: true }
@@ -52,7 +54,7 @@ function Providers({ children }: ProvidersProps) {
 
     return () => {
       unsubscribe();
-      window.onbeforeunload = null;
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 

@@ -4,11 +4,17 @@ import React from "react";
 import Script from "next/script";
 
 const GoogleAnalytics: React.FC = () => {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+
+  if (!gaId || process.env.NODE_ENV !== "production") {
+    return null;
+  }
+
   return (
     <>
       <Script
         async
-        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
       />
       <Script
         id="gtag-init"
@@ -19,7 +25,7 @@ const GoogleAnalytics: React.FC = () => {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
+          gtag('config', '${gaId}');
         `,
         }}
       />

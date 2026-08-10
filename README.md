@@ -121,3 +121,5 @@ app/
 ## Acknowledgments
 
 ArchiPi builds on the foundational work of [react-planner](https://github.com/cvdlab/react-planner) by [CVDLAB](https://github.com/cvdlab) at Roma Tre University. The original project established the core concepts of the 2D/3D floor planning architecture, catalog system, and element model that ArchiPi extends and modernizes.
+
+Furniture models: [Kenney Furniture Kit](https://kenney.nl) (kenney.nl, CC0).
