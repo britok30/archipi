@@ -1,40 +1,63 @@
 "use client";
 
-import { BoxHelper, Box3, ObjectLoader } from "three";
-import { loadObjWithMaterial } from "../../utils/load-obj";
-import convert, { Unit } from "convert-units";
+import * as Three from "three";
+
 import React from "react";
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
-const mtl = "/mtl/bed.mtl";
-const obj = "/obj/bed.obj";
-
-const width = { length: 160, unit: "cm" };
-const depth = { length: 200, unit: "cm" };
-const height = { length: 60, unit: "cm" };
-
-let cachedJSONBed: any = null;
-
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "bed",
   prototype: "items",
 
   info: {
     title: "bed",
-    tag: ["furnishings", "bedroom"],
-    description: "Queen size bed",
+    tag: ["furnishings","bedroom"],
+    description: "Double bed",
     image: "/images/bed.png",
   },
 
   properties: {
-    size: {
-      label: "Size",
-      type: "string",
-      defaultValue: "queen",
-      values: ["twin", "full", "queen", "king"],
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 160,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 200,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 60,
+        unit: "cm",
+      },
+    },
+    altitude: {
+      label: "Altitude",
+      type: "length-measure",
+      defaultValue: {
+        length: 0,
+        unit: "cm",
+      },
     },
   },
 
   render2D: function (element: any, layer: any, scene: any) {
+    let newWidth = readItemLength(element.properties?.width, scene, 160);
+
+    let newDepth = readItemLength(element.properties?.depth, scene, 200);
+
     let angle = element.rotation + 90;
     let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
@@ -44,27 +67,52 @@ export default {
       fill: "#84e1ce",
     };
 
+    let arrowStyle = {
+      stroke: element.selected ? "#0096fd" : undefined,
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
+
     return (
-      <g transform={`translate(${-width.length / 2},${-depth.length / 2})`}>
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
         <rect
+          key="1"
           x="0"
           y="0"
-          width={width.length}
-          height={depth.length}
+          width={newWidth}
+          height={newDepth}
           style={style}
         />
-        <rect
-          x={width.length * 0.05}
-          y={-20}
-          width={width.length * 0.9}
-          height={20}
-          style={style}
+        <line
+          key="2"
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="3"
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="4"
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
+          key="5"
           x="0"
           y="0"
-          transform={`translate(${width.length / 2}, ${
-            depth.length / 2
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
           }) scale(1,-1) rotate(${textRotation})`}
           style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
@@ -75,53 +123,21 @@ export default {
   },
 
   render3D: async function (element: any, layer: any, scene: any) {
-    let onLoadItem = (object: any) => {
-      let newWidth = convert(width.length)
-        .from(width.unit as Unit)
-        .to(scene.unit);
-      let newHeight = convert(height.length)
-        .from(height.unit as Unit)
-        .to(scene.unit);
-      let newDepth = convert(depth.length)
-        .from(depth.unit as Unit)
-        .to(scene.unit);
+    const newWidth = readItemLength(element.properties?.width, scene, 160);
 
-      // Apply scale
-      object.scale.set(
-        newWidth / width.length,
-        newDepth / depth.length,
-        newHeight / height.length
-      );
+    const newDepth = readItemLength(element.properties?.depth, scene, 200);
 
-      // Apply rotation to lay flat
-      object.rotation.x = -Math.PI / 2;
+    const newHeight = readItemLength(element.properties?.height, scene, 60);
 
-      // Get bounding box
-      let boundingBox = new Box3().setFromObject(object);
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
-      // Calculate center for X and Z, but use bottom for Y
-      let center = {
-        x: (boundingBox.max.x + boundingBox.min.x) / 2,
-        z: (boundingBox.max.z + boundingBox.min.z) / 2,
-      };
-
-      // Position adjustment
-      object.position.set(-center.x, -boundingBox.min.y, -center.z);
-
-      return object;
-    };
-
-    if (cachedJSONBed) {
-      let loader = new ObjectLoader();
-      let object = loader.parse(cachedJSONBed);
-      return await Promise.resolve(onLoadItem(object));
-    }
-
-    return loadObjWithMaterial(mtl, obj).then((object: any) => {
-      cachedJSONBed = object.toJSON();
-      let loader = new ObjectLoader();
-      return onLoadItem(loader.parse(cachedJSONBed));
-    });
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/bed-double.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
   },
 
   updateRender3D: (

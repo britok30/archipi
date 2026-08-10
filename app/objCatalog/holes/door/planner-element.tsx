@@ -2,9 +2,7 @@
 
 import React from "react";
 import * as Three from "three";
-import { loadObjWithMaterial } from "../../utils/load-obj";
-
-let cached3DDoor: any = null;
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -15,7 +13,7 @@ export default {
     title: "door",
     tag: ["door"],
     description: "Door",
-    image: "/images/door.png",
+    image: "/images/doorway.png",
   },
 
   properties: {
@@ -171,46 +169,27 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let onLoadItem = (object: any) => {
-      let boundingBox = new Three.Box3().setFromObject(object);
+  render3D: async function (element: any, layer: any, scene: any) {
+    const width = element.properties?.width?.length ?? 100;
+    const height = element.properties?.height?.length ?? 215;
+    const thickness = element.properties?.thickness?.length ?? 30;
+    const hFlip = element.properties?.flip_horizontal;
+    const vFlip = element.properties?.flip_vertical;
 
-      let initialWidth = boundingBox.max.x - boundingBox.min.x;
-      let initialHeight = boundingBox.max.y - boundingBox.min.y;
-      let initialThickness = boundingBox.max.z - boundingBox.min.z;
+    // Kenney doorway.glb native bbox: 0.486 (X, door span) x 1.010 (Y, height)
+    // x 0.113 (Z, frame depth) — already oriented door-plane-across-width, so
+    // no rotation wrapper is needed; fit it straight into the wall cutout.
+    const model = await loadGlb("/models/doorway.glb");
+    fitGlbToBox(model, { width, height, depth: thickness });
 
-      if (element.selected) {
-        let box = new Three.BoxHelper(object, 0x99c3fb);
-        box.material.linewidth = 2;
-        box.material.depthTest = false;
-        box.renderOrder = 1000;
-        object.add(box);
-      }
+    // Mirror the hinge side for a vertical flip; fitGlbToBox centers the
+    // model on x/z = 0, so a wrapper mirror keeps it centered in the hole.
+    const holder = new Three.Object3D();
+    holder.add(model);
+    if (vFlip) holder.scale.x = -1;
+    if (hFlip) holder.rotation.y = Math.PI;
 
-      let width = element.properties?.width?.length;
-      let height = element.properties?.height?.length;
-      let thickness = element.properties?.thickness?.length;
-
-      object.scale.set(
-        width / initialWidth,
-        height / initialHeight,
-        thickness / initialThickness
-      );
-
-      return object;
-    };
-
-    if (cached3DDoor) {
-      return Promise.resolve(onLoadItem(cached3DDoor.clone()));
-    }
-
-    let mtl = "/mtl/door.mtl";
-    let obj = "/obj/door.obj";
-    let img = "/images/textures/door-texture.jpg";
-
-    return loadObjWithMaterial(mtl, obj, img).then((object: any) => {
-      cached3DDoor = object;
-      return onLoadItem(cached3DDoor.clone());
-    });
+    if (element.selected) addSelectionBox(holder);
+    return holder;
   },
 };

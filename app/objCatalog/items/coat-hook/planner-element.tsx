@@ -1,12 +1,10 @@
 "use client";
 
 import * as Three from "three";
-import React from "react";
-import { loadTexture } from "../../utils/load-texture";
 
-const WIDTH = 200;
-const DEPTH = 20;
-const HEIGHT = 40;
+import React from "react";
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -14,15 +12,39 @@ export default {
   prototype: "items",
 
   info: {
-    tag: ["furnishings", "optional"],
     title: "Coat hook",
-    description: "Coat hook",
+    tag: ["furnishings","decor"],
+    description: "Wall-mounted coat rack",
     image: "/images/coat-hook.png",
   },
 
   properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 60,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 15,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 40,
+        unit: "cm",
+      },
+    },
     altitude: {
-      label: "altitude",
+      label: "Altitude",
       type: "length-measure",
       defaultValue: {
         length: 120,
@@ -32,64 +54,65 @@ export default {
   },
 
   render2D: function (element: any, layer: any, scene: any) {
+    let newWidth = readItemLength(element.properties?.width, scene, 60);
+
+    let newDepth = readItemLength(element.properties?.depth, scene, 15);
+
     let angle = element.rotation + 90;
+    let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
-    let textRotation = 0;
-    if (Math.sin((angle * Math.PI) / 180) < 0) {
-      textRotation = 180;
-    }
-
-    let rect_style = {
+    let style = {
       stroke: element.selected ? "#0096fd" : "#000",
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
-    let arrow_style = {
+
+    let arrowStyle = {
       stroke: element.selected ? "#0096fd" : undefined,
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
 
     return (
-      <g transform={`translate(${-WIDTH / 2},${-DEPTH / 2})`}>
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
         <rect
           key="1"
           x="0"
           y="0"
-          width={WIDTH}
-          height={DEPTH}
-          style={rect_style}
+          width={newWidth}
+          height={newDepth}
+          style={style}
         />
         <line
           key="2"
-          x1={WIDTH / 2}
-          x2={WIDTH / 2}
-          y1={DEPTH}
-          y2={1.5 * DEPTH}
-          style={arrow_style}
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
           key="3"
-          x1={0.45 * WIDTH}
-          x2={WIDTH / 2}
-          y1={1.2 * DEPTH}
-          y2={1.5 * DEPTH}
-          style={arrow_style}
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
           key="4"
-          x1={WIDTH / 2}
-          x2={0.55 * WIDTH}
-          y1={1.5 * DEPTH}
-          y2={1.2 * DEPTH}
-          style={arrow_style}
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
           key="5"
           x="0"
           y="0"
-          transform={`translate(${WIDTH / 2}, ${
-            DEPTH / 2
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
           }) scale(1,-1) rotate(${textRotation})`}
           style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
@@ -99,105 +122,44 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let newAltitude = element.properties?.altitude?.length;
+  render3D: async function (element: any, layer: any, scene: any) {
+    const newWidth = readItemLength(element.properties?.width, scene, 60);
 
-    let coatHook = new Three.Object3D();
+    const newDepth = readItemLength(element.properties?.depth, scene, 15);
 
-    let newWidth = 2.15;
-    let newDepth = 0.04;
-    let newHeight = 0.1;
-    let radius = 0.0125;
+    const newHeight = readItemLength(element.properties?.height, scene, 40);
 
-    let texture = loadTexture("/images/textures/wood.jpg");
-    let materialTexture = new Three.MeshLambertMaterial({ ...(texture ? { map: texture } : {}) });
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 120);
 
-    let geometry = new Three.BoxGeometry(newWidth, 1.5 * newHeight, newDepth);
-    //let material = new Three.MeshLambertMaterial( {color: 0x9b8c75} );
-    let plane = new Three.Mesh(geometry, materialTexture);
-    plane.position.y = newHeight / 2;
-    coatHook.add(plane);
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/coat-rack.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
+  },
 
-    let geometry_legs = new Three.CylinderGeometry(
-      radius,
-      radius,
-      newHeight / 1.7,
-      32
-    );
-    let material_legs = new Three.MeshLambertMaterial({ color: 0xd9d7d7 });
-    let p1 = new Three.Mesh(geometry_legs, material_legs);
-    p1.rotation.x += Math.PI / 2;
-    p1.position.set(1, 0.05, 0.05);
-    coatHook.add(p1);
+  updateRender3D: (
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
+  ) => {
+    let noPerf = () => {
+      selfDestroy();
+      return selfBuild();
+    };
 
-    let p2 = new Three.Mesh(geometry_legs, material_legs);
-    p2.rotation.x += Math.PI / 2;
-    p2.position.set(-0.95, 0.05, 0.05);
-    coatHook.add(p2);
-
-    let geometrySphereUp = new Three.SphereGeometry(0.035, 32, 32);
-    let sphere = new Three.Mesh(geometrySphereUp, material_legs);
-    sphere.position.set(1, 0.05, 0.08);
-    sphere.scale.set(1, 1, 0.5);
-    coatHook.add(sphere);
-
-    let sphere2 = new Three.Mesh(geometrySphereUp, material_legs);
-    sphere2.position.set(-0.95, 0.05, 0.08);
-    sphere2.scale.set(1, 1, 0.5);
-    coatHook.add(sphere2);
-
-    let newHeight2 = 0.2;
-
-    let curve = new Three.CatmullRomCurve3([
-      new Three.Vector3(0.05, 0.125, 0),
-      new Three.Vector3(0.125, 0.025, 0),
-      new Three.Vector3(-0.05, -0.075, 0),
-    ]);
-
-    for (let i = -0.95; i <= 1.05; i += 0.15) {
-      let geometry_legs2 = new Three.CylinderGeometry(
-        radius,
-        radius,
-        newHeight2,
-        32
-      );
-      let p3 = new Three.Mesh(geometry_legs2, material_legs);
-      p3.position.set(i, -0.05, 0);
-      coatHook.add(p3);
-
-      let geometry3 = new Three.TubeGeometry(curve, 32, 0.015, 16, false);
-      let mesh3 = new Three.Mesh(geometry3, material_legs);
-      mesh3.position.set(i, -0.05, 0.045);
-      mesh3.rotation.y -= Math.PI / 2;
-      mesh3.rotation.x += Math.PI + Math.PI / 7.5;
-      mesh3.rotation.z += Math.PI / 2;
-      coatHook.add(mesh3);
-
-      let geometrySphere = new Three.SphereGeometry(0.035, 32, 32);
-      let sphereTop = new Three.Mesh(geometrySphere, material_legs);
-      sphereTop.position.set(i, -0.142, 0.15);
-      sphereTop.rotation.x += Math.PI / 2 + Math.PI / 3;
-      coatHook.add(sphereTop);
+    if (differences.indexOf("rotation") !== -1) {
+      mesh.rotation.y = (element.rotation * Math.PI) / 180;
+      return Promise.resolve(mesh);
     }
 
-    let value = new Three.Box3().setFromObject(coatHook);
-
-    let deltaX = Math.abs(value.max.x - value.min.x);
-    let deltaY = Math.abs(value.max.y - value.min.y);
-    let deltaZ = Math.abs(value.max.z - value.min.z);
-
-    if (element.selected) {
-      let bbox = new Three.BoxHelper(coatHook, 0x99c3fb);
-      bbox.material.linewidth = 5;
-      bbox.renderOrder = 1000;
-      bbox.material.depthTest = false;
-      coatHook.add(bbox);
-    }
-
-    coatHook.rotation.y += Math.PI;
-    coatHook.position.y += HEIGHT / 1.5 + newAltitude;
-    coatHook.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
-
-    return Promise.resolve(coatHook);
+    return noPerf();
   },
 };

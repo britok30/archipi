@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as Three from "three";
-import path from "path";
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -13,7 +13,7 @@ export default {
     tag: ["gate"],
     title: "gate",
     description: "hole in the wall",
-    image: "/images/gate.jpg",
+    image: "/images/doorway-open.png",
   },
 
   properties: {
@@ -107,8 +107,20 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let object = new Three.Object3D();
-    return Promise.resolve(object);
+  render3D: async function (element: any, layer: any, scene: any) {
+    const width = element.properties?.width?.length ?? 80;
+    const height = element.properties?.height?.length ?? 215;
+    const thickness = element.properties?.thickness?.length ?? 30;
+
+    // Kenney doorwayOpen.glb native bbox: 0.486 (X, door span) x 1.010 (Y)
+    // x 0.089 (Z) — door plane already spans the width axis, no rotation
+    // wrapper needed. The gate previously rendered nothing in 3D.
+    const holder = new Three.Object3D();
+    const model = await loadGlb("/models/doorway-open.glb");
+    fitGlbToBox(model, { width, height, depth: thickness });
+    holder.add(model);
+
+    if (element.selected) addSelectionBox(holder);
+    return holder;
   },
 };

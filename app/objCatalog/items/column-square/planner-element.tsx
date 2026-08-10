@@ -1,92 +1,100 @@
 "use client";
 
-import * as Three from 'three';
-import React from 'react';
+import * as Three from "three";
+import React from "react";
+import { readItemLength } from "../../utils/read-length";
 
-const material = new Three.MeshLambertMaterial({color: 0xf5f4f4});
+const material = new Three.MeshLambertMaterial({ color: 0xf5f4f4 });
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  name: 'square column',
-  prototype: 'items',
+  name: "column-square",
+  prototype: "items",
 
   info: {
-    tag: ['structure'],
-    title: 'square column',
-    description: 'column',
-    image: require('./square_column.png')
+    tag: ["structure"],
+    title: "square column",
+    description: "Square structural column",
+    image: "/images/column-square.png",
   },
 
   properties: {
     altitude: {
-      label: 'altitude',
-      type: 'length-measure',
+      label: "altitude",
+      type: "length-measure",
       defaultValue: {
         length: 0,
-        unit: 'cm'
-      }
+        unit: "cm",
+      },
     },
-    height:{
-      label: 'height',
-      type: 'length-measure',
+    height: {
+      label: "height",
+      type: "length-measure",
       defaultValue: {
         length: 300,
-        unit: 'cm'
-      }
+        unit: "cm",
+      },
     },
-    width:{
-      label: 'width',
-      type: 'length-measure',
+    width: {
+      label: "width",
+      type: "length-measure",
       defaultValue: {
         length: 50,
-        unit: 'cm'
-      }
+        unit: "cm",
+      },
     },
-    depth:{
-      label: 'depth',
-      type: 'length-measure',
+    depth: {
+      label: "depth",
+      type: "length-measure",
       defaultValue: {
         length: 50,
-        unit: 'cm'
-      }
-    }
+        unit: "cm",
+      },
+    },
   },
 
   render2D: function (element: any, layer: any, scene: any) {
-
-    let width = element.properties?.width?.length;
-    let depth = element.properties?.depth?.length;
+    let width = readItemLength(element.properties?.width, scene, 50);
+    let depth = readItemLength(element.properties?.depth, scene, 50);
 
     let angle = element.rotation + 90;
 
     let textRotation = 0;
-    if (Math.sin(angle * Math.PI / 180) < 0) {
+    if (Math.sin((angle * Math.PI) / 180) < 0) {
       textRotation = 180;
     }
 
-    let circleStyle = {stroke: element.selected ? '#0096fd' : '#000', strokeWidth: '2px', fill: '#84e1ce'};
+    let rectStyle = {
+      stroke: element.selected ? "#0096fd" : "#000",
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
 
     return (
       <g transform={`translate(${-width / 2},${-depth / 2})`}>
-        <rect key='1' x='0' y='0' width={width} height={depth} style={circleStyle}/>
-        <text key='2' x='0' y='0' transform={`translate(${width / 2}, ${depth / 2}) scale(1,-1) rotate(${textRotation})`}
-              style={{textAnchor: 'middle' as const, fontSize: '11px'}}>
+        <rect key="1" x="0" y="0" width={width} height={depth} style={rectStyle} />
+        <text
+          key="2"
+          x="0"
+          y="0"
+          transform={`translate(${width / 2}, ${depth / 2}) scale(1,-1) rotate(${textRotation})`}
+          style={{ textAnchor: "middle" as const, fontSize: "11px" }}
+        >
           {element.type}
         </text>
       </g>
-    )
+    );
   },
 
-
   render3D: function (element: any, layer: any, scene: any) {
-
-    let HEIGHT = element.properties?.height?.length;
-    let width = element.properties?.width?.length;
-    let depth = element.properties?.depth?.length;
-    let newAltitude = element.properties?.altitude?.length;
+    let HEIGHT = readItemLength(element.properties?.height, scene, 300);
+    let width = readItemLength(element.properties?.width, scene, 50);
+    let depth = readItemLength(element.properties?.depth, scene, 50);
+    let newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
     let column = new Three.Object3D();
 
-    let object = new Three.Mesh(new Three.BoxGeometry(width,HEIGHT,depth, 32), material);
+    let object = new Three.Mesh(new Three.BoxGeometry(width, HEIGHT, depth), material);
 
     column.add(object);
 
@@ -99,10 +107,7 @@ export default {
     }
 
     column.position.y += HEIGHT / 2 + newAltitude;
-    column.position.x += width / 2;
-
 
     return Promise.resolve(column);
-
-  }
+  },
 };

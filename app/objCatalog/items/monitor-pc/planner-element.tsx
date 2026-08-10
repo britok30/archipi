@@ -1,161 +1,50 @@
 "use client";
 
 import * as Three from "three";
+
 import React from "react";
-import { loadTexture } from "../../utils/load-texture";
-
-const WIDTH = 50;
-const DEPTH = 50;
-const HEIGHT = 50;
-const power = loadTexture("/images/textures/pc-power.jpg");
-const black = loadTexture("/images/textures/pc-black.jpg");
-const white = loadTexture("/images/textures/pc-white.jpg");
-const keyboard = loadTexture("/images/textures/keyboard.jpg");
-
-const blackMaterial = new Three.MeshBasicMaterial({ ...(black ? { map: black } : {}) });
-
-const objectMaxLOD = makeObjectMaxLOD();
-const objectMinLOD = makeObjectMinLOD();
-
-function makeObjectMaxLOD() {
-  let monitorPC = new Three.Mesh();
-
-  let cubeGeometryBase = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let whiteMaterial = new Three.MeshBasicMaterial({ ...(white ? { map: white } : {}) });
-  let edge_p0 = new Three.Mesh(cubeGeometryBase, whiteMaterial);
-  edge_p0.position.set(0, 0.79, 0);
-  edge_p0.rotation.x = Math.PI / 2;
-  monitorPC.add(edge_p0);
-
-  let cubeGeometryBase2 = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let edge_p1 = new Three.Mesh(cubeGeometryBase2, whiteMaterial);
-  edge_p1.position.set(0, 0.43, 0);
-  edge_p1.rotation.x = Math.PI / 2;
-  monitorPC.add(edge_p1);
-
-  let cubeGeometryBase3 = new Three.BoxGeometry(0.04, 0.42, 0.04);
-  let edge_p3 = new Three.Mesh(cubeGeometryBase3, whiteMaterial);
-  edge_p3.position.set(0, 0.61, 0.21);
-  monitorPC.add(edge_p3);
-
-  let cubeGeometryBase4 = new Three.BoxGeometry(0.04, 0.42, 0.04);
-  let edge_p4 = new Three.Mesh(cubeGeometryBase4, whiteMaterial);
-  edge_p4.position.set(0, 0.61, -0.21);
-  monitorPC.add(edge_p4);
-
-  let cubeGeometryBase5 = new Three.BoxGeometry(0.4, 0.4, 0.05);
-  let back = new Three.Mesh(cubeGeometryBase5, blackMaterial);
-  back.position.set(-0.02, 0.61, 0);
-  back.rotation.y = Math.PI / 2;
-  monitorPC.add(back);
-
-  let powerGeometry = new Three.BoxGeometry(0.01, 0.02, 0.02);
-  let powerMaterial = new Three.MeshBasicMaterial({ ...(power ? { map: power } : {}) });
-  let powerButton = new Three.Mesh(powerGeometry, powerMaterial);
-  powerButton.position.set(0.0155, 0.43, 0);
-  monitorPC.add(powerButton);
-
-  let cylinderGeometry1 = new Three.CylinderGeometry(0.02, 0.02, 0.06, 32, 32);
-  let base_p1 = new Three.Mesh(cylinderGeometry1, blackMaterial);
-  base_p1.position.set(0, 0.38, 0);
-  monitorPC.add(base_p1);
-
-  let geometry = new Three.CylinderGeometry(0.1, 0.1, 0.02, 32, 32);
-  let material = new Three.MeshBasicMaterial({ ...(black ? { map: black } : {}) });
-  let base_p2 = new Three.Mesh(geometry, material);
-  base_p2.scale.set(0.8, 1, 1);
-  base_p2.position.set(0, 0.36, 0);
-  monitorPC.add(base_p2);
-
-  //keyboard
-  let cubeGeometryBase8 = new Three.BoxGeometry(0.4, 0.02, 0.2);
-
-  let boxMaterials = [
-    new Three.MeshBasicMaterial({ color: 0x000000 }),
-    new Three.MeshBasicMaterial({ color: 0x000000 }),
-    new Three.MeshBasicMaterial({ ...(keyboard ? { map: keyboard } : { color: 0x000000 }) }),
-    new Three.MeshBasicMaterial({ color: 0x000000 }),
-    new Three.MeshBasicMaterial({ color: 0x000000 }),
-    new Three.MeshBasicMaterial({ color: 0x000000 }),
-  ];
-
-  let keyboardMesh = new Three.Mesh(cubeGeometryBase8, boxMaterials);
-  keyboardMesh.position.set(0.3, 0.36, 0);
-  keyboardMesh.rotation.y = Math.PI / 2;
-  monitorPC.add(keyboardMesh);
-
-  return monitorPC;
-}
-
-function makeObjectMinLOD() {
-  let monitorPC = new Three.Mesh();
-
-  let cubeGeometryBase = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let whiteMaterial = new Three.MeshBasicMaterial({ ...(white ? { map: white } : {}) });
-  let edge_p0 = new Three.Mesh(cubeGeometryBase, whiteMaterial);
-  edge_p0.position.set(0, 0.79, 0);
-  edge_p0.rotation.x = Math.PI / 2;
-  monitorPC.add(edge_p0);
-
-  let cubeGeometryBase2 = new Three.BoxGeometry(0.04, 0.42, 0.06);
-  let edge_p1 = new Three.Mesh(cubeGeometryBase2, whiteMaterial);
-  edge_p1.position.set(0, 0.43, 0);
-  edge_p1.rotation.x = Math.PI / 2;
-  monitorPC.add(edge_p1);
-
-  let cubeGeometryBase3 = new Three.BoxGeometry(0.04, 0.42, 0.04);
-  let edge_p3 = new Three.Mesh(cubeGeometryBase3, whiteMaterial);
-  edge_p3.position.set(0, 0.61, 0.21);
-  monitorPC.add(edge_p3);
-
-  let cubeGeometryBase4 = new Three.BoxGeometry(0.04, 0.42, 0.04);
-  let edge_p4 = new Three.Mesh(cubeGeometryBase4, whiteMaterial);
-  edge_p4.position.set(0, 0.61, -0.21);
-  monitorPC.add(edge_p4);
-
-  let cubeGeometryBase5 = new Three.BoxGeometry(0.4, 0.4, 0.05);
-  let blackMaterial = new Three.MeshBasicMaterial({ ...(black ? { map: black } : {}) });
-  let back = new Three.Mesh(cubeGeometryBase5, blackMaterial);
-  back.position.set(-0.02, 0.61, 0);
-  back.rotation.y = Math.PI / 2;
-  monitorPC.add(back);
-
-  let cylinderGeometry1 = new Three.CylinderGeometry(0.02, 0.02, 0.06, 8, 8);
-  let base_p1 = new Three.Mesh(cylinderGeometry1, blackMaterial);
-  base_p1.position.set(0, 0.38, 0);
-  monitorPC.add(base_p1);
-
-  let geometry = new Three.CylinderGeometry(0.1, 0.1, 0.02, 8, 8);
-  let base_p2 = new Three.Mesh(geometry, blackMaterial);
-  base_p2.scale.set(0.8, 1, 1);
-  base_p2.position.set(0, 0.36, 0);
-  monitorPC.add(base_p2);
-
-  //keyboard
-  let cubeGeometryBase8 = new Three.BoxGeometry(0.4, 0.02, 0.2);
-  let keyboardMesh = new Three.Mesh(cubeGeometryBase8, blackMaterial);
-  keyboardMesh.position.set(0.3, 0.36, 0);
-  keyboardMesh.rotation.y = Math.PI / 2;
-  monitorPC.add(keyboardMesh);
-
-  return monitorPC;
-}
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  name: "monitor_pc",
+  name: "monitor-pc",
   prototype: "items",
 
   info: {
-    tag: ["furnishings"],
-    title: "pc monitor",
-    description: "pc monitor",
+    title: "monitor PC",
+    tag: ["furnishings","office"],
+    description: "Computer monitor",
     image: "/images/monitor-pc.png",
   },
 
   properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 55,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 20,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 40,
+        unit: "cm",
+      },
+    },
     altitude: {
-      label: "altitude",
+      label: "Altitude",
       type: "length-measure",
       defaultValue: {
         length: 100,
@@ -165,35 +54,67 @@ export default {
   },
 
   render2D: function (element: any, layer: any, scene: any) {
-    let angle = element.rotation + 90;
+    let newWidth = readItemLength(element.properties?.width, scene, 55);
 
-    let textRotation = 0;
-    if (Math.sin((angle * Math.PI) / 180) < 0) {
-      textRotation = 180;
-    }
+    let newDepth = readItemLength(element.properties?.depth, scene, 20);
+
+    let angle = element.rotation + 90;
+    let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
+
+    let style = {
+      stroke: element.selected ? "#0096fd" : "#000",
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
+
+    let arrowStyle = {
+      stroke: element.selected ? "#0096fd" : undefined,
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
 
     return (
-      <g transform={`translate(${-WIDTH / 2},${-DEPTH})`}>
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
         <rect
           key="1"
           x="0"
           y="0"
-          width={WIDTH}
-          height={DEPTH}
-          style={{
-            stroke: element.selected ? "#0096fd" : "#000",
-            strokeWidth: "2px",
-            fill: "#84e1ce",
-          }}
+          width={newWidth}
+          height={newDepth}
+          style={style}
+        />
+        <line
+          key="2"
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="3"
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="4"
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
-          key="2"
+          key="5"
           x="0"
           y="0"
-          transform={`translate(${WIDTH / 2}, ${
-            DEPTH / 2
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
           }) scale(1,-1) rotate(${textRotation})`}
-          style={{ textAnchor: "middle" as const, fontSize: "10px" }}
+          style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
           {element.type}
         </text>
@@ -201,51 +122,44 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let newAltitude = element.properties?.altitude?.length;
+  render3D: async function (element: any, layer: any, scene: any) {
+    const newWidth = readItemLength(element.properties?.width, scene, 55);
 
-    /**************** LOD max ***********************/
+    const newDepth = readItemLength(element.properties?.depth, scene, 20);
 
-    let monitorPC_MaxLOD = new Three.Object3D();
-    monitorPC_MaxLOD.add(objectMaxLOD.clone());
+    const newHeight = readItemLength(element.properties?.height, scene, 40);
 
-    let aa = new Three.Box3().setFromObject(monitorPC_MaxLOD);
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 100);
 
-    let deltaX = Math.abs(aa.max.x - aa.min.x);
-    let deltaY = Math.abs(aa.max.y - aa.min.y);
-    let deltaZ = Math.abs(aa.max.z - aa.min.z);
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/computer-screen.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
+  },
 
-    monitorPC_MaxLOD.rotation.y += -Math.PI / 2;
-    monitorPC_MaxLOD.position.y += -HEIGHT * 0.75 + newAltitude;
-    monitorPC_MaxLOD.scale.set(WIDTH / deltaZ, HEIGHT / deltaY, DEPTH / deltaX);
+  updateRender3D: (
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
+  ) => {
+    let noPerf = () => {
+      selfDestroy();
+      return selfBuild();
+    };
 
-    /**************** LOD min ***********************/
-
-    let monitorPC_MinLOD = new Three.Object3D();
-
-    monitorPC_MinLOD.add(objectMinLOD.clone());
-
-    monitorPC_MinLOD.rotation.y += -Math.PI / 2;
-    monitorPC_MinLOD.position.y += -HEIGHT * 0.75 + newAltitude;
-    monitorPC_MinLOD.scale.set(WIDTH / deltaZ, HEIGHT / deltaY, DEPTH / deltaX);
-
-    /*** add all Level of Detail ***/
-
-    let lod = new Three.LOD();
-
-    lod.addLevel(monitorPC_MaxLOD, 300);
-    lod.addLevel(monitorPC_MinLOD, 700);
-    lod.updateMatrix();
-    lod.matrixAutoUpdate = false;
-
-    if (element.selected) {
-      let bbox = new Three.BoxHelper(lod, 0x99c3fb);
-      bbox.material.linewidth = 5;
-      bbox.renderOrder = 1000;
-      bbox.material.depthTest = false;
-      lod.add(bbox);
+    if (differences.indexOf("rotation") !== -1) {
+      mesh.rotation.y = (element.rotation * Math.PI) / 180;
+      return Promise.resolve(mesh);
     }
 
-    return Promise.resolve(lod);
+    return noPerf();
   },
 };

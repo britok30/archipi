@@ -3,6 +3,7 @@
 import * as Three from "three";
 import React from "react";
 import { loadTexture } from "../../utils/load-texture";
+import { readItemLength } from "../../utils/read-length";
 
 const copperTexture = loadTexture("/images/textures/copper.jpg");
 const frameMaterial = new Three.MeshLambertMaterial({ ...(copperTexture ? { map: copperTexture } : {}) });
@@ -96,7 +97,7 @@ function makeObjectMinLOD(RADIUS: any, HEIGHT: any) {
 }
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  name: "round column",
+  name: "column",
   prototype: "items",
 
   info: {
@@ -134,7 +135,7 @@ export default {
   },
 
   render2D: function (element: any, layer: any, scene: any) {
-    let RADIUS = element.properties?.radius?.length;
+    let RADIUS = readItemLength(element.properties?.radius, scene, 20);
     let angle = element.rotation + 90;
 
     let textRotation = 0;
@@ -165,9 +166,9 @@ export default {
   },
 
   render3D: function (element: any, layer: any, scene: any) {
-    let HEIGHT = element.properties?.height?.length;
-    let RADIUS = element.properties?.radius?.length;
-    let newAltitude = element.properties?.altitude?.length;
+    let HEIGHT = readItemLength(element.properties?.height, scene, 300);
+    let RADIUS = readItemLength(element.properties?.radius, scene, 20);
+    let newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
     /**************** LOD max ***********************/
 

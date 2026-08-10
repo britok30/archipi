@@ -5,6 +5,7 @@ import React from "react";
 import { HELVETIKER } from "./helvetiker_regular.typeface";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { readItemLength } from "../../utils/read-length";
 
 const fontLoader = new FontLoader();
 const font = fontLoader.parse(HELVETIKER);
@@ -14,7 +15,7 @@ const defaultColor = "#000000";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  name: "text",
+  name: "text-3d",
   prototype: "items",
 
   info: {
@@ -106,7 +107,7 @@ export default {
       mesh.add(box);
     }
 
-    mesh.position.y += element.properties?.altitude?.length;
+    mesh.position.y += readItemLength(element.properties?.altitude, scene, 0);
     mesh.position.x -= width / 2;
 
     return Promise.resolve(mesh);

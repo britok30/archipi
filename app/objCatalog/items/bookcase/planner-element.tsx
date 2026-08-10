@@ -1,128 +1,10 @@
 "use client";
 
 import * as Three from "three";
+
 import React from "react";
-import { loadTexture } from "../../utils/load-texture";
-
-const WIDTH = 80;
-const DEPTH = 80;
-const HEIGHT = 200;
-const woodMaterial = loadTexture("/images/textures/wood.jpg");
-const bookTexture1 = loadTexture("/images/textures/bookTexture1.jpg");
-const bookTexture2 = loadTexture("/images/textures/bookTexture2.jpg");
-const bookTexture3 = loadTexture("/images/textures/bookTexture3.jpg");
-
-const objectMaxLOD = makeObjectMaxLOD();
-const objectMinLOD = makeObjectMinLOD();
-
-function makeObjectMaxLOD() {
-  let bookcase = new Three.Mesh();
-
-  //Bookcase
-  let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
-  let wood = woodMaterial
-    ? new Three.MeshStandardMaterial({ map: woodMaterial })
-    : new Three.MeshStandardMaterial({ color: 0x8b6914 });
-  let backside = new Three.Mesh(backGeometry, wood);
-  backside.position.set(0, 1, 0);
-  bookcase.add(backside);
-
-  let sideGeometry = new Three.BoxGeometry(0.3, 2, 0.03);
-  let side1 = new Three.Mesh(sideGeometry, wood);
-  side1.position.set(0.15, 1, 0.4);
-  bookcase.add(side1);
-
-  let side2 = new Three.Mesh(sideGeometry, wood);
-  side2.position.set(0.15, 1, -0.4);
-  bookcase.add(side2);
-
-  let bottomGeometry = new Three.BoxGeometry(0.3, 0.03, 0.8);
-  let bottomPanel = new Three.Mesh(bottomGeometry, wood);
-  bottomPanel.position.set(0.15, 2, 0);
-  bookcase.add(bottomPanel);
-
-  let topGeometry = new Three.BoxGeometry(0.3, 0.03, 0.8);
-  let topPanel = new Three.Mesh(topGeometry, wood);
-  topPanel.position.set(0.15, 0.015, 0);
-  bookcase.add(topPanel);
-
-  //shelves
-  for (let i = 1; i < 5; i++) {
-    let shelveGeometry = new Three.BoxGeometry(0.3, 0.03, 0.8);
-    let shelve = new Three.Mesh(shelveGeometry, wood);
-    shelve.position.set(0.15, 0.015 + i * 0.4, 0);
-    bookcase.add(shelve);
-  }
-
-  function choiceTexture() {
-    return Math.floor(Math.random() * 3);
-  }
-
-  //book
-  let bookGeometry = new Three.BoxGeometry(0.24, 0.32, 0.76);
-  let bookMaterial: any;
-
-  if (bookTexture1 && bookTexture2 && bookTexture3) {
-    bookMaterial = [
-      new Three.MeshStandardMaterial({ map: bookTexture1 }),
-      new Three.MeshStandardMaterial({ map: bookTexture2 }),
-      new Three.MeshStandardMaterial({ map: bookTexture3 }),
-    ];
-  }
-
-  if (bookMaterial) {
-    const bookPositions = [0.19, 0.59, 0.99, 1.39, 1.79];
-    for (const yPos of bookPositions) {
-      let book = new Three.Mesh(bookGeometry, bookMaterial[choiceTexture()]);
-      book.position.set(0.15, yPos, 0);
-      bookcase.add(book);
-    }
-  }
-
-  return bookcase;
-}
-
-function makeObjectMinLOD() {
-  let bookcase = new Three.Mesh();
-
-  //Bookcase
-  let backGeometry = new Three.BoxGeometry(0.03, 2, 0.8);
-  let wood = woodMaterial
-    ? new Three.MeshStandardMaterial({ map: woodMaterial })
-    : new Three.MeshStandardMaterial({ color: 0x8b6914 });
-  let backside = new Three.Mesh(backGeometry, wood);
-  backside.position.set(0, 1, 0);
-  bookcase.add(backside);
-
-  let sideGeometry = new Three.BoxGeometry(0.3, 2, 0.03);
-  let side1 = new Three.Mesh(sideGeometry, wood);
-  side1.position.set(0.15, 1, 0.4);
-  bookcase.add(side1);
-
-  let side2 = new Three.Mesh(sideGeometry, wood);
-  side2.position.set(0.15, 1, -0.4);
-  bookcase.add(side2);
-
-  let bottomGeometry = new Three.BoxGeometry(0.3, 0.03, 0.8);
-  let bottomPanel = new Three.Mesh(bottomGeometry, wood);
-  bottomPanel.position.set(0.15, 2, 0);
-  bookcase.add(bottomPanel);
-
-  let topGeometry = new Three.BoxGeometry(0.3, 0.03, 0.8);
-  let topPanel = new Three.Mesh(topGeometry, wood);
-  topPanel.position.set(0.15, 0.015, 0);
-  bookcase.add(topPanel);
-
-  //shelves
-  for (let i = 1; i < 5; i++) {
-    let shelveGeometry = new Three.BoxGeometry(0.3, 0.03, 0.8);
-    let shelve = new Three.Mesh(shelveGeometry, wood);
-    shelve.position.set(0.15, 0.015 + i * 0.4, 0);
-    bookcase.add(shelve);
-  }
-
-  return bookcase;
-}
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -130,15 +12,39 @@ export default {
   prototype: "items",
 
   info: {
-    tag: ["furnishings", "wood"],
     title: "bookcase",
-    description: "bookcase",
+    tag: ["furnishings","living","office"],
+    description: "Open bookcase",
     image: "/images/bookcase.png",
   },
 
   properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 80,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 30,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 180,
+        unit: "cm",
+      },
+    },
     altitude: {
-      label: "altitude",
+      label: "Altitude",
       type: "length-measure",
       defaultValue: {
         length: 0,
@@ -148,35 +54,65 @@ export default {
   },
 
   render2D: function (element: any, layer: any, scene: any) {
+    let newWidth = readItemLength(element.properties?.width, scene, 80);
+
+    let newDepth = readItemLength(element.properties?.depth, scene, 30);
+
     let angle = element.rotation + 90;
+    let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
-    let textRotation = 0;
-    if (Math.sin((angle * Math.PI) / 180) < 0) {
-      textRotation = 180;
-    }
-
-    let rect_style = {
+    let style = {
       stroke: element.selected ? "#0096fd" : "#000",
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
 
+    let arrowStyle = {
+      stroke: element.selected ? "#0096fd" : undefined,
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
+
     return (
-      <g transform={`translate(${-WIDTH / 2},${-DEPTH / 2})`}>
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
         <rect
           key="1"
           x="0"
           y="0"
-          width={WIDTH}
-          height={DEPTH}
-          style={rect_style}
+          width={newWidth}
+          height={newDepth}
+          style={style}
+        />
+        <line
+          key="2"
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="3"
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="4"
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
-          key="2"
+          key="5"
           x="0"
           y="0"
-          transform={`translate(${WIDTH / 2}, ${
-            DEPTH / 2
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
           }) scale(1,-1) rotate(${textRotation})`}
           style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
@@ -186,51 +122,44 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let newAltitude = element.properties?.altitude?.length;
+  render3D: async function (element: any, layer: any, scene: any) {
+    const newWidth = readItemLength(element.properties?.width, scene, 80);
 
-    /**************** lod max ******************/
+    const newDepth = readItemLength(element.properties?.depth, scene, 30);
 
-    let bookcaseMaxLOD = new Three.Object3D();
-    bookcaseMaxLOD.add(objectMaxLOD.clone());
+    const newHeight = readItemLength(element.properties?.height, scene, 180);
 
-    let value = new Three.Box3().setFromObject(bookcaseMaxLOD);
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
-    let deltaX = Math.abs(value.max.x - value.min.x);
-    let deltaY = Math.abs(value.max.y - value.min.y);
-    let deltaZ = Math.abs(value.max.z - value.min.z);
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/bookcase-open.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
+  },
 
-    bookcaseMaxLOD.rotation.y += Math.PI / 2;
-    bookcaseMaxLOD.position.y += newAltitude;
-    bookcaseMaxLOD.position.z += WIDTH / 2;
-    bookcaseMaxLOD.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
+  updateRender3D: (
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
+  ) => {
+    let noPerf = () => {
+      selfDestroy();
+      return selfBuild();
+    };
 
-    /**************** lod min ******************/
-
-    let bookcaseMinLOD = new Three.Object3D();
-    bookcaseMinLOD.add(objectMinLOD.clone());
-    bookcaseMinLOD.rotation.y += Math.PI / 2;
-    bookcaseMinLOD.position.y += newAltitude;
-    bookcaseMinLOD.position.z += WIDTH / 2;
-    bookcaseMinLOD.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
-
-    /**** all level of detail ***/
-
-    let lod = new Three.LOD();
-
-    lod.addLevel(bookcaseMaxLOD, 200);
-    lod.addLevel(bookcaseMinLOD, 900);
-    lod.updateMatrix();
-    lod.matrixAutoUpdate = false;
-
-    if (element.selected) {
-      let bbox = new Three.BoxHelper(lod, 0x99c3fb);
-      bbox.material.linewidth = 5;
-      bbox.renderOrder = 1000;
-      bbox.material.depthTest = false;
-      lod.add(bbox);
+    if (differences.indexOf("rotation") !== -1) {
+      mesh.rotation.y = (element.rotation * Math.PI) / 180;
+      return Promise.resolve(mesh);
     }
 
-    return Promise.resolve(lod);
+    return noPerf();
   },
 };

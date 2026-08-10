@@ -1,10 +1,10 @@
 "use client";
 
 import * as Three from "three";
-import React from "react";
 
-const RADIUS = 20;
-const HEIGHT = 40;
+import React from "react";
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -12,15 +12,39 @@ export default {
   prototype: "items",
 
   info: {
-    tag: ["furnishings"],
-    title: "Trash",
-    description: "Trash",
+    title: "trash can",
+    tag: ["furnishings","kitchen","decor"],
+    description: "Trash can",
     image: "/images/trash.png",
   },
 
   properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 40,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 40,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 60,
+        unit: "cm",
+      },
+    },
     altitude: {
-      label: "altitude",
+      label: "Altitude",
       type: "length-measure",
       defaultValue: {
         length: 0,
@@ -30,56 +54,66 @@ export default {
   },
 
   render2D: function (element: any, layer: any, scene: any) {
+    let newWidth = readItemLength(element.properties?.width, scene, 40);
+
+    let newDepth = readItemLength(element.properties?.depth, scene, 40);
+
     let angle = element.rotation + 90;
+    let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
-    let textRotation = 0;
-    if (Math.sin((angle * Math.PI) / 180) < 0) {
-      textRotation = 180;
-    }
-
-    let circleStyle = {
+    let style = {
       stroke: element.selected ? "#0096fd" : "#000",
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
-    let arrow_style = {
+
+    let arrowStyle = {
       stroke: element.selected ? "#0096fd" : undefined,
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
 
     return (
-      <g>
-        <circle key="1" cx="0" cy="0" r={RADIUS} style={circleStyle} />
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
+        <rect
+          key="1"
+          x="0"
+          y="0"
+          width={newWidth}
+          height={newDepth}
+          style={style}
+        />
         <line
           key="2"
-          x1={0}
-          x2={0}
-          y1={RADIUS}
-          y2={1.5 * RADIUS}
-          style={arrow_style}
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
           key="3"
-          x1={-RADIUS / 2 + 0.25 * RADIUS}
-          x2={-RADIUS / 2 + RADIUS / 2}
-          y1={1.2 * RADIUS}
-          y2={1.5 * RADIUS}
-          style={arrow_style}
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
           key="4"
-          x1={0}
-          x2={-RADIUS / 2 + 0.75 * RADIUS}
-          y1={1.5 * RADIUS}
-          y2={1.2 * RADIUS}
-          style={arrow_style}
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
           key="5"
-          cx="0"
-          cy="0"
-          transform={`scale(1,-1) rotate(${textRotation})`}
+          x="0"
+          y="0"
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
+          }) scale(1,-1) rotate(${textRotation})`}
           style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
           {element.type}
@@ -88,51 +122,44 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let newAltitude = element.properties?.altitude?.length;
+  render3D: async function (element: any, layer: any, scene: any) {
+    const newWidth = readItemLength(element.properties?.width, scene, 40);
 
-    var grey = new Three.MeshLambertMaterial({ color: 0xdddddd });
-    grey.side = Three.DoubleSide;
+    const newDepth = readItemLength(element.properties?.depth, scene, 40);
 
-    var cestino = new Three.Object3D();
+    const newHeight = readItemLength(element.properties?.height, scene, 60);
 
-    var cylinderGeometry1 = new Three.CylinderGeometry(0.25, 0.25, 0.0001, 80);
-    var p1 = new Three.Mesh(cylinderGeometry1, grey);
-    cestino.add(p1);
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
-    var cylinderGeometry2 = new Three.CylinderGeometry(
-      0.3,
-      0.25,
-      0.002,
-      80,
-      80,
-      true
-    );
-    var p2 = new Three.Mesh(cylinderGeometry2, grey);
-    p2.position.set(0, 0.001, 0);
-    p1.add(p2);
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/trashcan.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
+  },
 
-    let value = new Three.Box3().setFromObject(cestino);
+  updateRender3D: (
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
+  ) => {
+    let noPerf = () => {
+      selfDestroy();
+      return selfBuild();
+    };
 
-    let deltaX = Math.abs(value.max.x - value.min.x);
-    let deltaY = Math.abs(value.max.y - value.min.y);
-    let deltaZ = Math.abs(value.max.z - value.min.z);
-
-    if (element.selected) {
-      let bbox = new Three.BoxHelper(cestino, 0x99c3fb);
-      bbox.material.linewidth = 5;
-      bbox.renderOrder = 1000;
-      bbox.material.depthTest = false;
-      cestino.add(bbox);
+    if (differences.indexOf("rotation") !== -1) {
+      mesh.rotation.y = (element.rotation * Math.PI) / 180;
+      return Promise.resolve(mesh);
     }
 
-    cestino.position.y += HEIGHT / 16 + newAltitude;
-    cestino.scale.set(
-      (1.5 * RADIUS) / deltaX,
-      HEIGHT / deltaY,
-      (1.5 * RADIUS) / deltaZ
-    );
-
-    return Promise.resolve(cestino);
+    return noPerf();
   },
 };

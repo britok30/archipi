@@ -1,256 +1,50 @@
 "use client";
 
 import * as Three from "three";
+
 import React from "react";
-import { loadTexture } from "../../utils/load-texture";
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
-const WIDTH = 80;
-const DEPTH = 80;
-const HEIGHT = 180;
-const logoTexture = loadTexture("/images/textures/logo.jpg");
-const steelTexture = loadTexture("/images/textures/steel.jpg");
-const logoMaterial = new Three.MeshLambertMaterial({ ...(logoTexture ? { map: logoTexture } : {}) });
-const steel = new Three.MeshLambertMaterial({ ...(steelTexture ? { map: steelTexture } : {}) });
-
-const objectMaxLOD = makeObjectMaxLOD();
-const objectMinLOD = makeObjectMinLOD();
-
-function makeObjectMaxLOD() {
-  let fridge = new Three.Mesh();
-
-  //base
-  let base = new Three.Mesh(new Three.BoxGeometry(1, 0.05, 1), steel);
-  base.position.set(0, 0.15, 0);
-  fridge.add(base);
-
-  //foot
-  for (let gx = -0.45; gx <= 0.45; gx += 0.9) {
-    for (let gz = -0.45; gz <= 0.45; gz += 0.9) {
-      let foot = new Three.Mesh(
-        new Three.CylinderGeometry(0.05, 0.05, 0.05, 4),
-        steel
-      );
-      foot.position.set(gx, -0.05, gz);
-      foot.rotation.y = 0.25 * Math.PI;
-      base.add(foot);
-    }
-  }
-
-  //back
-  let back = new Three.Mesh(new Three.BoxGeometry(0.05, 1.8, 1), steel);
-  back.position.set(0.475, 0.925, 0);
-  base.add(back);
-
-  //side
-  let side1 = new Three.Mesh(new Three.BoxGeometry(1, 1.8, 0.05), steel);
-  side1.position.set(0, 0.925, 0.475);
-  base.add(side1);
-
-  let side2 = new Three.Mesh(new Three.BoxGeometry(1, 1.8, 0.05), steel);
-  side2.position.set(0, 0.925, -0.475);
-  base.add(side2);
-
-  //top
-  let top = new Three.Mesh(new Three.BoxGeometry(1, 0.2, 1), steel);
-  top.position.set(0, 1.85, 0);
-  base.add(top);
-
-  //logo
-  let logo = new Three.Mesh(new Three.PlaneGeometry(0.2, 0.1), logoMaterial);
-  logo.position.set(-0.51, 1.85, 0);
-  logo.rotation.y = -0.5 * Math.PI;
-  base.add(logo);
-
-  //up door
-  let door1 = new Three.Mesh(new Three.BoxGeometry(0.05, 0.9, 0.95), steel);
-  door1.position.set(-0.5, 1.3, 0);
-  base.add(door1);
-
-  //down door
-  let door2 = new Three.Mesh(new Three.BoxGeometry(0.05, 0.8, 0.95), steel);
-  door2.position.set(-0.5, 0.425, 0);
-  base.add(door2);
-
-  //middle plane
-  let middlePlane = new Three.Mesh(new Three.BoxGeometry(1, 0.05, 1), steel);
-  middlePlane.position.set(0, 0.845, 0);
-  base.add(middlePlane);
-
-  //handle
-  let handle1_p1 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.8),
-    steel
-  );
-  handle1_p1.position.set(-0.56, 1.3, -0.4);
-  base.add(handle1_p1);
-
-  let handle1_p2 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle1_p2.position.set(-0.53, 1.6, -0.4);
-  handle1_p2.rotation.z = 0.5 * Math.PI;
-  base.add(handle1_p2);
-
-  let handle1_p3 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle1_p3.position.set(-0.53, 1, -0.4);
-  handle1_p3.rotation.z = 0.5 * Math.PI;
-  base.add(handle1_p3);
-
-  //handle
-  let handle2_p1 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.7),
-    steel
-  );
-  handle2_p1.position.set(-0.56, 0.425, -0.4);
-  base.add(handle2_p1);
-
-  let handle2_p2 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle2_p2.position.set(-0.53, 0.7, -0.4);
-  handle2_p2.rotation.z = 0.5 * Math.PI;
-  base.add(handle2_p2);
-
-  let handle2_p3 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle2_p3.position.set(-0.53, 0.15, -0.4);
-  handle2_p3.rotation.z = 0.5 * Math.PI;
-  base.add(handle2_p3);
-
-  return fridge;
-}
-
-function makeObjectMinLOD() {
-  let fridge = new Three.Mesh();
-  //base
-  let base = new Three.Mesh(new Three.BoxGeometry(1, 0.05, 1), steel);
-  base.position.set(0, 0.15, 0);
-  fridge.add(base);
-
-  //foot
-  for (let gx = -0.45; gx <= 0.45; gx += 0.9) {
-    for (let gz = -0.45; gz <= 0.45; gz += 0.9) {
-      let foot = new Three.Mesh(
-        new Three.CylinderGeometry(0.05, 0.05, 0.05, 4),
-        steel
-      );
-      foot.position.set(gx, -0.05, gz);
-      foot.rotation.y = 0.25 * Math.PI;
-      base.add(foot);
-    }
-  }
-
-  //back
-  let back = new Three.Mesh(new Three.BoxGeometry(0.05, 1.8, 1), steel);
-  back.position.set(0.475, 0.925, 0);
-  base.add(back);
-
-  //side
-  let side1 = new Three.Mesh(new Three.BoxGeometry(1, 1.8, 0.05), steel);
-  side1.position.set(0, 0.925, 0.475);
-  base.add(side1);
-
-  let side2 = new Three.Mesh(new Three.BoxGeometry(1, 1.8, 0.05), steel);
-  side2.position.set(0, 0.925, -0.475);
-  base.add(side2);
-
-  //top
-  let top = new Three.Mesh(new Three.BoxGeometry(1, 0.2, 1), steel);
-  top.position.set(0, 1.85, 0);
-  base.add(top);
-
-  //logo
-  let logo = new Three.Mesh(new Three.PlaneGeometry(0.2, 0.1), logoMaterial);
-  logo.position.set(-0.51, 1.85, 0);
-  logo.rotation.y = -0.5 * Math.PI;
-  base.add(logo);
-
-  //up door
-  let door1 = new Three.Mesh(new Three.BoxGeometry(0.05, 0.9, 0.95), steel);
-  door1.position.set(-0.5, 1.3, 0);
-  base.add(door1);
-
-  //down door
-  let door2 = new Three.Mesh(new Three.BoxGeometry(0.05, 0.8, 0.95), steel);
-  door2.position.set(-0.5, 0.425, 0);
-  base.add(door2);
-
-  //middle plane
-  let middlePlane = new Three.Mesh(new Three.BoxGeometry(1, 0.05, 1), steel);
-  middlePlane.position.set(0, 0.845, 0);
-  base.add(middlePlane);
-
-  //handle
-  let handle1_p1 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.8),
-    steel
-  );
-  handle1_p1.position.set(-0.56, 1.3, -0.4);
-  base.add(handle1_p1);
-
-  let handle1_p2 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle1_p2.position.set(-0.53, 1.6, -0.4);
-  handle1_p2.rotation.z = 0.5 * Math.PI;
-  base.add(handle1_p2);
-
-  let handle1_p3 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle1_p3.position.set(-0.53, 1, -0.4);
-  handle1_p3.rotation.z = 0.5 * Math.PI;
-  base.add(handle1_p3);
-
-  //handle
-  let handle2_p1 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.7),
-    steel
-  );
-  handle2_p1.position.set(-0.56, 0.425, -0.4);
-  base.add(handle2_p1);
-
-  let handle2_p2 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle2_p2.position.set(-0.53, 0.7, -0.4);
-  handle2_p2.rotation.z = 0.5 * Math.PI;
-  base.add(handle2_p2);
-
-  let handle2_p3 = new Three.Mesh(
-    new Three.CylinderGeometry(0.02, 0.02, 0.06),
-    steel
-  );
-  handle2_p3.position.set(-0.53, 0.15, -0.4);
-  handle2_p3.rotation.z = 0.5 * Math.PI;
-  base.add(handle2_p3);
-
-  return fridge;
-}
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   name: "fridge",
   prototype: "items",
 
   info: {
-    tag: ["furnishings", "metal"],
     title: "fridge",
-    description: "fridge",
-    image: require("./fridge.png"),
+    tag: ["furnishings","kitchen"],
+    description: "Refrigerator",
+    image: "/images/fridge.png",
   },
 
   properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 70,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 70,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 180,
+        unit: "cm",
+      },
+    },
     altitude: {
-      label: "altitude",
+      label: "Altitude",
       type: "length-measure",
       defaultValue: {
         length: 0,
@@ -260,33 +54,65 @@ export default {
   },
 
   render2D: function (element: any, layer: any, scene: any) {
-    let angle = element.rotation + 90;
+    let newWidth = readItemLength(element.properties?.width, scene, 70);
 
-    let textRotation = 0;
-    if (Math.sin((angle * Math.PI) / 180) < 0) {
-      textRotation = 180;
-    }
+    let newDepth = readItemLength(element.properties?.depth, scene, 70);
+
+    let angle = element.rotation + 90;
+    let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
+
+    let style = {
+      stroke: element.selected ? "#0096fd" : "#000",
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
+
+    let arrowStyle = {
+      stroke: element.selected ? "#0096fd" : undefined,
+      strokeWidth: "2px",
+      fill: "#84e1ce",
+    };
 
     return (
-      <g transform={`translate(${-WIDTH / 2},${-DEPTH / 2})`}>
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
         <rect
           key="1"
           x="0"
           y="0"
-          width={WIDTH}
-          height={DEPTH}
-          style={{
-            stroke: element.selected ? "#0096fd" : "#000",
-            strokeWidth: "2px",
-            fill: "#84e1ce",
-          }}
+          width={newWidth}
+          height={newDepth}
+          style={style}
+        />
+        <line
+          key="2"
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="3"
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
+        />
+        <line
+          key="4"
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
-          key="2"
+          key="5"
           x="0"
           y="0"
-          transform={`translate(${WIDTH / 2}, ${
-            DEPTH / 2
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
           }) scale(1,-1) rotate(${textRotation})`}
           style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
@@ -296,47 +122,44 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let newAltitude = element.properties?.altitude?.length;
+  render3D: async function (element: any, layer: any, scene: any) {
+    const newWidth = readItemLength(element.properties?.width, scene, 70);
 
-    /**************** lod max *******************/
+    const newDepth = readItemLength(element.properties?.depth, scene, 70);
 
-    let fridgeMaxLOD = new Three.Object3D();
-    fridgeMaxLOD.add(objectMaxLOD.clone());
+    const newHeight = readItemLength(element.properties?.height, scene, 180);
 
-    let valuePosition = new Three.Box3().setFromObject(fridgeMaxLOD);
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
-    let deltaX = Math.abs(valuePosition.max.x - valuePosition.min.x);
-    let deltaY = Math.abs(valuePosition.max.y - valuePosition.min.y);
-    let deltaZ = Math.abs(valuePosition.max.z - valuePosition.min.z);
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/kitchen-fridge.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
+  },
 
-    fridgeMaxLOD.position.y += newAltitude;
-    fridgeMaxLOD.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
+  updateRender3D: (
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
+  ) => {
+    let noPerf = () => {
+      selfDestroy();
+      return selfBuild();
+    };
 
-    /**************** lod min *******************/
-
-    let fridgeMinLOD = new Three.Object3D();
-    fridgeMinLOD.add(objectMinLOD.clone());
-    fridgeMinLOD.position.y += newAltitude;
-    fridgeMinLOD.scale.set(WIDTH / deltaX, HEIGHT / deltaY, DEPTH / deltaZ);
-
-    /**** all level of detail ***/
-
-    let lod = new Three.LOD();
-
-    lod.addLevel(fridgeMaxLOD, 200);
-    lod.addLevel(fridgeMinLOD, 900);
-    lod.updateMatrix();
-    lod.matrixAutoUpdate = false;
-
-    if (element.selected) {
-      let bbox = new Three.BoxHelper(lod, 0x99c3fb);
-      bbox.material.linewidth = 5;
-      bbox.renderOrder = 1000;
-      bbox.material.depthTest = false;
-      lod.add(bbox);
+    if (differences.indexOf("rotation") !== -1) {
+      mesh.rotation.y = (element.rotation * Math.PI) / 180;
+      return Promise.resolve(mesh);
     }
 
-    return Promise.resolve(lod);
+    return noPerf();
   },
 };

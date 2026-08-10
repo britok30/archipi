@@ -1,11 +1,10 @@
 "use client";
+
 import * as Three from "three";
-import { loadObjWithMaterial } from "../../utils/load-obj";
 
 import React from "react";
-import convert, { Unit } from "convert-units";
-
-let cached3DTV: any = null;
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -14,41 +13,61 @@ export default {
 
   info: {
     title: "tv",
-    tag: ["furnishing", "electronics"],
-    description: "LCD TV",
+    tag: ["furnishings","living"],
+    description: "Modern television",
     image: "/images/tv.png",
   },
 
   properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 120,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 35,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 70,
+        unit: "cm",
+      },
+    },
     altitude: {
       label: "Altitude",
       type: "length-measure",
       defaultValue: {
-        length: 0,
+        length: 60,
+        unit: "cm",
       },
     },
   },
 
   render2D: function (element: any, layer: any, scene: any) {
-    let width = { length: 1.6, unit: "ft" };
-    let depth = { length: 0.59, unit: "ft" };
+    let newWidth = readItemLength(element.properties?.width, scene, 120);
 
-    let newWidth = convert(width.length).from(width.unit as Unit).to(scene.unit as Unit);
-    let newDepth = convert(depth.length).from(depth.unit as Unit).to(scene.unit as Unit);
+    let newDepth = readItemLength(element.properties?.depth, scene, 35);
 
     let angle = element.rotation + 90;
-
-    let textRotation = 0;
-    if (Math.sin((angle * Math.PI) / 180) < 0) {
-      textRotation = 180;
-    }
+    let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
     let style = {
       stroke: element.selected ? "#0096fd" : "#000",
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
-    let arrow_style = {
+
+    let arrowStyle = {
       stroke: element.selected ? "#0096fd" : undefined,
       strokeWidth: "2px",
       fill: "#84e1ce",
@@ -69,24 +88,24 @@ export default {
           x1={newWidth / 2}
           x2={newWidth / 2}
           y1={newDepth}
-          y2={1.5 * newDepth}
-          style={arrow_style}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
           key="3"
           x1={0.35 * newWidth}
           x2={newWidth / 2}
-          y1={1.2 * newDepth}
-          y2={1.5 * newDepth}
-          style={arrow_style}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
           key="4"
           x1={newWidth / 2}
           x2={0.65 * newWidth}
-          y1={1.5 * newDepth}
-          y2={1.2 * newDepth}
-          style={arrow_style}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
           key="5"
@@ -103,63 +122,44 @@ export default {
     );
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let width = { length: 1.6, unit: "ft" };
-    let depth = { length: 0.59, unit: "ft" };
-    let height = { length: 1.05, unit: "ft" };
+  render3D: async function (element: any, layer: any, scene: any) {
+    const newWidth = readItemLength(element.properties?.width, scene, 120);
 
-    let onLoadItem = (object: any) => {
-      let newWidth = convert(width.length).from(width.unit as Unit).to(scene.unit as Unit);
-      let newHeight = convert(height.length).from(height.unit as Unit).to(scene.unit as Unit);
-      let newDepth = convert(depth.length).from(depth.unit as Unit).to(scene.unit as Unit);
+    const newDepth = readItemLength(element.properties?.depth, scene, 35);
 
-      let newAltitude = element.properties?.altitude?.length;
+    const newHeight = readItemLength(element.properties?.height, scene, 70);
 
-      if (element.selected) {
-        let box = new Three.BoxHelper(object, 0x99c3fb);
-        box.material.linewidth = 2;
-        box.material.depthTest = false;
-        box.renderOrder = 1000;
-        object.add(box);
-      }
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 60);
 
-      object.scale.set(
-        newWidth / width.length,
-        newHeight / height.length,
-        newDepth / depth.length
-      );
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/television-modern.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
+  },
 
-      // Normalize the origin of the object
-      let boundingBox = new Three.Box3().setFromObject(object);
-
-      let center = [
-        (boundingBox.max.x - boundingBox.min.x) / 2 + boundingBox.min.x,
-        (boundingBox.max.y - boundingBox.min.y) / 2 + boundingBox.min.y,
-        (boundingBox.max.z - boundingBox.min.z) / 2 + boundingBox.min.z,
-      ];
-
-      object.position.x -= center[0];
-      object.position.y -=
-        center[1] - (boundingBox.max.y - boundingBox.min.y) / 2;
-      object.position.z -= center[2];
-
-      object.position.y += newAltitude;
-
-      object.rotation.y = Math.PI;
-
-      return object;
+  updateRender3D: (
+    element: any,
+    layer: any,
+    scene: any,
+    mesh: any,
+    oldElement: any,
+    differences: any,
+    selfDestroy: any,
+    selfBuild: any
+  ) => {
+    let noPerf = () => {
+      selfDestroy();
+      return selfBuild();
     };
 
-    if (cached3DTV) {
-      return Promise.resolve(onLoadItem(cached3DTV.clone()));
+    if (differences.indexOf("rotation") !== -1) {
+      mesh.rotation.y = (element.rotation * Math.PI) / 180;
+      return Promise.resolve(mesh);
     }
 
-    let mtl = "/mtl/tv.mtl";
-    let obj = "/obj/tv.obj";
-
-    return loadObjWithMaterial(mtl, obj).then((object: any) => {
-      cached3DTV = object;
-      return onLoadItem(cached3DTV.clone());
-    });
+    return noPerf();
   },
 };

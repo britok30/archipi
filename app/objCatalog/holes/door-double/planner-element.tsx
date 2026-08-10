@@ -2,130 +2,7 @@
 
 import React from "react";
 import * as Three from "three";
-
-const black = new Three.MeshLambertMaterial({ color: 0x000000 });
-const metalBlue = new Three.MeshLambertMaterial({ color: 0xb7ceec });
-const grey = new Three.MeshLambertMaterial({ color: 0xd2b06a });
-const darkGrey = new Three.MeshLambertMaterial({ color: 0xffefce });
-
-const boxMaterials = [grey, grey, grey, grey, darkGrey, darkGrey];
-
-function makeDoor(width: any, height: any, thickness: any) {
-  let door_double = new Three.Mesh();
-
-  let LongDoorGeometry = new Three.BoxGeometry(0.75 * width, height, thickness);
-  let longDoor = new Three.Mesh(LongDoorGeometry, boxMaterials);
-  longDoor.position.x -= width * 0.25;
-  door_double.add(longDoor);
-
-  let ShortDoorGeometry = new Three.BoxGeometry(
-    0.25 * width,
-    height,
-    thickness
-  );
-  let shortDoor = new Three.Mesh(ShortDoorGeometry, boxMaterials);
-  shortDoor.position.x += width * 0.25;
-  shortDoor.position.z += thickness / 10;
-  door_double.add(shortDoor);
-
-  let handle = makeHandle(width);
-  handle.position.set(width / 20, height / 40, thickness / 2 + thickness / 10);
-  handle.rotation.z += Math.PI;
-  handle.rotation.x += Math.PI / 2;
-  door_double.add(handle);
-
-  let handleBase = makeHandleBase();
-  handleBase.position.set(width / 20, 0, thickness / 2);
-  handleBase.rotation.x = 0;
-  door_double.add(handleBase);
-
-  let handle2 = makeHandle(width);
-  handle2.position.set(
-    width / 20,
-    height / 40,
-    -thickness / 2 - thickness / 10
-  );
-  handle2.rotation.z += Math.PI;
-  handle2.rotation.x -= Math.PI / 2;
-  door_double.add(handle2);
-
-  let handleBase2 = makeHandleBase();
-  handleBase2.position.set(width / 20, 0, -thickness / 2);
-  handleBase2.rotation.x = 0;
-  door_double.add(handleBase2);
-
-  return door_double;
-}
-
-function makeHandle(width: any) {
-  let handle = new Three.Object3D();
-  let geometry_p1 = new Three.CylinderGeometry(
-    width / 100,
-    width / 100,
-    width / 32.5,
-    Math.round(32)
-  );
-  let geometry_p2 = new Three.SphereGeometry(
-    width / 100,
-    Math.round(32),
-    Math.round(32)
-  );
-  let geometry_p3 = new Three.CylinderGeometry(
-    width / 100,
-    width / 100,
-    width / 14.5,
-    Math.round(32)
-  );
-  let p1 = new Three.Mesh(geometry_p1, black);
-  let p2 = new Three.Mesh(geometry_p2, black);
-  let p3 = new Three.Mesh(geometry_p3, black);
-  let p4 = new Three.Mesh(geometry_p2, black);
-  p3.rotation.z = Math.PI / 2;
-  p3.position.x = width / 14.5 / 2;
-  p2.position.y = -width / 32.5 / 2;
-  p4.position.y = -width / 14.5 / 2;
-  p3.add(p4);
-  p2.add(p3);
-  p1.add(p2);
-  handle.add(p1);
-
-  return handle;
-}
-
-function makeHandleBase() {
-  let handleBase = new Three.Object3D();
-  let geometryBase1 = new Three.BoxGeometry(7.6, 28, 2);
-  let geometryBase2 = new Three.CylinderGeometry(3.6, 3.6, 2, Math.round(32));
-  let lock = makeLock();
-  let handleBase1 = new Three.Mesh(geometryBase1, black);
-  let handleBase2 = new Three.Mesh(geometryBase2, black);
-  lock.rotation.x = Math.PI / 2;
-  lock.position.y = -3;
-  handleBase2.rotation.x = Math.PI / 2;
-  handleBase2.position.y = -3.3;
-  handleBase2.scale.z = 1.5;
-  handleBase1.add(lock);
-  handleBase1.add(handleBase2);
-  handleBase.add(handleBase1);
-
-  return handleBase;
-}
-
-function makeLock() {
-  let lock = new Three.Object3D();
-  let LockGeometry1 = new Three.CylinderGeometry(1.5, 1.5, 4, Math.round(32));
-  let lockGeometry2 = new Three.BoxGeometry(1.6, 4, 4);
-  let lockGeometry3 = new Three.BoxGeometry(1.4, 4.06, 0.36);
-  let lock_p1 = new Three.Mesh(LockGeometry1, metalBlue);
-  let lock_p2 = new Three.Mesh(lockGeometry2, metalBlue);
-  let lock_p3 = new Three.Mesh(lockGeometry3, grey);
-  lock_p2.position.z = 1;
-  lock_p1.add(lock_p2);
-  lock_p1.add(lock_p3);
-  lock.add(lock_p1);
-
-  return lock;
-}
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -136,7 +13,7 @@ export default {
     tag: ["door"],
     title: "double door",
     description: "Double Door",
-    image: "/images/door_double.png",
+    image: "/images/doorway-double.png",
   },
 
   properties: {
@@ -294,41 +171,35 @@ export default {
     }
   },
 
-  render3D: function (element: any, layer: any, scene: any) {
-    let flip = element.properties?.flip_horizontal;
-    let width = element.properties?.width?.length;
-    let height = element.properties?.height?.length;
-    let thickness = element.properties?.thickness?.length;
-    let newAltitude = element.properties?.altitude?.length;
+  render3D: async function (element: any, layer: any, scene: any) {
+    const width = element.properties?.width?.length ?? 200;
+    const height = element.properties?.height?.length ?? 215;
+    const thickness = element.properties?.thickness?.length ?? 30;
+    const hFlip = element.properties?.flip_horizontal;
 
-    let door_double = new Three.Object3D();
-    door_double.add(
-      makeDoor(width, height, thickness).clone()
-    );
+    // Two Kenney doorway leaves (native bbox 0.486 x 1.010 x 0.113 — door
+    // span already along X, no rotation wrapper needed), mirrored so the
+    // hinges sit on the outer jambs.
+    const [leftLeaf, rightLeaf] = await Promise.all([
+      loadGlb("/models/doorway.glb"),
+      loadGlb("/models/doorway.glb"),
+    ]);
+    fitGlbToBox(leftLeaf, { width: width / 2, height, depth: thickness });
+    fitGlbToBox(rightLeaf, { width: width / 2, height, depth: thickness });
+    leftLeaf.position.x -= width / 4;
 
-    let valuePosition = new Three.Box3().setFromObject(door_double);
+    // fitGlbToBox centers each leaf on x/z = 0, so mirroring via a wrapper
+    // keeps the right leaf centered before it is shifted to its half.
+    const rightWrap = new Three.Object3D();
+    rightWrap.add(rightLeaf);
+    rightWrap.scale.x = -1;
+    rightWrap.position.x = width / 4;
 
-    let deltaX = Math.abs(valuePosition.max.x - valuePosition.min.x);
-    let deltaY = Math.abs(valuePosition.max.y - valuePosition.min.y);
-    let deltaZ = Math.abs(valuePosition.max.z - valuePosition.min.z);
+    const holder = new Three.Object3D();
+    holder.add(leftLeaf, rightWrap);
+    if (hFlip) holder.rotation.y = Math.PI;
 
-    if (element.selected) {
-      let bbox = new Three.BoxHelper(door_double, 0x99c3fb);
-      bbox.material.linewidth = 5;
-      bbox.renderOrder = 1000;
-      bbox.material.depthTest = false;
-      door_double.add(bbox);
-    }
-
-    if (flip) {
-      door_double.rotation.y += Math.PI;
-      door_double.position.x -= width / 4;
-    }
-
-    door_double.position.y += newAltitude;
-    door_double.position.x += width / 8;
-    door_double.scale.set(width / deltaX, height / deltaY, thickness / deltaZ);
-
-    return Promise.resolve(door_double);
+    if (element.selected) addSelectionBox(holder);
+    return holder;
   },
 };

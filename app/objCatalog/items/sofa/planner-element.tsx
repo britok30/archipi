@@ -1,21 +1,10 @@
 "use client";
 
-import { BoxHelper, Box3, ObjectLoader } from "three";
-import { loadObjWithMaterial } from "../../utils/load-obj";
-import path from "path";
-import convert, { Unit } from "convert-units";
+import * as Three from "three";
 
 import React from "react";
-
-const mtl = "/mtl/sofa.mtl";
-const obj = "/obj/sofa.obj";
-const img = "/images/textures/sofa-texture.jpg";
-
-const width = { length: 180, unit: "cm" };
-const depth = { length: 60, unit: "cm" };
-const height = { length: 70, unit: "cm" };
-
-let cachedJSONSofa: any = null;
+import { loadGlb, fitGlbToBox, addSelectionBox } from "../../utils/load-glb";
+import { readItemLength } from "../../utils/read-length";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -24,14 +13,51 @@ export default {
 
   info: {
     title: "sofa",
-    tag: ["furnishings", "leather"],
-    description: "Leather sofa",
+    tag: ["furnishings","living"],
+    description: "Lounge sofa",
     image: "/images/sofa.png",
   },
 
-  properties: {},
+  properties: {
+    width: {
+      label: "Width",
+      type: "length-measure",
+      defaultValue: {
+        length: 180,
+        unit: "cm",
+      },
+    },
+    depth: {
+      label: "Depth",
+      type: "length-measure",
+      defaultValue: {
+        length: 60,
+        unit: "cm",
+      },
+    },
+    height: {
+      label: "Height",
+      type: "length-measure",
+      defaultValue: {
+        length: 70,
+        unit: "cm",
+      },
+    },
+    altitude: {
+      label: "Altitude",
+      type: "length-measure",
+      defaultValue: {
+        length: 0,
+        unit: "cm",
+      },
+    },
+  },
 
   render2D: function (element: any, layer: any, scene: any) {
+    let newWidth = readItemLength(element.properties?.width, scene, 180);
+
+    let newDepth = readItemLength(element.properties?.depth, scene, 60);
+
     let angle = element.rotation + 90;
     let textRotation = Math.sin((angle * Math.PI) / 180) < 0 ? 180 : 0;
 
@@ -40,47 +66,53 @@ export default {
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
-    let arrow_style = {
+
+    let arrowStyle = {
       stroke: element.selected ? "#0096fd" : undefined,
       strokeWidth: "2px",
       fill: "#84e1ce",
     };
 
     return (
-      <g transform={`translate(${-width.length / 2},${-depth.length / 2})`}>
+      <g transform={`translate(${-newWidth / 2},${-newDepth / 2})`}>
         <rect
+          key="1"
           x="0"
           y="0"
-          width={width.length}
-          height={depth.length}
+          width={newWidth}
+          height={newDepth}
           style={style}
         />
         <line
-          x1={width.length / 2}
-          x2={width.length / 2}
-          y1={depth.length}
-          y2={1.5 * depth.length}
-          style={arrow_style}
+          key="2"
+          x1={newWidth / 2}
+          x2={newWidth / 2}
+          y1={newDepth}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
-          x1={0.35 * width.length}
-          x2={width.length / 2}
-          y1={1.2 * depth.length}
-          y2={1.5 * depth.length}
-          style={arrow_style}
+          key="3"
+          x1={0.35 * newWidth}
+          x2={newWidth / 2}
+          y1={newDepth + 15}
+          y2={newDepth + 30}
+          style={arrowStyle}
         />
         <line
-          x1={width.length / 2}
-          x2={0.65 * width.length}
-          y1={1.5 * depth.length}
-          y2={1.2 * depth.length}
-          style={arrow_style}
+          key="4"
+          x1={newWidth / 2}
+          x2={0.65 * newWidth}
+          y1={newDepth + 30}
+          y2={newDepth + 15}
+          style={arrowStyle}
         />
         <text
+          key="5"
           x="0"
           y="0"
-          transform={`translate(${width.length / 2}, ${
-            depth.length / 2
+          transform={`translate(${newWidth / 2}, ${
+            newDepth / 2
           }) scale(1,-1) rotate(${textRotation})`}
           style={{ textAnchor: "middle" as const, fontSize: "11px" }}
         >
@@ -91,52 +123,21 @@ export default {
   },
 
   render3D: async function (element: any, layer: any, scene: any) {
-    let onLoadItem = (object: any) => {
-      let newWidth = convert(width.length).from(width.unit as Unit).to(scene.unit as Unit);
-      let newHeight = convert(height.length).from(height.unit as Unit).to(scene.unit as Unit);
-      let newDepth = convert(depth.length).from(depth.unit as Unit).to(scene.unit as Unit);
+    const newWidth = readItemLength(element.properties?.width, scene, 180);
 
-      object.scale.set(
-        newWidth / width.length,
-        newHeight / height.length,
-        newDepth / depth.length
-      );
+    const newDepth = readItemLength(element.properties?.depth, scene, 60);
 
-      let box = new BoxHelper(object, 0x99c3fb);
-      box.material.linewidth = 2;
-      box.material.depthTest = false;
-      box.renderOrder = 1000;
-      box.visible = element.selected;
-      object.add(box);
+    const newHeight = readItemLength(element.properties?.height, scene, 70);
 
-      // Normalize the origin of this item
-      let boundingBox = new Box3().setFromObject(object);
+    const newAltitude = readItemLength(element.properties?.altitude, scene, 0);
 
-      let center = [
-        (boundingBox.max.x - boundingBox.min.x) / 2 + boundingBox.min.x,
-        (boundingBox.max.y - boundingBox.min.y) / 2 + boundingBox.min.y,
-        (boundingBox.max.z - boundingBox.min.z) / 2 + boundingBox.min.z,
-      ];
-
-      object.position.x -= center[0];
-      object.position.y -=
-        center[1] - (boundingBox.max.y - boundingBox.min.y) / 2;
-      object.position.z -= center[2];
-
-      return object;
-    };
-
-    if (cachedJSONSofa) {
-      let loader = new ObjectLoader();
-      let object = loader.parse(cachedJSONSofa);
-      return await Promise.resolve(onLoadItem(object));
-    }
-
-    return loadObjWithMaterial(mtl, obj, img).then((object: any) => {
-      cachedJSONSofa = object.toJSON();
-      let loader = new ObjectLoader();
-      return onLoadItem(loader.parse(cachedJSONSofa));
-    });
+    const item = new Three.Object3D();
+    const model = await loadGlb("/models/lounge-sofa.glb");
+    fitGlbToBox(model, { width: newWidth, height: newHeight, depth: newDepth });
+    item.add(model);
+    item.position.y += newAltitude;
+    if (element.selected) addSelectionBox(item);
+    return item;
   },
 
   updateRender3D: (
@@ -153,16 +154,6 @@ export default {
       selfDestroy();
       return selfBuild();
     };
-
-    if (differences.indexOf("selected") !== -1) {
-      mesh.traverse((child: any) => {
-        if (child instanceof BoxHelper) {
-          child.visible = element.selected;
-        }
-      });
-
-      return Promise.resolve(mesh);
-    }
 
     if (differences.indexOf("rotation") !== -1) {
       mesh.rotation.y = (element.rotation * Math.PI) / 180;
