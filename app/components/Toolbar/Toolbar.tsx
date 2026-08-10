@@ -17,6 +17,7 @@ import {
   MousePointer,
   Redo,
   Rotate3D,
+  Sparkles,
   Square,
   Undo,
 } from "lucide-react";
@@ -176,6 +177,21 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <SettingsButton />
         <TipsButton />
         <ScreenshotToolbarButton />
+
+        {/* Funnel: hand the plan off to ArchitectGPT for AI rendering */}
+        <ToolbarButton
+          active={false}
+          tooltip="Render with AI (ArchitectGPT)"
+          onClick={() =>
+            window.open(
+              "https://www.architectgpt.io?utm_source=archipi&utm_medium=toolbar",
+              "_blank",
+              "noopener",
+            )
+          }
+        >
+          <Sparkles size={20} />
+        </ToolbarButton>
       </div>
 
       {/* New Project Confirmation Dialog */}

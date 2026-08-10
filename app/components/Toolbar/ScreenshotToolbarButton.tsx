@@ -7,6 +7,13 @@ import ToolbarButton from "./ToolbarButton";
 import { MODE_3D_FIRST_PERSON, MODE_3D_VIEW } from "../../store/types";
 import { saveSVGtoPngBase64 } from "../../../lib/floorplan-utils/image";
 import { downloadDataURI } from "../../../lib/floorplan-utils/browser";
+import { toast } from "sonner";
+
+// The screenshot is exactly what ArchitectGPT's AI renders from — offer the
+// handoff at the moment the user has the artifact in hand. UTM-tagged so the
+// ArchiPi → ArchitectGPT funnel is measurable.
+const RENDER_URL =
+  "https://www.architectgpt.io?utm_source=archipi&utm_medium=screenshot-toast";
 
 type Status = "idle" | "capturing" | "done";
 
@@ -43,6 +50,16 @@ export default function ScreenshotToolbarButton() {
           .slice(0, 19)
           .replace(/[T:]/g, "-");
         downloadDataURI(dataUri, `archipi-${timestamp}.png`);
+
+        toast.success("Screenshot saved", {
+          description:
+            "Want it photorealistic? Render this plan with ArchitectGPT's AI.",
+          action: {
+            label: "Render with AI",
+            onClick: () => window.open(RENDER_URL, "_blank", "noopener"),
+          },
+          duration: 8000,
+        });
 
         setStatus("done");
         setTimeout(() => setStatus("idle"), 1500);
