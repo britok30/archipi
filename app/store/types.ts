@@ -267,6 +267,7 @@ export interface CatalogCategory {
 export interface RuntimeCatalog {
   unit: string;
   getElement: (type: string) => CatalogElement;
+  getElementSafe: (type: string) => CatalogElement | null;
   getCategory: (categoryName: string) => CatalogCategory;
   hasElement: (type: string) => boolean;
   hasCategory: (categoryName: string) => boolean;
@@ -449,29 +450,37 @@ export const DEFAULT_SNAP_MASK: SnapMask = {
   SNAP_GUIDE: true,
 };
 
-export const DEFAULT_ELEMENTS_SET: ElementsSet = {
-  vertices: [],
-  lines: [],
-  holes: [],
-  areas: [],
-  items: [],
-  selected: [],
-};
+export function makeDefaultElementsSet(): ElementsSet {
+  return {
+    vertices: [],
+    lines: [],
+    holes: [],
+    areas: [],
+    items: [],
+    selected: [],
+  };
+}
 
-export const DEFAULT_LAYER: Layer = {
-  id: 'layer-1',
-  altitude: 0,
-  order: 0,
-  opacity: 1,
-  name: 'default',
-  visible: true,
-  vertices: {},
-  lines: {},
-  holes: {},
-  areas: {},
-  items: {},
-  selected: { ...DEFAULT_ELEMENTS_SET },
-};
+export function makeDefaultLayer(): Layer {
+  return {
+    id: 'layer-1',
+    altitude: 0,
+    order: 0,
+    opacity: 1,
+    name: 'default',
+    visible: true,
+    vertices: {},
+    lines: {},
+    holes: {},
+    areas: {},
+    items: {},
+    selected: makeDefaultElementsSet(),
+  };
+}
+
+export const DEFAULT_ELEMENTS_SET: ElementsSet = makeDefaultElementsSet();
+
+export const DEFAULT_LAYER: Layer = makeDefaultLayer();
 
 export const DEFAULT_GRIDS: Record<string, Grid> = {
   h1: {
@@ -492,23 +501,27 @@ export const DEFAULT_GRIDS: Record<string, Grid> = {
   },
 };
 
-export const DEFAULT_SCENE: Scene = {
-  unit: 'cm',
-  layers: {
-    'layer-1': { ...DEFAULT_LAYER },
-  },
-  grids: { ...DEFAULT_GRIDS },
-  selectedLayer: 'layer-1',
-  groups: {},
-  width: 3000,
-  height: 2000,
-  meta: {},
-  guides: {
-    horizontal: {},
-    vertical: {},
-    circular: {},
-  },
-};
+export function makeDefaultScene(): Scene {
+  return {
+    unit: 'cm',
+    layers: {
+      'layer-1': makeDefaultLayer(),
+    },
+    grids: JSON.parse(JSON.stringify(DEFAULT_GRIDS)),
+    selectedLayer: 'layer-1',
+    groups: {},
+    width: 3000,
+    height: 2000,
+    meta: {},
+    guides: {
+      horizontal: {},
+      vertical: {},
+      circular: {},
+    },
+  };
+}
+
+export const DEFAULT_SCENE: Scene = makeDefaultScene();
 
 export const DEFAULT_CATALOG: CatalogState = {
   ready: false,
@@ -522,26 +535,101 @@ export const DEFAULT_HISTORY: HistoryStructure = {
   future: [],
 };
 
-export const INITIAL_STATE: PlannerState = {
-  mode: MODE_IDLE,
-  overlays: [],
-  scene: { ...DEFAULT_SCENE },
-  sceneHistory: { ...DEFAULT_HISTORY },
-  catalog: { ...DEFAULT_CATALOG },
-  viewer2D: {},
-  mouse: { x: 0, y: 0 },
-  zoom: 0,
-  snapMask: { ...DEFAULT_SNAP_MASK },
-  snapElements: [],
-  activeSnapElement: null,
-  drawingSupport: {},
-  draggingSupport: {},
-  rotatingSupport: {},
-  errors: [],
-  warnings: [],
-  clipboardProperties: {},
-  selectedElementsHistory: [],
-  misc: {},
-  alterate: false,
-  isDirty: false,
-};
+export function makeInitialState(): PlannerState {
+  return {
+    mode: MODE_IDLE,
+    overlays: [],
+    scene: makeDefaultScene(),
+    sceneHistory: { past: [], future: [] },
+    catalog: { ...DEFAULT_CATALOG, path: [], elements: {} },
+    viewer2D: {},
+    mouse: { x: 0, y: 0 },
+    zoom: 0,
+    snapMask: { ...DEFAULT_SNAP_MASK },
+    snapElements: [],
+    activeSnapElement: null,
+    drawingSupport: {},
+    draggingSupport: {},
+    rotatingSupport: {},
+    errors: [],
+    warnings: [],
+    clipboardProperties: {},
+    selectedElementsHistory: [],
+    misc: {},
+    alterate: false,
+    isDirty: false,
+  };
+}
+
+export const INITIAL_STATE: PlannerState = makeInitialState();
+
+/**
+ * Validate and normalize a raw (parsed) scene against the default scene shape.
+ * Returns null when the payload is unusable (caller should fall back to the
+ * default scene). Guards against schema drift in persisted saves.
+ */
+export function normalizeScene(raw: unknown): Scene | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+
+  const parsed = raw as Partial<Scene> & Record<string, unknown>;
+  const base = makeDefaultScene();
+
+  const rawLayers =
+    parsed.layers && typeof parsed.layers === 'object' && !Array.isArray(parsed.layers)
+      ? (parsed.layers as Record<string, unknown>)
+      : {};
+  const layerIds = Object.keys(rawLayers);
+  if (layerIds.length === 0) return null;
+
+  const asRecord = (value: unknown): Record<string, any> =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, any>)
+      : {};
+  const asArray = (value: unknown): string[] => (Array.isArray(value) ? value : []);
+
+  const layers: Record<string, Layer> = {};
+  for (const id of layerIds) {
+    const rawLayer = asRecord(rawLayers[id]);
+    const baseLayer = makeDefaultLayer();
+    const rawSelected = asRecord(rawLayer.selected);
+    layers[id] = {
+      ...baseLayer,
+      ...rawLayer,
+      id,
+      vertices: asRecord(rawLayer.vertices),
+      lines: asRecord(rawLayer.lines),
+      holes: asRecord(rawLayer.holes),
+      areas: asRecord(rawLayer.areas),
+      items: asRecord(rawLayer.items),
+      selected: {
+        vertices: asArray(rawSelected.vertices),
+        lines: asArray(rawSelected.lines),
+        holes: asArray(rawSelected.holes),
+        areas: asArray(rawSelected.areas),
+        items: asArray(rawSelected.items),
+        selected: asArray(rawSelected.selected),
+      },
+    };
+  }
+
+  const rawGuides = asRecord(parsed.guides);
+  const selectedLayer =
+    typeof parsed.selectedLayer === 'string' && layers[parsed.selectedLayer]
+      ? parsed.selectedLayer
+      : layerIds[0];
+
+  return {
+    ...base,
+    ...parsed,
+    layers,
+    selectedLayer,
+    grids: Object.keys(asRecord(parsed.grids)).length > 0 ? asRecord(parsed.grids) : base.grids,
+    groups: asRecord(parsed.groups) as Record<string, Group>,
+    meta: asRecord(parsed.meta),
+    guides: {
+      horizontal: asRecord(rawGuides.horizontal),
+      vertical: asRecord(rawGuides.vertical),
+      circular: asRecord(rawGuides.circular),
+    },
+  };
+}

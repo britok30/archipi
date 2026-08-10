@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, useMemo, ReactNode } from "react";
 import type { RuntimeCatalog } from "../store/types";
 
 // Simple context for catalog only
@@ -20,8 +20,12 @@ interface PlannerProviderProps {
 }
 
 export function PlannerProvider({ children, catalog }: PlannerProviderProps) {
+  // A stable context value is load-bearing: consumers put `catalog` in effect
+  // dependency arrays, and a fresh object per render turns rapid store
+  // updates (e.g. rotating an item) into an update-depth cascade.
+  const value = useMemo(() => ({ catalog: catalog ?? null }), [catalog]);
   return (
-    <ReactPlannerContext.Provider value={{ catalog: catalog ?? null }}>
+    <ReactPlannerContext.Provider value={value}>
       {children}
     </ReactPlannerContext.Provider>
   );

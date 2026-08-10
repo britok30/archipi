@@ -231,12 +231,16 @@ function find_inner_cycles(V: Vertex[], EV: EdgePair[]): InnerCyclesResult {
   let cycles = find_cycles(V, EV);
   let v_cycles = cycles.v_cycles;
   let e_cycles = cycles.e_cycles;
+  let dir_e_cycles = cycles.dir_e_cycles;
   let short_cycles_indexes = find_short_cycles_indexes(v_cycles, e_cycles);
-  short_cycles_indexes.forEach((indx) => {
+  // Splice in descending index order so earlier removals don't shift later
+  // indexes, and keep dir_e_cycles aligned with v_cycles/e_cycles.
+  for (let k = short_cycles_indexes.length - 1; k >= 0; k -= 1) {
+    let indx = short_cycles_indexes[k];
     v_cycles.splice(indx, 1);
     e_cycles.splice(indx, 1);
-  });
-  let dir_e_cycles = cycles.dir_e_cycles;
+    dir_e_cycles.splice(indx, 1);
+  }
   let rooms_values = cycles.e_cycles.map((cycle, i) =>
     cycle.map(function (edge, j) {
       let v1: number;

@@ -78,14 +78,18 @@ export function setupKeyboardShortcuts(): () => void {
         if (mode === MODE_DRAWING_LINE) {
           // Stop drawing but keep already-placed walls
           state.stopDrawingLine();
+        } else if (mode === MODE_DRAWING_HOLE || mode === MODE_DRAWING_ITEM) {
+          // Nothing was pushed to history at drawing start, so just cancel
+          // the placement without touching the undo stack
+          state.cancelDrawing();
         } else if (
-          mode === MODE_DRAWING_HOLE ||
-          mode === MODE_DRAWING_ITEM ||
           mode === MODE_DRAGGING_LINE ||
           mode === MODE_DRAGGING_VERTEX ||
           mode === MODE_DRAGGING_ITEM ||
           mode === MODE_DRAGGING_HOLE
         ) {
+          // Dragging modes push to history at begin, so rollback restores
+          // the pre-drag scene
           rollback();
         } else {
           selectToolEdit();
@@ -192,11 +196,23 @@ export function setupKeyboardShortcuts(): () => void {
     }
   };
 
+  const handleBlur = () => {
+    const { alterateState, alterate } = usePlannerStore.getState();
+
+    // Alt-Tab away can drop the keyup event; reset the alterate flag so it
+    // doesn't stay stuck when the window regains focus
+    if (alterate) {
+      alterateState();
+    }
+  };
+
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
+  window.addEventListener('blur', handleBlur);
 
   return () => {
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('blur', handleBlur);
   };
 }

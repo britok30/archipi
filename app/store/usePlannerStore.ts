@@ -23,10 +23,10 @@ import {
   HorizontalGuide,
   VerticalGuide,
   CircularGuide,
-  INITIAL_STATE,
-  DEFAULT_ELEMENTS_SET,
-  DEFAULT_LAYER,
-  DEFAULT_SNAP_MASK,
+  makeInitialState,
+  makeDefaultLayer,
+  makeDefaultScene,
+  normalizeScene,
   Mode,
   MODE_IDLE,
   MODE_2D_ZOOM_IN,
@@ -52,7 +52,7 @@ import {
 // ============================================================================
 
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15);
+  return crypto.randomUUID();
 }
 
 export function generateName(prototype: string, type: string): string {
@@ -61,6 +61,63 @@ export function generateName(prototype: string, type: string): string {
 
 function deepClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
+}
+
+const HISTORY_LIMIT = 50;
+
+/** Push the current scene onto the undo stack, cap its size, and mark dirty */
+function pushHistory(state: PlannerState): void {
+  state.sceneHistory.past.push(deepClone(state.scene));
+  state.sceneHistory.future = [];
+  if (state.sceneHistory.past.length > HISTORY_LIMIT) {
+    state.sceneHistory.past.shift();
+  }
+  state.isDirty = true;
+}
+
+/**
+ * Cleanup for an in-progress line drawing: removes the trailing rubber-band
+ * line and its loose endpoint vertex, sweeps orphan vertices, re-runs area
+ * detection, and clears drawingSupport. Keeps all committed walls.
+ */
+function cleanupDrawingLineInDraft(state: PlannerState): void {
+  const { layerID, currentVertex, lines: drawingLines } = state.drawingSupport;
+  if (layerID && currentVertex) {
+    const layer = state.scene.layers[layerID];
+    if (layer) {
+      // The last line in drawingLines is the trailing in-progress line
+      // (connects last committed vertex → currentVertex which follows cursor)
+      const trailingLineId = drawingLines?.[drawingLines.length - 1];
+      if (trailingLineId && layer.lines[trailingLineId]) {
+        const trailingLine = layer.lines[trailingLineId];
+        // Remove line reference from its vertices
+        for (const vId of trailingLine.vertices) {
+          const v = layer.vertices[vId];
+          if (v) {
+            v.lines = v.lines.filter((id) => id !== trailingLineId);
+          }
+        }
+        delete layer.lines[trailingLineId];
+      }
+
+      // Remove the trailing cursor vertex if it has no remaining lines
+      const cv = layer.vertices[currentVertex];
+      if (cv && cv.lines.length === 0) {
+        delete layer.vertices[currentVertex];
+      }
+
+      // Also clean up any orphan vertices with no lines
+      for (const [vId, vertex] of Object.entries(layer.vertices)) {
+        if (vertex.lines.length === 0 && vertex.areas.length === 0) {
+          delete layer.vertices[vId];
+        }
+      }
+
+      // Run area detection with the final state
+      detectAndUpdateAreas(layer, state.catalog.elements);
+    }
+  }
+  state.drawingSupport = {};
 }
 
 /** Inline unselectAll on an Immer draft — avoids nested set() which loses changes */
@@ -174,6 +231,7 @@ export interface PlannerActions {
   undo: () => void;
   redo: () => void;
   rollback: () => void;
+  cancelDrawing: () => void;
   setProjectProperties: (properties: Partial<Scene>) => void;
   openProjectConfigurator: () => void;
   initCatalog: (catalog: RuntimeCatalog) => void;
@@ -311,21 +369,19 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       // Initial State
       // -----------------------------------------------------------------------
-      ...INITIAL_STATE,
+      ...makeInitialState(),
 
       // -----------------------------------------------------------------------
       // Project Actions
       // -----------------------------------------------------------------------
       newProject: () =>
         set((state) => {
-          Object.assign(state, INITIAL_STATE);
-          state.sceneHistory = { past: [], future: [] };
-          state.isDirty = false;
+          Object.assign(state, makeInitialState());
         }),
 
       loadProject: (scene) =>
         set((state) => {
-          state.scene = scene;
+          state.scene = normalizeScene(scene) ?? makeDefaultScene();
           state.sceneHistory = { past: [], future: [] };
           state.mode = MODE_IDLE;
           state.isDirty = false;
@@ -333,13 +389,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       saveProjectToHistory: () =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
-          state.isDirty = true;
-          // Keep history size reasonable
-          if (state.sceneHistory.past.length > 50) {
-            state.sceneHistory.past.shift();
-          }
+          pushHistory(state);
         }),
 
       markClean: () =>
@@ -349,11 +399,17 @@ export const usePlannerStore = create<PlannerStore>()(
 
       setMode: (mode) =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = mode;
         }),
 
       selectToolEdit: () =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_IDLE;
         }),
 
@@ -367,16 +423,29 @@ export const usePlannerStore = create<PlannerStore>()(
           const layerId = state.scene.selectedLayer;
           if (!layerId || !state.scene.layers[layerId]) return;
 
-          // Save to history first
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
-
           const layer = state.scene.layers[layerId];
           const selected = layer.selected;
 
+          // Only push history when something will actually be deleted
+          // (areas are derived from lines and cannot be deleted directly)
+          const hasDeletions =
+            selected.items.length > 0 ||
+            selected.holes.length > 0 ||
+            selected.lines.length > 0;
+
+          if (hasDeletions) {
+            pushHistory(state);
+          }
+
+          // Track every deleted element id so group references can be swept
+          const deletedIds = new Set<string>();
+
           // Remove selected items
           selected.items.forEach((id) => {
-            delete layer.items[id];
+            if (layer.items[id]) {
+              deletedIds.add(id);
+              delete layer.items[id];
+            }
           });
 
           // Remove selected holes
@@ -387,6 +456,7 @@ export const usePlannerStore = create<PlannerStore>()(
               if (line) {
                 line.holes = line.holes.filter((hId) => hId !== id);
               }
+              deletedIds.add(id);
               delete layer.holes[id];
             }
           });
@@ -398,6 +468,7 @@ export const usePlannerStore = create<PlannerStore>()(
             if (line) {
               // Remove holes on this line
               line.holes.forEach((hId) => {
+                deletedIds.add(hId);
                 delete layer.holes[hId];
               });
               // Remove vertex references
@@ -405,22 +476,45 @@ export const usePlannerStore = create<PlannerStore>()(
                 const vertex = layer.vertices[vId];
                 if (vertex) {
                   vertex.lines = vertex.lines.filter((lId) => lId !== id);
-                  // Remove orphan vertices
-                  if (vertex.lines.length === 0 && vertex.areas.length === 0) {
-                    delete layer.vertices[vId];
-                  }
                 }
               });
+              deletedIds.add(id);
               delete layer.lines[id];
             }
           });
+
+          // Sweep deleted ids from every group's element references
+          if (deletedIds.size > 0) {
+            Object.values(state.scene.groups).forEach((group) => {
+              const groupElements = group.elements[layerId];
+              if (!groupElements) return;
+              Object.keys(groupElements).forEach((prototype) => {
+                groupElements[prototype] = groupElements[prototype].filter(
+                  (id) => !deletedIds.has(id)
+                );
+              });
+            });
+          }
 
           // Re-detect areas after removing lines (areas may no longer be valid)
           if (removedLines) {
             detectAndUpdateAreas(layer, state.catalog.elements);
           }
 
-          // Clear selection
+          // Remove orphan vertices after area detection so vertices still
+          // referenced by surviving areas are kept
+          Object.entries(layer.vertices).forEach(([vId, vertex]) => {
+            if (vertex.lines.length === 0 && vertex.areas.length === 0) {
+              delete layer.vertices[vId];
+            }
+          });
+
+          // Clear selection (including areas, which are not deletable)
+          selected.areas.forEach((id) => {
+            if (layer.areas[id]) {
+              layer.areas[id].selected = false;
+            }
+          });
           layer.selected = { vertices: [], lines: [], holes: [], areas: [], items: [], selected: [] };
           state.mode = MODE_IDLE;
         }),
@@ -433,6 +527,9 @@ export const usePlannerStore = create<PlannerStore>()(
           state.sceneHistory.future.push(deepClone(state.scene));
           state.scene = previousScene;
           state.mode = MODE_IDLE;
+          state.drawingSupport = {};
+          state.draggingSupport = {};
+          state.rotatingSupport = {};
         }),
 
       redo: () =>
@@ -443,25 +540,36 @@ export const usePlannerStore = create<PlannerStore>()(
           state.sceneHistory.past.push(deepClone(state.scene));
           state.scene = nextScene;
           state.mode = MODE_IDLE;
+          state.drawingSupport = {};
+          state.draggingSupport = {};
+          state.rotatingSupport = {};
         }),
 
       rollback: () =>
         set((state) => {
-          if (state.sceneHistory.past.length === 0) return;
-
-          // Rollback to last saved state without adding to redo
-          const lastScene = state.sceneHistory.past[state.sceneHistory.past.length - 1];
-          state.scene = deepClone(lastScene);
+          // Rollback to last saved state without adding to redo. Pop the
+          // entry so the next undo is not a visible no-op.
+          if (state.sceneHistory.past.length > 0) {
+            state.scene = state.sceneHistory.past.pop()!;
+          }
+          // Always reset mode and supports, even with empty history
           state.mode = MODE_IDLE;
           state.drawingSupport = {};
           state.draggingSupport = {};
           state.rotatingSupport = {};
         }),
 
+      cancelDrawing: () =>
+        set((state) => {
+          // Cancel an in-progress hole/item placement: nothing was pushed to
+          // history at drawing start, so just reset mode and preview state
+          state.mode = MODE_IDLE;
+          state.drawingSupport = {};
+        }),
+
       setProjectProperties: (properties) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
           Object.assign(state.scene, properties);
         }),
 
@@ -550,13 +658,20 @@ export const usePlannerStore = create<PlannerStore>()(
           const layer = state.scene.layers[layerId];
           const selected = layer.selected;
 
-          // Apply clipboard properties to selected elements
-          [...selected.lines, ...selected.holes, ...selected.items, ...selected.areas].forEach((id) => {
-            const element =
-              layer.lines[id] || layer.holes[id] || layer.items[id] || layer.areas[id];
-            if (element) {
-              Object.assign(element.properties, state.clipboardProperties);
-            }
+          if (Object.keys(state.clipboardProperties).length === 0) return;
+
+          const elements = [...selected.lines, ...selected.holes, ...selected.items, ...selected.areas]
+            .map((id) => layer.lines[id] || layer.holes[id] || layer.items[id] || layer.areas[id])
+            .filter(Boolean);
+
+          if (elements.length === 0) return;
+
+          pushHistory(state);
+
+          // Apply clipboard properties to selected elements (deep-cloned so
+          // elements never share nested references with the clipboard)
+          elements.forEach((element) => {
+            Object.assign(element.properties, deepClone(state.clipboardProperties));
           });
         }),
 
@@ -582,8 +697,7 @@ export const usePlannerStore = create<PlannerStore>()(
           const layerId = state.scene.selectedLayer;
           if (!layerId || !state.scene.layers[layerId]) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const layer = state.scene.layers[layerId];
           const selected = layer.selected;
@@ -602,8 +716,7 @@ export const usePlannerStore = create<PlannerStore>()(
           const layerId = state.scene.selectedLayer;
           if (!layerId || !state.scene.layers[layerId]) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const layer = state.scene.layers[layerId];
           layer.selected.items.forEach((id) => {
@@ -618,15 +731,57 @@ export const usePlannerStore = create<PlannerStore>()(
           const layerId = state.scene.selectedLayer;
           if (!layerId || !state.scene.layers[layerId]) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
-
           const layer = state.scene.layers[layerId];
+          if (layer.selected.lines.length === 0) return;
+
+          pushHistory(state);
+
+          const vertexOne = attributes.vertexOne as Point | undefined;
+          const vertexTwo = attributes.vertexTwo as Point | undefined;
+          const lineLength = attributes.lineLength as
+            | { length?: number; _unit?: string }
+            | undefined;
+
           layer.selected.lines.forEach((id) => {
-            if (layer.lines[id]) {
-              Object.assign(layer.lines[id], attributes);
+            const line = layer.lines[id];
+            if (!line) return;
+
+            const v0 = layer.vertices[line.vertices[0]];
+            const v1 = layer.vertices[line.vertices[1]];
+            if (!v0 || !v1) return;
+
+            // Update actual vertex coordinates (the editor sends full vertex
+            // objects; only x/y are authoritative here)
+            const hasV0 = vertexOne && typeof vertexOne.x === 'number' && typeof vertexOne.y === 'number';
+            const hasV1 = vertexTwo && typeof vertexTwo.x === 'number' && typeof vertexTwo.y === 'number';
+            if (hasV0) {
+              v0.x = vertexOne.x;
+              v0.y = vertexOne.y;
+            }
+            if (hasV1) {
+              v1.x = vertexTwo.x;
+              v1.y = vertexTwo.y;
+            }
+
+            // Fallback: length-only edit moves the second vertex along the
+            // line direction to the requested length
+            if (!hasV0 && !hasV1 && typeof lineLength?.length === 'number') {
+              const dx = v1.x - v0.x;
+              const dy = v1.y - v0.y;
+              const currentLength = Math.sqrt(dx * dx + dy * dy);
+              if (currentLength > 0) {
+                v1.x = v0.x + (dx / currentLength) * lineLength.length;
+                v1.y = v0.y + (dy / currentLength) * lineLength.length;
+              }
+            }
+
+            // Preserve the unit chosen in the editor
+            if (lineLength?._unit) {
+              line.misc._unitLength = lineLength._unit;
             }
           });
+
+          detectAndUpdateAreas(layer, state.catalog.elements);
         }),
 
       setHolesAttributes: (attributes) =>
@@ -634,13 +789,31 @@ export const usePlannerStore = create<PlannerStore>()(
           const layerId = state.scene.selectedLayer;
           if (!layerId || !state.scene.layers[layerId]) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
-
           const layer = state.scene.layers[layerId];
+          if (layer.selected.holes.length === 0) return;
+
+          pushHistory(state);
+
+          const offset = attributes.offset;
+          const offsetA = attributes.offsetA as { _unit?: string } | undefined;
+          const offsetB = attributes.offsetB as { _unit?: string } | undefined;
+
           layer.selected.holes.forEach((id) => {
-            if (layer.holes[id]) {
-              Object.assign(layer.holes[id], attributes);
+            const hole = layer.holes[id];
+            if (!hole) return;
+
+            // Only store real Hole fields; offsetA/offsetB are derived
+            // editor-side representations of the same offset
+            if (typeof offset === 'number' && Number.isFinite(offset)) {
+              hole.offset = Math.max(0, Math.min(1, offset));
+            }
+
+            // Preserve the units chosen in the editor
+            if (offsetA?._unit) {
+              hole.misc._unitA = offsetA._unit;
+            }
+            if (offsetB?._unit) {
+              hole.misc._unitB = offsetB._unit;
             }
           });
         }),
@@ -655,16 +828,25 @@ export const usePlannerStore = create<PlannerStore>()(
 
       selectToolPan: () =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_2D_PAN;
         }),
 
       selectToolZoomIn: () =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_2D_ZOOM_IN;
         }),
 
       selectToolZoomOut: () =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_2D_ZOOM_OUT;
         }),
 
@@ -683,11 +865,17 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       selectTool3DView: () =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_3D_VIEW;
         }),
 
       selectTool3DFirstPerson: () =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_3D_FIRST_PERSON;
         }),
 
@@ -706,7 +894,7 @@ export const usePlannerStore = create<PlannerStore>()(
           const id = generateId();
           const order = Object.keys(state.scene.layers).length;
           state.scene.layers[id] = {
-            ...DEFAULT_LAYER,
+            ...makeDefaultLayer(),
             id,
             name,
             altitude,
@@ -727,6 +915,11 @@ export const usePlannerStore = create<PlannerStore>()(
           if (Object.keys(state.scene.layers).length <= 1) return;
 
           delete state.scene.layers[layerId];
+
+          // Purge the layer's element references from every group
+          Object.values(state.scene.groups).forEach((group) => {
+            delete group.elements[layerId];
+          });
 
           if (state.scene.selectedLayer === layerId) {
             state.scene.selectedLayer = Object.keys(state.scene.layers)[0];
@@ -784,14 +977,16 @@ export const usePlannerStore = create<PlannerStore>()(
 
       selectToolDrawingLine: (type) =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_WAITING_DRAWING_LINE;
           state.drawingSupport = { type };
         }),
 
       beginDrawingLine: (layerId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const layer = state.scene.layers[layerId];
           if (!layer) return;
@@ -902,6 +1097,17 @@ export const usePlannerStore = create<PlannerStore>()(
           const rx = Math.round(x);
           const ry = Math.round(y);
 
+          // Skip committing a zero-length segment: clicking exactly on the
+          // previous committed vertex keeps the current rubber-band line
+          const trailingLineId =
+            state.drawingSupport.lines?.[state.drawingSupport.lines.length - 1];
+          const trailingLine = trailingLineId ? layer.lines[trailingLineId] : undefined;
+          const prevCommittedId = trailingLine?.vertices.find((vId) => vId !== currentVertex);
+          const prevCommitted = prevCommittedId ? layer.vertices[prevCommittedId] : undefined;
+          if (prevCommitted && prevCommitted.x === rx && prevCommitted.y === ry) {
+            return;
+          }
+
           // Finalize current vertex position
           layer.vertices[currentVertex].x = rx;
           layer.vertices[currentVertex].y = ry;
@@ -916,6 +1122,37 @@ export const usePlannerStore = create<PlannerStore>()(
             // Merge current vertex into the existing one
             mergeVertices(layer, currentVertex, existingVertexId);
             prevVertexId = existingVertexId;
+
+            // Dedupe lines sharing the same unordered vertex pair (keep one)
+            const target = layer.vertices[prevVertexId];
+            if (target) {
+              const seenPairs = new Set<string>();
+              const duplicateLineIds: string[] = [];
+              for (const lineId of target.lines) {
+                const line = layer.lines[lineId];
+                if (!line) continue;
+                const pairKey = [...line.vertices].sort().join('|');
+                if (seenPairs.has(pairKey)) {
+                  duplicateLineIds.push(lineId);
+                } else {
+                  seenPairs.add(pairKey);
+                }
+              }
+              for (const lineId of duplicateLineIds) {
+                const line = layer.lines[lineId];
+                if (!line) continue;
+                line.holes.forEach((hId) => {
+                  delete layer.holes[hId];
+                });
+                line.vertices.forEach((vId) => {
+                  const vertex = layer.vertices[vId];
+                  if (vertex) {
+                    vertex.lines = vertex.lines.filter((id) => id !== lineId);
+                  }
+                });
+                delete layer.lines[lineId];
+              }
+            }
           }
 
           // Continue drawing: create new vertex and line
@@ -976,55 +1213,13 @@ export const usePlannerStore = create<PlannerStore>()(
       // in-progress line and its loose endpoint vertex.
       stopDrawingLine: () =>
         set((state) => {
-          const { layerID, currentVertex, lines: drawingLines } = state.drawingSupport;
-          if (!layerID || !currentVertex) {
-            state.mode = MODE_IDLE;
-            state.drawingSupport = {};
-            return;
-          }
-
-          const layer = state.scene.layers[layerID];
-          if (layer) {
-            // The last line in drawingLines is the trailing in-progress line
-            // (connects last committed vertex → currentVertex which follows cursor)
-            const trailingLineId = drawingLines?.[drawingLines.length - 1];
-            if (trailingLineId && layer.lines[trailingLineId]) {
-              const trailingLine = layer.lines[trailingLineId];
-              // Remove line reference from its vertices
-              for (const vId of trailingLine.vertices) {
-                const v = layer.vertices[vId];
-                if (v) {
-                  v.lines = v.lines.filter((id) => id !== trailingLineId);
-                }
-              }
-              delete layer.lines[trailingLineId];
-            }
-
-            // Remove the trailing cursor vertex if it has no remaining lines
-            const cv = layer.vertices[currentVertex];
-            if (cv && cv.lines.length === 0) {
-              delete layer.vertices[currentVertex];
-            }
-
-            // Also clean up any orphan vertices with no lines
-            for (const [vId, vertex] of Object.entries(layer.vertices)) {
-              if (vertex.lines.length === 0 && vertex.areas.length === 0) {
-                delete layer.vertices[vId];
-              }
-            }
-
-            // Run area detection with the final state
-            detectAndUpdateAreas(layer, state.catalog.elements);
-          }
-
+          cleanupDrawingLineInDraft(state);
           state.mode = MODE_IDLE;
-          state.drawingSupport = {};
         }),
 
       beginDraggingLine: (layerId, lineId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           state.mode = MODE_DRAGGING_LINE;
           state.draggingSupport = {
@@ -1077,8 +1272,7 @@ export const usePlannerStore = create<PlannerStore>()(
       // -----------------------------------------------------------------------
       beginDraggingVertex: (layerId, vertexId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           state.mode = MODE_DRAGGING_VERTEX;
           state.draggingSupport = {
@@ -1142,6 +1336,9 @@ export const usePlannerStore = create<PlannerStore>()(
 
       selectToolDrawingHole: (type) =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_DRAWING_HOLE;
           state.drawingSupport = { type };
         }),
@@ -1161,9 +1358,13 @@ export const usePlannerStore = create<PlannerStore>()(
             const v1 = layer.vertices[line.vertices[1]];
             if (!v0 || !v1) continue;
 
+            // Skip zero-length lines (distance formula would divide by zero)
+            const lineLenSq = (v1.y - v0.y) ** 2 + (v1.x - v0.x) ** 2;
+            if (lineLenSq === 0) continue;
+
             const dist = Math.abs(
               (v1.y - v0.y) * x - (v1.x - v0.x) * y + v1.x * v0.y - v1.y * v0.x
-            ) / Math.sqrt((v1.y - v0.y) ** 2 + (v1.x - v0.x) ** 2);
+            ) / Math.sqrt(lineLenSq);
 
             if (dist < bestDist) {
               bestDist = dist;
@@ -1205,61 +1406,49 @@ export const usePlannerStore = create<PlannerStore>()(
 
       endDrawingHole: (layerId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
-
           const layer = state.scene.layers[layerId];
-          if (!layer) return;
-
+          const { previewLineId, previewOffset } = state.drawingSupport;
           const type = state.drawingSupport.type || 'door';
 
-          // Find the line under the cursor
-          // This is simplified - real implementation would use geometry utils
-          let targetLine: Line | null = null;
-          let targetLineId: string | null = null;
+          // Place the hole on the line/offset computed by updateDrawingHole
+          if (
+            layer &&
+            typeof previewLineId === 'string' &&
+            typeof previewOffset === 'number'
+          ) {
+            const targetLine = layer.lines[previewLineId];
+            const v0 = targetLine ? layer.vertices[targetLine.vertices[0]] : undefined;
+            const v1 = targetLine ? layer.vertices[targetLine.vertices[1]] : undefined;
 
-          for (const [lineId, line] of Object.entries(layer.lines)) {
-            const v0 = layer.vertices[line.vertices[0]];
-            const v1 = layer.vertices[line.vertices[1]];
-            if (v0 && v1) {
-              // Simple point-to-line distance check
-              // Real implementation would be more sophisticated
-              const dist = Math.abs(
-                (v1.y - v0.y) * x - (v1.x - v0.x) * y + v1.x * v0.y - v1.y * v0.x
-              ) / Math.sqrt((v1.y - v0.y) ** 2 + (v1.x - v0.x) ** 2);
-              if (dist < 10) {
-                targetLine = line;
-                targetLineId = lineId;
-                break;
+            // Guard zero-length lines
+            if (targetLine && v0 && v1 && (v0.x !== v1.x || v0.y !== v1.y)) {
+              pushHistory(state);
+
+              const holeId = generateId();
+              const catalogElement = state.catalog.elements[type];
+              const properties: Record<string, unknown> = {};
+
+              if (catalogElement) {
+                Object.entries(catalogElement.properties).forEach(([key, prop]) => {
+                  properties[key] = prop.defaultValue;
+                });
               }
+
+              layer.holes[holeId] = {
+                id: holeId,
+                type,
+                prototype: 'holes',
+                name: generateName('holes', type),
+                offset: Math.max(0, Math.min(1, previewOffset)),
+                line: previewLineId,
+                misc: {},
+                selected: false,
+                properties,
+                visible: true,
+              };
+
+              targetLine.holes.push(holeId);
             }
-          }
-
-          if (targetLine && targetLineId) {
-            const holeId = generateId();
-            const catalogElement = state.catalog.elements[type];
-            const properties: Record<string, unknown> = {};
-
-            if (catalogElement) {
-              Object.entries(catalogElement.properties).forEach(([key, prop]) => {
-                properties[key] = prop.defaultValue;
-              });
-            }
-
-            layer.holes[holeId] = {
-              id: holeId,
-              type,
-              prototype: 'holes',
-              name: generateName('holes', type),
-              offset: 0.5, // Middle of line
-              line: targetLineId,
-              misc: {},
-              selected: false,
-              properties,
-              visible: true,
-            };
-
-            targetLine.holes.push(holeId);
           }
 
           state.mode = MODE_IDLE;
@@ -1268,8 +1457,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       beginDraggingHole: (layerId, holeId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           state.mode = MODE_DRAGGING_HOLE;
           state.draggingSupport = {
@@ -1296,14 +1484,21 @@ export const usePlannerStore = create<PlannerStore>()(
           const v1 = layer.vertices[line.vertices[1]];
           if (!v0 || !v1) return;
 
-          // Calculate offset along line
-          const lineLength = Math.sqrt((v1.x - v0.x) ** 2 + (v1.y - v0.y) ** 2);
-          const dx = v1.x - v0.x;
-          const dy = v1.y - v0.y;
+          // Order vertices left-to-right, matching how the renderer
+          // interprets offset (measured from the x-sorted left endpoint)
+          let x0 = v0.x, y0 = v0.y, x1 = v1.x, y1 = v1.y;
+          if (x0 > x1) {
+            x0 = v1.x; y0 = v1.y; x1 = v0.x; y1 = v0.y;
+          }
+
+          const dx = x1 - x0;
+          const dy = y1 - y0;
+          const lenSq = dx * dx + dy * dy;
+          if (lenSq === 0) return;
 
           // Project point onto line
           const t = Math.max(0, Math.min(1,
-            ((x - v0.x) * dx + (y - v0.y) * dy) / (lineLength * lineLength)
+            ((x - x0) * dx + (y - y0) * dy) / lenSq
           ));
 
           hole.offset = t;
@@ -1343,6 +1538,9 @@ export const usePlannerStore = create<PlannerStore>()(
 
       selectToolDrawingItem: (type) =>
         set((state) => {
+          if (state.mode === MODE_DRAWING_LINE) {
+            cleanupDrawingLineInDraft(state);
+          }
           state.mode = MODE_DRAWING_ITEM;
           state.drawingSupport = { type };
         }),
@@ -1355,8 +1553,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       endDrawingItem: (layerId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const layer = state.scene.layers[layerId];
           if (!layer) return;
@@ -1392,8 +1589,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       beginDraggingItem: (layerId, itemId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const layer = state.scene.layers[layerId];
           if (!layer || !layer.items[itemId]) return;
@@ -1432,8 +1628,7 @@ export const usePlannerStore = create<PlannerStore>()(
 
       beginRotatingItem: (layerId, itemId, x, y) =>
         set((state) => {
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const layer = state.scene.layers[layerId];
           if (!layer || !layer.items[itemId]) return;
@@ -1609,13 +1804,15 @@ export const usePlannerStore = create<PlannerStore>()(
           const group = state.scene.groups[groupId];
           if (!group) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           // Delete all elements in the group
           Object.entries(group.elements).forEach(([layerId, elements]) => {
             const layer = state.scene.layers[layerId];
             if (!layer) return;
+
+            const deletedAreaIds = new Set<string>();
+            let touchedGeometry = false;
 
             Object.entries(elements).forEach(([prototype, ids]) => {
               (ids as string[]).forEach((id) => {
@@ -1631,12 +1828,10 @@ export const usePlannerStore = create<PlannerStore>()(
                       const vertex = layer.vertices[vId];
                       if (vertex) {
                         vertex.lines = vertex.lines.filter((lId) => lId !== id);
-                        if (vertex.lines.length === 0 && vertex.areas.length === 0) {
-                          delete layer.vertices[vId];
-                        }
                       }
                     });
                     delete layer.lines[id];
+                    touchedGeometry = true;
                   }
                 } else if (prototype === 'holes') {
                   const hole = layer.holes[id];
@@ -1650,10 +1845,41 @@ export const usePlannerStore = create<PlannerStore>()(
                 } else if (prototype === 'items') {
                   delete layer.items[id];
                 } else if (prototype === 'areas') {
-                  delete layer.areas[id];
+                  const area = layer.areas[id];
+                  if (area) {
+                    // Clean vertex back-references
+                    area.vertices.forEach((vId) => {
+                      const vertex = layer.vertices[vId];
+                      if (vertex) {
+                        vertex.areas = vertex.areas.filter((aId) => aId !== id);
+                      }
+                    });
+                    delete layer.areas[id];
+                    deletedAreaIds.add(id);
+                    touchedGeometry = true;
+                  }
                 }
               });
             });
+
+            // Remove dangling references to deleted areas from remaining
+            // areas' holes arrays
+            if (deletedAreaIds.size > 0) {
+              Object.values(layer.areas).forEach((area) => {
+                area.holes = area.holes.filter((aId) => !deletedAreaIds.has(aId));
+              });
+            }
+
+            // Re-run area detection for the touched layer, then sweep
+            // orphan vertices
+            if (touchedGeometry) {
+              detectAndUpdateAreas(layer, state.catalog.elements);
+              Object.entries(layer.vertices).forEach(([vId, vertex]) => {
+                if (vertex.lines.length === 0 && vertex.areas.length === 0) {
+                  delete layer.vertices[vId];
+                }
+              });
+            }
           });
 
           delete state.scene.groups[groupId];
@@ -1664,8 +1890,7 @@ export const usePlannerStore = create<PlannerStore>()(
           const group = state.scene.groups[groupId];
           if (!group) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const dx = x - group.x;
           const dy = y - group.y;
@@ -1713,8 +1938,7 @@ export const usePlannerStore = create<PlannerStore>()(
           const group = state.scene.groups[groupId];
           if (!group) return;
 
-          state.sceneHistory.past.push(deepClone(state.scene));
-          state.sceneHistory.future = [];
+          pushHistory(state);
 
           const deltaRotation = rotation - group.rotation;
           const centerX = group.x;

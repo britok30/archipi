@@ -82,18 +82,27 @@ interface WallElement {
 }
 
 const epsilon = 20;
-const STYLE_TEXT: React.CSSProperties = { textAnchor: "middle" };
+const STYLE_TEXT: React.CSSProperties = {
+  textAnchor: "middle",
+  fontSize: "11px",
+  fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+  fill: SharedStyle.CANVAS.accent,
+  fontWeight: 600,
+  pointerEvents: "none",
+  userSelect: "none",
+};
 const STYLE_LINE: React.CSSProperties = {
-  stroke: SharedStyle.LINE_MESH_COLOR.selected,
+  stroke: SharedStyle.CANVAS.wallStrokeSelected,
 };
 const STYLE_RECT: React.CSSProperties = {
   strokeWidth: 1,
-  stroke: SharedStyle.LINE_MESH_COLOR.unselected,
-  fill: "#292929",
+  stroke: SharedStyle.CANVAS.wallStroke,
+  fill: SharedStyle.CANVAS.wallFill,
 };
 const STYLE_RECT_SELECTED: React.CSSProperties = {
   ...STYLE_RECT,
-  stroke: SharedStyle.LINE_MESH_COLOR.selected,
+  fill: SharedStyle.CANVAS.wallFillSelected,
+  stroke: SharedStyle.CANVAS.wallStrokeSelected,
 };
 
 
@@ -161,10 +170,22 @@ export default function WallFactory(
             y2={half_thickness_eps}
             style={STYLE_LINE}
           />
-          <text x={length_5} y={textDistance + char_height} style={STYLE_TEXT}>
+          {/* Counter-flip the labels: the drawing paper is Y-flipped via
+              scale(1, -1), so text must be flipped back to read upright. */}
+          <text
+            x={length_5}
+            y={-(textDistance + char_height)}
+            transform="scale(1, -1)"
+            style={STYLE_TEXT}
+          >
             A
           </text>
-          <text x={length_5} y={-textDistance} style={STYLE_TEXT}>
+          <text
+            x={length_5}
+            y={textDistance}
+            transform="scale(1, -1)"
+            style={STYLE_TEXT}
+          >
             B
           </text>
         </g>

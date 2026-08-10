@@ -11,11 +11,3 @@ export {
   ImageUtils,
   MathUtils,
 };
-
-export default {
-  BrowserUtils,
-  GeometryUtils,
-  GraphInnerCycles,
-  ImageUtils,
-  MathUtils,
-};

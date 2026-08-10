@@ -4,10 +4,8 @@
  *  @return The fixed float value
  */
 export function toFixedFloat(num: number, precision: number = 6): number {
-  if (num && precision) {
-    return parseFloat(parseFloat(String(num)).toFixed(precision));
-  }
-  return 0;
+  if (!Number.isFinite(num)) return 0;
+  return parseFloat(num.toFixed(precision));
 }
 
 /** @description Return absolute value of a number */

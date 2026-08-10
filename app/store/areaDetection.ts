@@ -47,7 +47,11 @@ export function detectAndUpdateAreas(
       line.vertices.map((vertexID) => vertexID_to_verticesArrayIndex[vertexID]),
     )
     .filter(
-      (arr) => arr.length === 2 && arr[0] !== undefined && arr[1] !== undefined,
+      (arr) =>
+        arr.length === 2 &&
+        arr[0] !== undefined &&
+        arr[1] !== undefined &&
+        arr[0] !== arr[1],
     );
 
   // Calculate inner cycles (closed polygons)
@@ -166,11 +170,27 @@ export function detectAndUpdateAreas(
 
     for (let j = 0; j < verticesCoordsForArea.length; j++) {
       if (i !== j && verticesCoordsForArea[j].vertices.length > 0) {
-        const isHole = ContainsPoint(
-          areaVerticesList,
-          verticesCoordsForArea[j].vertices[0][0],
-          verticesCoordsForArea[j].vertices[0][1],
-        );
+        const jVertices = verticesCoordsForArea[j].vertices;
+
+        // Test an interior point of polygon j (its vertex centroid) instead
+        // of a boundary vertex, since ContainsPoint classifies boundary
+        // points as outside.
+        const centroidX =
+          jVertices.reduce((sum, v) => sum + v[0], 0) / jVertices.length;
+        const centroidY =
+          jVertices.reduce((sum, v) => sum + v[1], 0) / jVertices.length;
+
+        let isHole = ContainsPoint(areaVerticesList, centroidX, centroidY);
+
+        if (!isHole) {
+          // Fallback for non-convex polygons whose centroid may fall outside:
+          // require a strict majority of j's vertices strictly inside area i.
+          const insideCount = jVertices.filter((v) =>
+            ContainsPoint(areaVerticesList, v[0], v[1]),
+          ).length;
+          isHole = insideCount * 2 > jVertices.length;
+        }
+
         if (isHole) {
           holesList.push(verticesCoordsForArea[j].id);
         }

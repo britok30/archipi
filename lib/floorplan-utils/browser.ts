@@ -31,7 +31,9 @@ export function browserDownloadWithName(
   const data = new Blob([file], { type: typeMap[ext] });
   const url = URL.createObjectURL(data);
   triggerDownload(url, fullName);
-  URL.revokeObjectURL(url);
+  // Defer revocation so the browser has started the download before the
+  // object URL is invalidated.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export function browserUpload(): Promise<Record<string, unknown>> {

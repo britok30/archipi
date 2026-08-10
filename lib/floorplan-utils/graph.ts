@@ -25,7 +25,6 @@ class Graph {
   V: number;
   E: number;
   adj: number[][];
-  children: number;
 
   constructor(v: number) {
     if (typeof v !== "number" || v < 0) {
@@ -37,7 +36,6 @@ class Graph {
     this.time = 0;
     this.V = v;
     this.E = 0;
-    this.children = 0;
 
     // Initialize adjacency list with arrays
     this.adj = Array.from({ length: v }, () => [] as number[]);
@@ -74,14 +72,14 @@ class Graph {
   _BCCUtil(u: number, disc: number[], low: number[], st: Edge[], parent: number[]): void {
     // Initialize discovery time and low value
     disc[u] = low[u] = ++this.time;
-    this.children = 0;
+    let children = 0;
 
     // Go through all vertices adjacent to this
     // v is current adjacent of 'u'
     this.adj[u].forEach((v) => {
       // If v is not visited yet, then recur for it
       if (disc[v] === -1) {
-        this.children++;
+        children++;
         parent[v] = u;
 
         // store the edge in stack
@@ -96,7 +94,7 @@ class Graph {
         // If u is an articulation point,
         // pop all edges from stack till u -- v
         if (
-          (disc[u] === 1 && this.children > 1) ||
+          (disc[u] === 1 && children > 1) ||
           (disc[u] > 1 && low[v] >= disc[u])
         ) {
           let subgraph: Edge[] = [];
@@ -117,7 +115,7 @@ class Graph {
       // Update low value of 'u' only of 'v' is still in stack
       // (i.e. it's a back edge, not cross edge).
       // Case 2 -- per Strongly Connected Components Article
-      else if (v !== parent[u] && disc[v] < low[u]) {
+      else if (v !== parent[u] && disc[v] < disc[u]) {
         if (low[u] > disc[v]) low[u] = disc[v];
         st.push(new Edge(u, v));
       }

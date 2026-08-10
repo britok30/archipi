@@ -55,8 +55,14 @@ export function createArea(
   let vertices: Vertex[] = [];
 
   element.vertices.forEach((vertexID: string) => {
-    vertices.push(layer.vertices[vertexID]);
+    let vertex = layer.vertices[vertexID];
+    if (vertex) vertices.push(vertex);
   });
+
+  // Deleted or transient areas can yield an empty vertex list; skip them
+  if (vertices.length === 0) {
+    return Promise.resolve(new Mesh());
+  }
 
   let textureName = element.properties?.texture as string | undefined;
   let color = element.properties?.patternColor as string | undefined;
@@ -79,9 +85,11 @@ export function createArea(
   element.holes.forEach((holeID: string) => {
     let holeCoords: number[][] = [];
     (layer.areas[holeID]?.vertices || []).forEach((vertexID: string) => {
-      let { x, y } = layer.vertices[vertexID];
-      holeCoords.push([x, y]);
+      let vertex = layer.vertices[vertexID];
+      if (vertex) holeCoords.push([vertex.x, vertex.y]);
     });
+    // Deleted hole sub-areas yield empty coordinate lists; skip them
+    if (holeCoords.length === 0) return;
     holeCoords = holeCoords.reverse();
     let holeShape = createShape(holeCoords);
     shape.holes.push(holeShape);
@@ -150,6 +158,7 @@ export function updatedArea(
  */
 const createShape = (shapeCoords: number[][]): Shape => {
   let shape = new Shape();
+  if (shapeCoords.length === 0) return shape;
   shape.moveTo(shapeCoords[0][0], shapeCoords[0][1]);
   for (let i = 1; i < shapeCoords.length; i++) {
     shape.lineTo(shapeCoords[i][0], shapeCoords[i][1]);

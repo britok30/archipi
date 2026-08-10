@@ -115,7 +115,15 @@ export default function AreaFactory(
         ? SharedStyle.AREA_MESH_COLOR.selected
         : element.properties?.patternColor;
 
-      return <path d={path} fill={fill} />;
+      return (
+        <path
+          d={path}
+          fill={fill}
+          stroke={element.selected ? SharedStyle.CANVAS.accent : "none"}
+          strokeWidth={element.selected ? 2 : 0}
+          strokeLinejoin="round"
+        />
+      );
     },
 
     render3D: function (element: Element, layer: Layer, scene: Object3D) {

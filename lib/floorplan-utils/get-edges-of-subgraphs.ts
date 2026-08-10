@@ -11,9 +11,11 @@ function getEdgesOfSubgraphs(subgraphs: Edge[][], graph: GraphLike): number[][][
     edges.push([]);
     let vertices = getVerticesFromBiconnectedComponent(component);
     vertices.forEach((vertex) => {
-      let adjacents = graph.adj[vertex];
+      // Dedup adjacents so duplicate edges between the same two vertices
+      // produce a single edge entry.
+      let adjacents = new Set(graph.adj[vertex]);
       adjacents.forEach((adj) => {
-        if (vertex <= adj && vertices.has(adj)) {
+        if (vertex < adj && vertices.has(adj)) {
           edges[edges.length - 1].push([vertex, adj]);
         }
       });

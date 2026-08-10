@@ -16,26 +16,12 @@ export interface Line {
   c: number;
 }
 
-export type IntersectionResult =
-  | { type: "intersecting"; point: Point }
-  | { type: "colinear" }
-  | { type: "parallel" }
-  | { type: "none" };
-
 // ============================================================================
 // Vertex comparison and ordering
 // ============================================================================
 
 export function compareVertices(v0: Point, v1: Point): number {
   return v0.x === v1.x ? v0.y - v1.y : v0.x - v1.x;
-}
-
-export function minVertex(v0: Point, v1: Point): Point {
-  return compareVertices(v0, v1) > 0 ? v1 : v0;
-}
-
-export function maxVertex(v0: Point, v1: Point): Point {
-  return compareVertices(v0, v1) > 0 ? v0 : v1;
 }
 
 export function orderVertices<T extends Point>(vertices: T[]): T[] {
@@ -69,38 +55,6 @@ export function verticalLine(x: number): Line {
   return { a: 1, b: 0, c: -x };
 }
 
-export function linePassingThroughTwoPoints(x1: number, y1: number, x2: number, y2: number): Line {
-  if (x1 === x2 && y1 === y2) {
-    throw new Error("Geometry error");
-  }
-  if (x1 === x2) return verticalLine(x1);
-  if (y1 === y2) return horizontalLine(y1);
-
-  return {
-    a: y1 - y2,
-    b: x2 - x1,
-    c: y2 * x1 - x2 * y1,
-  };
-}
-
-// ============================================================================
-// Point-to-line distance and projection
-// ============================================================================
-
-export function distancePointFromLine(a: number, b: number, c: number, x: number, y: number): number {
-  //https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-  return fAbs(a * x + b * y + c) / Math.sqrt(a * a + b * b);
-}
-
-export function closestPointFromLine(a: number, b: number, c: number, x: number, y: number): Point {
-  //https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-  let denom = a * a + b * b;
-  return {
-    x: (b * (b * x - a * y) - a * c) / denom,
-    y: (a * -b * x + a * y - b * c) / denom,
-  };
-}
-
 // ============================================================================
 // Line intersections
 // ============================================================================
@@ -119,125 +73,6 @@ export function twoLinesIntersection(
   return { x, y };
 }
 
-export function twoLineSegmentsIntersection(p1: Point, p2: Point, p3: Point, p4: Point): IntersectionResult {
-  //https://github.com/psalaets/line-intersect/blob/master/lib/check-intersection.js
-
-  let { x: x1, y: y1 } = p1;
-  let { x: x2, y: y2 } = p2;
-  let { x: x3, y: y3 } = p3;
-  let { x: x4, y: y4 } = p4;
-
-  let denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-  let numA = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
-  let numB = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
-
-  if (fAbs(denom) <= EPSILON) {
-    if (fAbs(numA) <= EPSILON && fAbs(numB) <= EPSILON) {
-      let comparator = (pa: Point, pb: Point): number => (pa.x === pb.x ? pa.y - pb.y : pa.x - pb.x);
-      let line0 = [p1, p2].sort(comparator);
-      let line1 = [p3, p4].sort(comparator);
-
-      let [lineSX, lineDX] = [line0, line1].sort((lineA, lineB) =>
-        comparator(lineA[0], lineB[0])
-      );
-
-      if (lineSX[1].x === lineDX[0].x) {
-        return { type: lineDX[0].y <= lineSX[1].y ? "colinear" : "none" };
-      } else {
-        return { type: lineDX[0].x <= lineSX[1].x ? "colinear" : "none" };
-      }
-    }
-    return { type: "parallel" };
-  }
-
-  let uA = numA / denom;
-  let uB = numB / denom;
-
-  if (
-    uA >= 0 - EPSILON &&
-    uA <= 1 + EPSILON &&
-    uB >= 0 - EPSILON &&
-    uB <= 1 + EPSILON
-  ) {
-    let point = {
-      x: x1 + uA * (x2 - x1),
-      y: y1 + uA * (y2 - y1),
-    };
-    return { type: "intersecting", point };
-  }
-
-  return { type: "none" };
-}
-
-// ============================================================================
-// Point-to-line-segment distance and projection
-// ============================================================================
-
-export function distancePointFromLineSegment(
-  x1: number, y1: number, x2: number, y2: number, xp: number, yp: number
-): number {
-  //http://stackoverflow.com/a/6853926/1398836
-
-  let A = xp - x1;
-  let B = yp - y1;
-  let C = x2 - x1;
-  let D = y2 - y1;
-
-  let dot = A * C + B * D;
-  let len_sq = C * C + D * D;
-  let param = -1;
-  if (len_sq !== 0)
-    //in case of 0 length line
-    param = dot / len_sq;
-
-  let xx: number, yy: number;
-
-  if (param < 0) {
-    xx = x1;
-    yy = y1;
-  } else if (param > 1) {
-    xx = x2;
-    yy = y2;
-  } else {
-    xx = x1 + param * C;
-    yy = y1 + param * D;
-  }
-
-  let dx = xp - xx;
-  let dy = yp - yy;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-export function isPointOnLineSegment(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  xp: number,
-  yp: number,
-  maxDistance: number = EPSILON
-): boolean {
-  return distancePointFromLineSegment(x1, y1, x2, y2, xp, yp) <= maxDistance;
-}
-
-export function closestPointFromLineSegment(
-  x1: number, y1: number, x2: number, y2: number, xp: number, yp: number
-): Point {
-  if (x1 === x2) return { x: x1, y: yp };
-  if (y1 === y2) return { x: xp, y: y1 };
-
-  let m = (y2 - y1) / (x2 - x1);
-  let q = y1 - m * x1;
-
-  let mi = -1 / m;
-  let qi = yp - mi * xp;
-
-  let x = (qi - q) / (m - mi);
-  let y = m * x + q;
-
-  return { x, y };
-}
-
 // ============================================================================
 // Position and mapping
 // ============================================================================
@@ -246,6 +81,7 @@ export function pointPositionOnLineSegment(
   x1: number, y1: number, x2: number, y2: number, xp: number, yp: number
 ): number {
   let length = pointsDistance(x1, y1, x2, y2);
+  if (length === 0) return 0;
   let distance = pointsDistance(x1, y1, xp, yp);
 
   let offset = distance / length;
@@ -254,7 +90,7 @@ export function pointPositionOnLineSegment(
   return offset;
 }
 
-export function mapRange(value: number, low1: number, high1: number, low2: number, high2: number): number {
+function mapRange(value: number, low1: number, high1: number, low2: number, high2: number): number {
   return low2 + ((high2 - low2) * (value - low1)) / (high1 - low1);
 }
 
@@ -268,14 +104,6 @@ export function angleBetweenTwoPointsAndOrigin(x1: number, y1: number, x2: numbe
 
 export function angleBetweenTwoPoints(x1: number, y1: number, x2: number, y2: number): number {
   return Math.atan2(y2 - y1, x2 - x1);
-}
-
-export function angleBetweenTwoVertices(v1: Point, v2: Point): number {
-  return angleBetweenTwoPoints(v1.x, v1.y, v2.x, v2.y);
-}
-
-export function absAngleBetweenTwoPoints(x1: number, y1: number, x2: number, y2: number): number {
-  return Math.atan2(Math.abs(y2 - y1), Math.abs(x2 - x1));
 }
 
 export function samePoints({ x: x1, y: y1 }: Point, { x: x2, y: y2 }: Point): boolean {
@@ -295,14 +123,6 @@ export function extendLine(
   return {
     x: toFixedFloat(x1 + Math.cos(rad) * newDistance, precision),
     y: toFixedFloat(y1 + Math.sin(rad) * newDistance, precision),
-  };
-}
-
-export function roundVertex(vertex: Point, precision: number = 6): Point {
-  return {
-    ...vertex,
-    x: toFixedFloat(vertex.x, precision),
-    y: toFixedFloat(vertex.y, precision),
   };
 }
 
@@ -355,55 +175,3 @@ export function ContainsPoint(polygon: number[], pointX: number, pointY: number)
   return (depth & 1) === 1;
 }
 
-// ============================================================================
-// Trigonometric helpers
-// ============================================================================
-
-export function cosWithThreshold(alpha: number, threshold: number): number {
-  let cos = Math.cos(alpha);
-  return cos < threshold ? 0 : cos;
-}
-
-export function sinWithThreshold(alpha: number, threshold: number): number {
-  let sin = Math.sin(alpha);
-  return sin < threshold ? 0 : sin;
-}
-
-// ============================================================================
-// Midpoints
-// ============================================================================
-
-export function midPoint(x1: number, y1: number, x2: number, y2: number): Point {
-  return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
-}
-
-export function verticesMidPoint(verticesArray: Point[]): Point {
-  let res = verticesArray.reduce(
-    (incr, vertex) => {
-      return { x: incr.x + vertex.x, y: incr.y + vertex.y };
-    },
-    { x: 0, y: 0 }
-  );
-  return { x: res.x / verticesArray.length, y: res.y / verticesArray.length };
-}
-
-// ============================================================================
-// Rotation
-// ============================================================================
-
-export function rotatePointAroundPoint(
-  px: number, py: number, ox: number, oy: number, theta: number
-): Point {
-  let thetaRad = (theta * Math.PI) / 180;
-
-  let cos = Math.cos(thetaRad);
-  let sin = Math.sin(thetaRad);
-
-  let deltaX = px - ox;
-  let deltaY = py - oy;
-
-  return {
-    x: cos * deltaX - sin * deltaY + ox,
-    y: sin * deltaX + cos * deltaY + oy,
-  };
-}

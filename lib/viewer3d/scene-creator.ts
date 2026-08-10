@@ -2,8 +2,6 @@ import * as Three from "three";
 import createGrid from "./grid-creator";
 import type { Scene, Layer, RuntimeCatalog } from "@/app/store/types";
 
-const MAX_BUSY_RETRIES = 50;
-
 interface SceneGraph {
   unit: string;
   layers: Record<string, {
@@ -15,18 +13,8 @@ interface SceneGraph {
     visible: boolean;
     altitude: number;
   }>;
-  busyResources: {
-    layers: Record<string, {
-      id: string;
-      lines: Record<string, boolean>;
-      holes: Record<string, boolean>;
-      areas: Record<string, boolean>;
-      items: Record<string, boolean>;
-    }>;
-  };
   width: number;
   height: number;
-  LODs: Record<string, Three.LOD>;
 }
 
 interface PlanData {
@@ -47,16 +35,14 @@ export function parseData(
   sceneData: Scene,
   actions: Actions,
   catalog: RuntimeCatalog
-): PlanData {
+): Promise<PlanData> {
   let planData = {} as PlanData;
 
   planData.sceneGraph = {
     unit: sceneData.unit,
     layers: {},
-    busyResources: { layers: {} },
     width: sceneData.width,
     height: sceneData.height,
-    LODs: {},
   };
 
   planData.plan = new Three.Object3D();
@@ -79,9 +65,10 @@ export function parseData(
     }
   });
 
-  Promise.all(promises).then((value) => updateBoundingBox(planData));
-
-  return planData;
+  return Promise.all(promises).then(() => {
+    updateBoundingBox(planData);
+    return planData;
+  });
 }
 
 function createLayerObjects(
@@ -101,14 +88,6 @@ function createLayerObjects(
     items: {},
     visible: layer.visible,
     altitude: layer.altitude,
-  };
-
-  planData.sceneGraph.busyResources.layers[layer.id] = {
-    id: layer.id,
-    lines: {},
-    holes: {},
-    areas: {},
-    items: {},
   };
 
   // Import lines
@@ -155,10 +134,6 @@ function addHole(
     ?.getElement(holeData.type)
     .render3D!(holeData, layer, sceneData)
     .then((object: any) => {
-      if (object instanceof Three.LOD) {
-        planData.sceneGraph.LODs[holeID] = object;
-      }
-
       let pivot = new Three.Object3D();
       pivot.name = "pivot";
       pivot.add(object);
@@ -225,23 +200,8 @@ function addLine(
   layer: Layer,
   lineID: string,
   catalog: RuntimeCatalog,
-  actions: Actions,
-  retryCount: number = 0
+  actions: Actions
 ): Promise<void> | undefined {
-  if (planData.sceneGraph.busyResources.layers[layer.id].lines[lineID]) {
-    if (retryCount >= MAX_BUSY_RETRIES) {
-      console.warn(`addLine: max retries (${MAX_BUSY_RETRIES}) exceeded for line ${lineID} on layer ${layer.id}`);
-      return;
-    }
-    setTimeout(
-      () => addLine(sceneData, planData, layer, lineID, catalog, actions, retryCount + 1),
-      100
-    );
-    return;
-  }
-
-  planData.sceneGraph.busyResources.layers[layer.id].lines[lineID] = true;
-
   let line = layer.lines[lineID];
 
   // First of all I need to find the vertices of this line
@@ -258,10 +218,6 @@ function addLine(
     ?.getElement(line.type)
     .render3D!(line, layer, sceneData)
     .then((line3D: any) => {
-      if (line3D instanceof Three.LOD) {
-        planData.sceneGraph.LODs[line.id] = line3D;
-      }
-
       let pivot = new Three.Object3D();
       pivot.name = "pivot";
       pivot.add(line3D);
@@ -282,7 +238,6 @@ function addLine(
         opacity = 1;
       }
       applyOpacity(pivot, opacity);
-      planData.sceneGraph.busyResources.layers[layer.id].lines[lineID] = false;
     });
 }
 
@@ -292,23 +247,8 @@ function addArea(
   layer: Layer,
   areaID: string,
   catalog: RuntimeCatalog,
-  actions: Actions,
-  retryCount: number = 0
+  actions: Actions
 ): Promise<void> | undefined {
-  if (planData.sceneGraph.busyResources.layers[layer.id].areas[areaID]) {
-    if (retryCount >= MAX_BUSY_RETRIES) {
-      console.warn(`addArea: max retries (${MAX_BUSY_RETRIES}) exceeded for area ${areaID} on layer ${layer.id}`);
-      return;
-    }
-    setTimeout(
-      () => addArea(sceneData, planData, layer, areaID, catalog, actions, retryCount + 1),
-      100
-    );
-    return;
-  }
-
-  planData.sceneGraph.busyResources.layers[layer.id].areas[areaID] = true;
-
   let area = layer.areas[areaID];
   let interactFunction = () => actions.selectArea(layer.id, areaID);
 
@@ -316,10 +256,6 @@ function addArea(
     ?.getElement(area.type)
     .render3D!(area, layer, sceneData)
     .then((area3D: any) => {
-      if (area3D instanceof Three.LOD) {
-        planData.sceneGraph.LODs[areaID] = area3D;
-      }
-
       let pivot = new Three.Object3D();
       pivot.name = "pivot";
       pivot.add(area3D);
@@ -335,7 +271,6 @@ function addArea(
       }
 
       applyOpacity(pivot, opacity);
-      planData.sceneGraph.busyResources.layers[layer.id].areas[areaID] = false;
     });
 }
 
@@ -353,10 +288,6 @@ function addItem(
     ?.getElement(item.type)
     .render3D!(item, layer, sceneData)
     .then((item3D: any) => {
-      if (item3D instanceof Three.LOD) {
-        planData.sceneGraph.LODs[itemID] = item3D;
-      }
-
       let pivot = new Three.Object3D();
       pivot.name = "pivot";
       pivot.add(item3D);

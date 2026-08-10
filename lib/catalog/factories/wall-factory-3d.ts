@@ -35,6 +35,13 @@ export function buildWall(
   const faceDistance = 1;
 
   const distance = verticesDistance(vertex0, vertex1);
+
+  // A zero-length wall would produce NaN rotation and degenerate geometry,
+  // poisoning scene bounds (and OBJ export recentering)
+  if (distance < 1e-4) {
+    return Promise.resolve(new Group());
+  }
+
   const halfDistance = distance / 2;
 
   const soulMaterial = new MeshStandardMaterial({
@@ -67,7 +74,9 @@ export function buildWall(
     const offset = inverted ? 1 - holeData.offset : holeData.offset;
     const holeDistance = offset * distance;
 
-    const holeGeometry = new BoxGeometry(holeWidth, holeHeight, thickness);
+    // Inflate the cutter depth so it fully pierces the wall; exactly-coplanar
+    // faces cause CSG shards and z-fighting
+    const holeGeometry = new BoxGeometry(holeWidth, holeHeight, thickness + 1);
     const holeMesh = new Mesh(holeGeometry);
 
     holeMesh.position.y += holeHeight / 2 + holeAltitude;

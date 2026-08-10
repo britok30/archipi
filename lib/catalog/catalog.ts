@@ -134,6 +134,11 @@ export default class Catalog {
     throw new Error(`Element ${type} does not exist in catalog`);
   }
 
+  /** Like getElement, but returns null instead of throwing for unknown types. */
+  getElementSafe(type: string): Element | null {
+    return this.hasElement(type) ? this.elements[type] : null;
+  }
+
   getCategory(categoryName: string): Category {
     if (this.hasCategory(categoryName)) {
       return this.categories[categoryName];
